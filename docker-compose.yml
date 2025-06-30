@@ -24,6 +24,6 @@ services:
     environment:
       - SERVER_PORT=8081
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - SPRING_APPLICATION_NAME=ms-servico-exemplo
+      - SPRING_APPLICATION_NAME=users-service
     depends_on:
       - eureka-server
