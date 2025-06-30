@@ -1,0 +1,14 @@
+server:
+  port: 8761 # Porta padrão do Eureka
+
+spring:
+  application:
+    name: eureka-server
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+  server:
+    # Em produção, desative para evitar que instâncias com lease expirado sejam removidas
+    # wait-time-in-ms-when-sync-empty: 0
