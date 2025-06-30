@@ -1,0 +1,14 @@
+server:
+  port: 0 # Usar porta 0 faz o Spring escolher uma porta aleatória disponível, útil para rodar várias instâncias
+
+spring:
+  application:
+    name: users-service
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.cloud.client.ip-address}:${server.port}

@@ -11,7 +11,6 @@ spring:
           enabled: true
           lower-case-service-id: true
       routes:
-        # Exemplo de rota explícita para o 'ms-servico-exemplo'
         - id: rota_servico_exemplo
           # 'lb' significa Load Balancer. O Gateway usará o Eureka para encontrar uma instância de 'MS-SERVICO-EXEMPLO'
           uri: lb://MS-SERVICO-EXEMPLO
@@ -19,17 +18,13 @@ spring:
             # Qualquer requisição para /api/exemplo/** será roteada
             - Path=/api/exemplo/**
           filters:
-            # Remove o primeiro segmento do path antes de repassar (ex: /api/exemplo/teste -> /teste)
             - StripPrefix=2
 
-# Configuração do cliente Eureka
 eureka:
   client:
     service-url:
-      # Endereço onde o Eureka Server está rodando
       defaultZone: http://localhost:8761/eureka/
 
-# Para visualizar as rotas configuradas via Actuator
 management:
   endpoints:
     web:
