@@ -32,14 +32,4 @@ build/
 ### Arch Linux ###
 .tool-versions
 
-users-service/target
-seller-daily-analytics-service/target
-reviews-service/target
-products-service/target
-products-recommendations-service/target
-orders-service/target
-listings-service/target
-eureka-server/target
-catalog-service/target
-carts-service/target
-api-gateway/target
+**/target
