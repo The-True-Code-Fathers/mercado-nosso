@@ -1,6 +1,6 @@
-package adapters.out.persistence.mongo;
+package listingservice.adapters.out.persistence.mongo;
 
-import core.domain.enums.ProductCondition;
+import listingservice.core.domain.enums.ProductCondition;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;

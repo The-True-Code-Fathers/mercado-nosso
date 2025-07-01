@@ -1,8 +1,7 @@
-package core.ports.out;
+package listingservice.core.ports.out;
 
-import core.domain.Listing;
+import listingservice.core.domain.Listing;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

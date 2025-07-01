@@ -1,6 +1,6 @@
-package adapters.out.persistence.mongo;
+package listingservice.adapters.out.persistence.mongo;
 
-import core.domain.Listing;
+import listingservice.core.domain.Listing;
 import org.springframework.stereotype.Component;
 import java.util.UUID;
 

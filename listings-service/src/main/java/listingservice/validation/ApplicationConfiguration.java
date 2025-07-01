@@ -1,4 +1,4 @@
-package validation;
+package listingservice.validation;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -6,7 +6,6 @@ import org.springframework.validation.beanvalidation.MethodValidationPostProcess
 
 @Configuration
 public class ApplicationConfiguration {
-
     @Bean
     public static MethodValidationPostProcessor validationPostProcessor() {
         MethodValidationPostProcessor processor = new MethodValidationPostProcessor();

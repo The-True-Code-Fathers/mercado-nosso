@@ -1,10 +1,10 @@
-package core.usecases;
+package listingservice.core.usecases;
 
-import core.domain.Listing;
-import core.domain.exception.BusinessRuleException;
-import core.domain.exception.ListingNotFoundException;
-import core.ports.in.ListingServicePort;
-import core.ports.out.ListingRepositoryPort;
+import listingservice.core.domain.Listing;
+import listingservice.core.domain.exception.BusinessRuleException;
+import listingservice.core.domain.exception.ListingNotFoundException;
+import listingservice.core.ports.in.ListingServicePort;
+import listingservice.core.ports.out.ListingRepositoryPort;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 
