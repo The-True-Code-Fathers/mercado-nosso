@@ -12,10 +12,8 @@ spring:
           lower-case-service-id: true
       routes:
         - id: rota_servico_exemplo
-          # 'lb' significa Load Balancer. O Gateway usará o Eureka para encontrar uma instância de 'MS-SERVICO-EXEMPLO'
           uri: lb://MS-SERVICO-EXEMPLO
           predicates:
-            # Qualquer requisição para /api/exemplo/** será roteada
             - Path=/api/exemplo/**
           filters:
             - StripPrefix=2
