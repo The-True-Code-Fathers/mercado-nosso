@@ -9,6 +9,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -21,7 +22,7 @@ public class ListingServiceImpl implements ListingServicePort {
         this.validator = validator;
     }
 
-    public Listing createNewListing(Listing listing) {
+    public Listing create(Listing listing) {
         validateListing(listing);
         listing.setCreationDate(LocalDateTime.now());
         listing.setActive(true);
@@ -29,14 +30,19 @@ public class ListingServiceImpl implements ListingServicePort {
     }
 
     @Override
-    public Listing searchListingById(UUID id) {
+    public Listing searchById(UUID id) {
         return listingRepositoryPort.searchById(id).orElseThrow(() ->
                 new ListingNotFoundException("Anúncio com ID " + id + " não encontrado."));
     }
 
     @Override
-    public void deleteListing(Listing listing) {
+    public void delete(Listing listing) {
         listingRepositoryPort.delete(listing);
+    }
+
+    @Override
+    public List<Listing> listAll() {
+        return listingRepositoryPort.listAll();
     }
 
     private void validateListing(Listing listing) {

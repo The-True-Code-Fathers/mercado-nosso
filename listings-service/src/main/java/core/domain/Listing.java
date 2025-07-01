@@ -42,4 +42,6 @@ public class Listing {
 
     @NotNull(message = "A condição do produto é obrigatória.")
     private ProductCondition productCondition;
+
+    private Integer stock;
 }

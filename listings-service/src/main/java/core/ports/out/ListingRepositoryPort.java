@@ -10,6 +10,6 @@ import java.util.UUID;
 public interface ListingRepositoryPort {
     Listing save(Listing listing);
     Optional<Listing> searchById(UUID id);
-    List<Listing> listAll = new ArrayList<>();
+    List<Listing> listAll();
     void delete(Listing listing);
 }
