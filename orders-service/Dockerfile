@@ -1,12 +1,11 @@
-FROM maven:3.9.9-openjdk-21 AS build
-WORKDIR /app
-COPY ../api-gateway/pom.xml .
-RUN mvn dependency:go-offline
-COPY ../api-gateway/src ./src
-RUN mvn package -DskipTests
-
-FROM openjdk:21-jdk-slim
-WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+FROM maven:latest
+VOLUME /tmp
+ARG PROJECT_VERSION=1.0.0
+RUN mkdir -p /home/app
+WORKDIR /home/app
+ENV SPRING_PROFILES_ACTIVE application
+COPY ./ .
+ADD target/orders-service-1.0.0-SNAPSHOT.jar orders-service-1.0.0-SNAPSHOT.jar
+EXPOSE 8888
+ENTRYPOINT ["java", "-jar", "orders-service-1.0.0-SNAPSHOT.jar"]
+CMD ["mvn", "spring-boot:run"]

@@ -1,14 +1,17 @@
 services:
   eureka-server:
-    build: eureka-server
-    container_name: eureka-server
+    build:
+      context: .
+      dockerfile: eureka-server/Dockerfile
     ports:
       - "8761:8761"
     environment:
       - SERVER_PORT=8761
 
   api-gateway:
-    build: api-gateway
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
     container_name: api-gateway
     ports:
       - "8080:8080"
@@ -19,7 +22,9 @@ services:
       - eureka-server
 
   users-service:
-    build: users-service
+    build:
+      context: .
+      dockerfile: users-service/Dockerfile
     container_name: users-service
     environment:
       - SERVER_PORT=8081
