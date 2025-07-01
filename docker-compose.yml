@@ -2,7 +2,9 @@ services:
   eureka-server:
     build:
       context: .
-      dockerfile: eureka-server/Dockerfile
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: eureka-server
     ports:
       - "8761:8761"
     environment:
@@ -11,7 +13,9 @@ services:
   api-gateway:
     build:
       context: .
-      dockerfile: api-gateway/Dockerfile
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: api-gateway
     container_name: api-gateway
     ports:
       - "8080:8080"
@@ -24,7 +28,9 @@ services:
   carts-service:
     build:
       context: .
-      dockerfile: carts-service/Dockerfile
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: carts-service
     container_name: carts-service
     environment:
       - SERVER_PORT=8082
@@ -32,10 +38,13 @@ services:
       - SPRING_APPLICATION_NAME=carts-service
     depends_on:
       - eureka-server
+
   catalog-service:
     build:
       context: .
-      dockerfile: catalog-service/Dockerfile
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: catalog-service
     container_name: catalog-service
     environment:
       - SERVER_PORT=8083
@@ -43,10 +52,13 @@ services:
       - SPRING_APPLICATION_NAME=catalog-service
     depends_on:
       - eureka-server
+
   listings-service:
     build:
       context: .
-      dockerfile: listings-service/Dockerfile
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: listings-service
     container_name: listings-service
     environment:
       - SERVER_PORT=8084
@@ -54,10 +66,13 @@ services:
       - SPRING_APPLICATION_NAME=listings-service
     depends_on:
       - eureka-server
+
   orders-service:
     build:
       context: .
-      dockerfile: orders-service/Dockerfile
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: orders-service
     container_name: orders-service
     environment:
       - SERVER_PORT=8085
@@ -65,10 +80,13 @@ services:
       - SPRING_APPLICATION_NAME=orders-service
     depends_on:
       - eureka-server
+
   products-recommendations-service:
     build:
       context: .
-      dockerfile: products-recommendations-service/Dockerfile
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: products-recommendations-service
     container_name: products-recommendations-service
     environment:
       - SERVER_PORT=8086
@@ -76,10 +94,13 @@ services:
       - SPRING_APPLICATION_NAME=products-recommendations-service
     depends_on:
       - eureka-server
+
   products-service:
     build:
       context: .
-      dockerfile: products-service/Dockerfile
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: products-service
     container_name: products-service
     environment:
       - SERVER_PORT=8087
@@ -87,10 +108,13 @@ services:
       - SPRING_APPLICATION_NAME=products-service
     depends_on:
       - eureka-server
+
   reviews-service:
     build:
       context: .
-      dockerfile: reviews-service/Dockerfile
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: reviews-service
     container_name: reviews-service
     environment:
       - SERVER_PORT=8088
@@ -98,10 +122,13 @@ services:
       - SPRING_APPLICATION_NAME=reviews-service
     depends_on:
       - eureka-server
+
   seller-daily-analytics-service:
     build:
       context: .
-      dockerfile: seller-daily-analytics-service/Dockerfile
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: seller-daily-analytics-service
     container_name: seller-daily-analytics-service
     environment:
       - SERVER_PORT=8089
@@ -109,10 +136,13 @@ services:
       - SPRING_APPLICATION_NAME=seller-daily-analytics-service
     depends_on:
       - eureka-server
+
   users-service:
     build:
       context: .
-      dockerfile: users-service/Dockerfile
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: users-service
     container_name: users-service
     environment:
       - SERVER_PORT=8081
