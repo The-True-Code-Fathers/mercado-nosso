@@ -60,10 +60,14 @@ services:
       args:
         SERVICE_NAME: listings-service
     container_name: listings-service
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     environment:
       - SERVER_PORT=8084
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_APPLICATION_NAME=listings-service
+      - MAVEN_OPTS="-Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true"
     depends_on:
       - eureka-server
 
