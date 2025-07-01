@@ -1,11 +1,16 @@
-FROM maven:latest
+FROM maven:3.9.6-eclipse-temurin-21 AS builder
+WORKDIR /app
+COPY pom.xml .
+COPY eureka-server/pom.xml ./eureka-server/
+
+COPY eureka-server/src ./eureka-server/src
+
+RUN mvn clean package -pl eureka-server -am -DskipTests
+
+FROM maven:3.9.6-eclipse-temurin-21 AS eureka-server
 VOLUME /tmp
-ARG PROJECT_VERSION=1.0.0
-RUN mkdir -p /home/app
-WORKDIR /home/app
-ENV SPRING_PROFILES_ACTIVE application
-COPY ./ .
-ADD target/eureka-server-1.0.0-SNAPSHOT.jar eureka-server-1.0.0-SNAPSHOT.jar
+WORKDIR /app
+ENV SPRING_PROFILES_ACTIVE=application
+COPY --from=builder /app/eureka-server/target/eureka-server-1.0.0-SNAPSHOT.jar app.jar
 EXPOSE 8888
-ENTRYPOINT ["java", "-jar", "eureka-server-1.0.0-SNAPSHOT.jar"]
-CMD ["mvn", "spring-boot:run"]
+ENTRYPOINT ["java", "-jar", "app.jar"]

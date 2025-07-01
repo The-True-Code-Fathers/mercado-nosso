@@ -21,6 +21,94 @@ services:
     depends_on:
       - eureka-server
 
+  carts-service:
+    build:
+      context: .
+      dockerfile: carts-service/Dockerfile
+    container_name: carts-service
+    environment:
+      - SERVER_PORT=8082
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_APPLICATION_NAME=carts-service
+    depends_on:
+      - eureka-server
+  catalog-service:
+    build:
+      context: .
+      dockerfile: catalog-service/Dockerfile
+    container_name: catalog-service
+    environment:
+      - SERVER_PORT=8083
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_APPLICATION_NAME=catalog-service
+    depends_on:
+      - eureka-server
+  listings-service:
+    build:
+      context: .
+      dockerfile: listings-service/Dockerfile
+    container_name: listings-service
+    environment:
+      - SERVER_PORT=8084
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_APPLICATION_NAME=listings-service
+    depends_on:
+      - eureka-server
+  orders-service:
+    build:
+      context: .
+      dockerfile: orders-service/Dockerfile
+    container_name: orders-service
+    environment:
+      - SERVER_PORT=8085
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_APPLICATION_NAME=orders-service
+    depends_on:
+      - eureka-server
+  products-recommendations-service:
+    build:
+      context: .
+      dockerfile: products-recommendations-service/Dockerfile
+    container_name: products-recommendations-service
+    environment:
+      - SERVER_PORT=8086
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_APPLICATION_NAME=products-recommendations-service
+    depends_on:
+      - eureka-server
+  products-service:
+    build:
+      context: .
+      dockerfile: products-service/Dockerfile
+    container_name: products-service
+    environment:
+      - SERVER_PORT=8087
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_APPLICATION_NAME=products-service
+    depends_on:
+      - eureka-server
+  reviews-service:
+    build:
+      context: .
+      dockerfile: reviews-service/Dockerfile
+    container_name: reviews-service
+    environment:
+      - SERVER_PORT=8088
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_APPLICATION_NAME=reviews-service
+    depends_on:
+      - eureka-server
+  seller-daily-analytics-service:
+    build:
+      context: .
+      dockerfile: seller-daily-analytics-service/Dockerfile
+    container_name: seller-daily-analytics-service
+    environment:
+      - SERVER_PORT=8089
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_APPLICATION_NAME=seller-daily-analytics-service
+    depends_on:
+      - eureka-server
   users-service:
     build:
       context: .
