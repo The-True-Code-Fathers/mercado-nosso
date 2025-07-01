@@ -5,13 +5,13 @@ WORKDIR /app
 
 COPY . .
 
-# Configura Maven para usar repositório central e retry
+
 RUN mvn clean package -pl ${SERVICE_NAME} -am -DskipTests \
     -Dmaven.repo.central=http://repo1.maven.org/maven2 \
     -Dmaven.wagon.http.retryHandler.count=3 \
     -Dmaven.wagon.http.ssl.insecure=true \
     -Dmaven.wagon.http.ssl.allowall=true
-# Stage 2: Runtime
+
 FROM eclipse-temurin:21-jre-alpine
 
 ARG SERVICE_NAME
