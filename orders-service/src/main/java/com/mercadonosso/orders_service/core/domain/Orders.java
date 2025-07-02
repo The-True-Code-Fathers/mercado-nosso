@@ -14,10 +14,14 @@ import java.util.UUID;
 public class Orders {
 
     private UUID orderId;
+
     @NotNull(message = "Must have buyer ID.")
     private UUID buyerId;
+
     private LocalDateTime date;
+
     private OrderStatus status;
+
     @NotNull(message = "Must have an item")
     private List<UUID> listingId;
 

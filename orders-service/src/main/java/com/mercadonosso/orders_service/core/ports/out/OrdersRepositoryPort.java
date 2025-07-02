@@ -13,6 +13,5 @@ public interface OrdersRepositoryPort {
     Optional<Orders> findById(UUID id);
     List<Orders> findAll();
     void delete(Orders order);
-    void deleteById(UUID id);
 
 }
