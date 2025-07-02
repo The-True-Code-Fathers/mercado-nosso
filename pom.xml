@@ -22,7 +22,7 @@
     <module>catalog-service</module>
     <module>eureka-server</module>
     <module>listings-service</module>
-    <module>order-service</module>
+    <module>orders-service</module>
     <module>products-recommendations-service</module>
     <module>products-service</module>
     <module>reviews-service</module>
