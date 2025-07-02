@@ -1,5 +1,5 @@
 server:
-  port: 0 # Usar porta 0 faz o Spring escolher uma porta aleatória disponível, útil para rodar várias instâncias
+  port: 0
 
 spring:
   application:
