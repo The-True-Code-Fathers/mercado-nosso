@@ -8,7 +8,7 @@
     <version>1.0.0-SNAPSHOT</version>
     <relativePath>../pom.xml</relativePath>
   </parent>
-  <artifactId>listingsEntities-service</artifactId>
+  <artifactId>listings-service</artifactId>
   <packaging>jar</packaging>
   <dependencies>
     <dependency>
