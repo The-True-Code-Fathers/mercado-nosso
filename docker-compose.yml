@@ -1,5 +1,8 @@
 services:
   eureka-server:
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     build:
       context: .
       dockerfile: Dockerfile
@@ -17,6 +20,9 @@ services:
       args:
         SERVICE_NAME: api-gateway
     container_name: api-gateway
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     ports:
       - "8080:8080"
     environment:
@@ -32,6 +38,9 @@ services:
       args:
         SERVICE_NAME: carts-service
     container_name: carts-service
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     environment:
       - SERVER_PORT=8082
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
@@ -46,6 +55,9 @@ services:
       args:
         SERVICE_NAME: catalog-service
     container_name: catalog-service
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     environment:
       - SERVER_PORT=8083
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
@@ -60,10 +72,14 @@ services:
       args:
         SERVICE_NAME: listings-service
     container_name: listings-service
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     environment:
       - SERVER_PORT=8084
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_APPLICATION_NAME=listings-service
+      - MAVEN_OPTS="-Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true"
     depends_on:
       - eureka-server
 
@@ -74,6 +90,9 @@ services:
       args:
         SERVICE_NAME: orders-service
     container_name: orders-service
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     environment:
       - SERVER_PORT=8085
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
@@ -88,6 +107,9 @@ services:
       args:
         SERVICE_NAME: products-recommendations-service
     container_name: products-recommendations-service
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     environment:
       - SERVER_PORT=8086
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
@@ -102,6 +124,9 @@ services:
       args:
         SERVICE_NAME: products-service
     container_name: products-service
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     environment:
       - SERVER_PORT=8087
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
@@ -116,6 +141,9 @@ services:
       args:
         SERVICE_NAME: reviews-service
     container_name: reviews-service
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     environment:
       - SERVER_PORT=8088
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
@@ -130,6 +158,9 @@ services:
       args:
         SERVICE_NAME: seller-daily-analytics-service
     container_name: seller-daily-analytics-service
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     environment:
       - SERVER_PORT=8089
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
@@ -144,6 +175,9 @@ services:
       args:
         SERVICE_NAME: users-service
     container_name: users-service
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     environment:
       - SERVER_PORT=8081
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
