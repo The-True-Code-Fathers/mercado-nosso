@@ -68,6 +68,7 @@ public class ListingsController {
         ListingsEntity listingToDelete = listingsServicePort.findById(id);
         listingsServicePort.delete(listingToDelete);
 
+
         return ResponseEntity.noContent().build();
     }
 }
