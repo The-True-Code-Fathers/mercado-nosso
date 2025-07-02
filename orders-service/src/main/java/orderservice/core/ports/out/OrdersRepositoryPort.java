@@ -1,6 +1,6 @@
-package com.mercadonosso.orders_service.core.ports.out;
+package orderservice.core.ports.out;
 
-import com.mercadonosso.orders_service.core.domain.Orders;
+import orderservice.core.domain.Order;
 
 
 import java.util.List;
@@ -9,9 +9,9 @@ import java.util.UUID;
 
 public interface OrdersRepositoryPort {
 
-    Orders save(Orders orders);
-    Optional<Orders> findById(UUID id);
-    List<Orders> findAll();
-    void delete(Orders order);
+    Order save(Order order);
+    Optional<Order> findById(UUID id);
+    List<Order> findAll();
+    void delete(Order order);
 
 }

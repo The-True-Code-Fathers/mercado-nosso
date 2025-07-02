@@ -1,4 +1,4 @@
-package com.mercadonosso.orders_service.core.domain.enums;
+package orderservice.core.domain.enums;
 
 public enum OrderStatus {
     OPEN,

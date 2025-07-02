@@ -1,2 +1,4 @@
-package orderservice.config;public class BeanConfiguration {
+package orderservice.config;
+
+public class BeanConfiguration {
 }

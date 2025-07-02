@@ -1,11 +1,11 @@
-package com.mercadonosso.orders_service.core.usecases;
+package orderservice.core.usecases;
 
-import com.mercadonosso.orders_service.core.domain.Orders;
-import com.mercadonosso.orders_service.core.domain.enums.OrderStatus;
-import com.mercadonosso.orders_service.core.domain.exceptions.BusinessRuleException;
-import com.mercadonosso.orders_service.core.domain.exceptions.OrderNotFoundException;
-import com.mercadonosso.orders_service.core.ports.out.OrdersRepositoryPort;
-import com.mercadonosso.orders_service.core.ports.in.OrdersServicePort;
+import orderservice.core.domain.Order;
+import orderservice.core.domain.enums.OrderStatus;
+import orderservice.core.domain.exceptions.BusinessRuleException;
+import orderservice.core.domain.exceptions.OrderNotFoundException;
+import orderservice.core.ports.out.OrdersRepositoryPort;
+import orderservice.core.ports.in.OrdersServicePort;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 
@@ -25,7 +25,7 @@ public class OrdersServiceImpl implements OrdersServicePort {
         this.validator = validator;
     }
 
-    public Orders create(Orders order, UUID buyerId, List<UUID> listing) {
+    public Order create(Order order, UUID buyerId, List<UUID> listing) {
         validateOrders(order);
         order.setOrderId(UUID.randomUUID());
         order.setBuyerId(buyerId);
@@ -37,29 +37,29 @@ public class OrdersServiceImpl implements OrdersServicePort {
 
 
     @Override
-    public Orders updateOrder(Orders order, OrderStatus status) {
+    public Order updateOrder(Order order, OrderStatus status) {
         order.setStatus(status);
         return ordersRepositoryPort.save(order);
     }
 
     @Override
-    public void delete(Orders order) {
+    public void delete(Order order) {
         ordersRepositoryPort.delete(order);
     }
 
     @Override
-    public Orders findOrderById(UUID id) {
+    public Order findOrderById(UUID id) {
         return ordersRepositoryPort.findById(id).orElseThrow(() ->
                 new OrderNotFoundException("Order " + id + " não encontrada"));
     }
 
     @Override
-    public List<Orders> findAllOrders() {
+    public List<Order> findAllOrders() {
         return ordersRepositoryPort.findAll();
     }
 
-    private void validateOrders(Orders order) {
-        Set<ConstraintViolation<Orders>> violations = validator.validate(order);
+    private void validateOrders(Order order) {
+        Set<ConstraintViolation<Order>> violations = validator.validate(order);
         if (!violations.isEmpty()) {
             throw new BusinessRuleException(violations.iterator().next().getMessage());
         }

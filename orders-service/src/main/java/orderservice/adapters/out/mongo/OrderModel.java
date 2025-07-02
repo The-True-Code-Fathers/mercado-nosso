@@ -1,2 +1,4 @@
-package orderservice.adapters.out.mongo;public class OrderModel {
+package orderservice.adapters.out.mongo;
+
+public class OrderModel {
 }
