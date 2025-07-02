@@ -5,6 +5,7 @@ import com.mercadonosso.listings_service.adapters.in.web.dto.ListingResponse;
 import com.mercadonosso.listings_service.core.domain.ListingsEntity;
 import com.mercadonosso.listings_service.core.ports.in.ListingsServicePort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
@@ -60,5 +61,13 @@ public class ListingsController {
                 listingsEntity.getProductCondition(),
                 listingsEntity.getCreatedAt()
         );
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteListingById(@PathVariable UUID id) {
+        ListingsEntity listingToDelete = listingsServicePort.searchById(id);
+        listingsServicePort.delete(listingToDelete);
+
+        return ResponseEntity.noContent().build();
     }
 }
