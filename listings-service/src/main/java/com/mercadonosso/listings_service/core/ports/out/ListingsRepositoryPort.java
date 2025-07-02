@@ -10,5 +10,5 @@ public interface ListingsRepositoryPort {
     ListingsEntity save(ListingsEntity listingsEntity);
     void delete(ListingsEntity listingsEntity);
     List<ListingsEntity> listAll();
-    Optional<ListingsEntity> searchById(UUID id);
+    Optional<ListingsEntity> findById(UUID id);
 }

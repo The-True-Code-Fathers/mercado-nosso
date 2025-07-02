@@ -9,6 +9,6 @@ public interface ListingsServicePort {
     ListingsEntity create(ListingsEntity listingsEntity);
     ListingsEntity update(UUID id, ListingsEntity listingsEntity);
     void delete(ListingsEntity listingsEntity);
-    ListingsEntity searchById(UUID id);
+    ListingsEntity findById(UUID id);
     List<ListingsEntity> listAll();
 }

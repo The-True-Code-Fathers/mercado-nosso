@@ -27,7 +27,7 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
     }
 
     @Override
-    public Optional<ListingsEntity> searchById(UUID id) {
+    public Optional<ListingsEntity> findById(UUID id) {
         Optional<ListingsModel> modelOptional = mongoRepository.findById(id.toString());
         return modelOptional.map(mapper::toDomain);
     }

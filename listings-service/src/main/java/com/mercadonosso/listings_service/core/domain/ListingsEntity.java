@@ -44,6 +44,7 @@ public class ListingsEntity {
     @Field(targetType = FieldType.DECIMAL128)
     private BigDecimal price;
 
+    @Field(name = "active")
     private boolean active;
 
     @Field("created_at")
@@ -53,5 +54,6 @@ public class ListingsEntity {
     @Field("product_condition")
     private ProductCondition productCondition;
 
+    @Field(name = "stock")
     private Integer stock;
 }
