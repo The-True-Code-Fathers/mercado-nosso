@@ -10,11 +10,68 @@ spring:
         locator:
           enabled: true
           lower-case-service-id: true
+      
       routes:
-        - id: rota_servico_exemplo
-          uri: lb://MS-SERVICO-EXEMPLO
+        - id: users_service_route
+          uri: lb://users-service
           predicates:
-            - Path=/api/exemplo/**
+            - Path=/api/users/**
+          filters:
+            - StripPrefix=2
+
+        - id: carts_service_route
+          uri: lb://carts-service
+          predicates:
+            - Path=/api/carts/**
+          filters:
+            - StripPrefix=2
+
+        - id: catalog_service_route
+          uri: lb://catalog-service
+          predicates:
+            - Path=/api/catalog/**
+          filters:
+            - StripPrefix=2
+
+        - id: listings_service_route
+          uri: lb://listings-service
+          predicates:
+            - Path=/api/listings/**
+          filters:
+            - StripPrefix=2
+
+        - id: orders_service_route
+          uri: lb://orders-service
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - StripPrefix=2
+
+        - id: products_recommendations_service_route
+          uri: lb://products-recommendations-service
+          predicates:
+            - Path=/api/recommendations/**
+          filters:
+            - StripPrefix=2
+
+        - id: products_service_route
+          uri: lb://products-service
+          predicates:
+            - Path=/api/products/**
+          filters:
+            - StripPrefix=2
+
+        - id: reviews_service_route
+          uri: lb://reviews-service
+          predicates:
+            - Path=/api/reviews/**
+          filters:
+            - StripPrefix=2
+
+        - id: seller_daily_analytics_service_route
+          uri: lb://seller-daily-analytics-service
+          predicates:
+            - Path=/api/analytics/**
           filters:
             - StripPrefix=2
 
@@ -22,9 +79,15 @@ eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
 
 management:
   endpoints:
     web:
       exposure:
-        include: gateway
+        include: "*"
+  endpoint:
+    gateway:
+      enabled: true
+
