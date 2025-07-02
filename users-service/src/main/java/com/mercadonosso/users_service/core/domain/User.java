@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -19,6 +20,9 @@ public class User {
     private String cnpj;
     private boolean isSeller;
     private String profilePictureUrl;
-    private final Instant createdAt = Instant.now();
+    private List<UUID> listingSellingId;
+    private List<UUID> listingBoughtId;
+    private Instant createdAt = Instant.now();
     private Instant updatedAt = Instant.now();
+    private boolean active = true;
 }
