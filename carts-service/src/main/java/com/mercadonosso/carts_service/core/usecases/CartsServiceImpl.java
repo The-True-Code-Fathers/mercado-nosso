@@ -27,7 +27,7 @@ public class CartsServiceImpl implements CartsServicePort {
     }
 
     @Override
-    public CartsEntity searchById(UUID userId) {
+    public CartsEntity findById(UUID userId) {
         return cartsRepositoryPort.findByUserId(userId).orElseThrow(() -> new CartNotFoundException("Cart not found!"));
     }
 
@@ -122,7 +122,7 @@ public class CartsServiceImpl implements CartsServicePort {
 
     @Override
     public void clear(UUID userId) {
-
+        
     }
 
 }
