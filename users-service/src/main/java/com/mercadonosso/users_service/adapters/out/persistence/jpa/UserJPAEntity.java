@@ -51,4 +51,7 @@ public class UserJPAEntity {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private Instant updatedAt;
+
+    @Column(nullable = false)
+    private boolean active = true;
 }
