@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: users-service
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
 
 eureka:
   client:
