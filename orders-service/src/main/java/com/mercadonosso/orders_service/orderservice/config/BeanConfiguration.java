@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 public class BeanConfiguration {
 
     @Bean
-    public OrdersServicePort ordersServicePort(
+    public OrdersServicePort orderServicePort(
             OrderRepositoryAdapter ordersRepositoryAdapter,
             Validator validator
     ) {
