@@ -7,7 +7,8 @@ import java.util.UUID;
 
 public interface ListingsServicePort {
     ListingsEntity create(ListingsEntity listingsEntity);
-    ListingsEntity searchById(UUID id);
+    ListingsEntity update(UUID id, ListingsEntity listingsEntity);
     void delete(ListingsEntity listingsEntity);
+    ListingsEntity searchById(UUID id);
     List<ListingsEntity> listAll();
 }

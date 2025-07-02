@@ -70,4 +70,5 @@ public class ListingsController {
 
         return ResponseEntity.noContent().build();
     }
+
 }

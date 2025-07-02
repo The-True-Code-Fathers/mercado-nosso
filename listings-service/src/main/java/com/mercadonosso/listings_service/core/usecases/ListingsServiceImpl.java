@@ -7,12 +7,13 @@ import com.mercadonosso.listings_service.core.ports.in.ListingsServicePort;
 import com.mercadonosso.listings_service.core.ports.out.ListingsRepositoryPort;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
-
+import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+@Service
 public class ListingsServiceImpl implements ListingsServicePort {
     private final ListingsRepositoryPort listingsRepositoryPort;
     private final Validator validator;
@@ -30,14 +31,29 @@ public class ListingsServiceImpl implements ListingsServicePort {
     }
 
     @Override
-    public ListingsEntity searchById(UUID id) {
-        return listingsRepositoryPort.searchById(id).orElseThrow(() ->
-                new ListingsNotFoundException("Anúncio com ID " + id + " não encontrado."));
+    public ListingsEntity update(UUID id, ListingsEntity newListingData) {
+        ListingsEntity existingListing = this.searchById(id);
+
+        validateListing(newListingData);
+
+        existingListing.setTitle(newListingData.getTitle());
+        existingListing.setDescription(newListingData.getDescription());
+        existingListing.setPrice(newListingData.getPrice());
+        existingListing.setStock(newListingData.getStock());
+        existingListing.setProductCondition(newListingData.getProductCondition());
+
+        return listingsRepositoryPort.save(existingListing);
     }
 
     @Override
     public void delete(ListingsEntity listingsEntity) {
         listingsRepositoryPort.delete(listingsEntity);
+    }
+
+    @Override
+    public ListingsEntity searchById(UUID id) {
+        return listingsRepositoryPort.searchById(id).orElseThrow(() ->
+                new ListingsNotFoundException("Anúncio com ID " + id + " não encontrado."));
     }
 
     @Override

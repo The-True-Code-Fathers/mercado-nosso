@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public interface ListingsRepositoryPort {
     ListingsEntity save(ListingsEntity listingsEntity);
-    Optional<ListingsEntity> searchById(UUID id);
-    List<ListingsEntity> listAll();
     void delete(ListingsEntity listingsEntity);
+    List<ListingsEntity> listAll();
+    Optional<ListingsEntity> searchById(UUID id);
 }

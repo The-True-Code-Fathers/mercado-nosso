@@ -4,6 +4,8 @@ import com.mercadonosso.listings_service.core.domain.enums.ProductCondition;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import org.springframework.data.mongodb.core.mapping.FieldType;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -19,6 +21,8 @@ public class ListingsModel {
     private UUID sellerId;
     private String title;
     private String description;
+
+    @Field(targetType = FieldType.DECIMAL128)
     private BigDecimal price;
     private Integer stock;
     private boolean active;

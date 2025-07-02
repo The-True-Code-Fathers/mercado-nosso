@@ -4,6 +4,7 @@ import com.mercadonosso.listings_service.adapters.out.persistence.mongo.Listings
 import com.mercadonosso.listings_service.core.ports.in.ListingsServicePort;
 
 import com.mercadonosso.listings_service.core.usecases.ListingsServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import jakarta.validation.Validator;
