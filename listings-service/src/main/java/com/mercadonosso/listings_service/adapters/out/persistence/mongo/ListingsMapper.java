@@ -5,15 +5,15 @@ import org.springframework.stereotype.Component;
 import java.util.UUID;
 
 @Component
-public class ListingMapper {
-    ListingModel model = new ListingModel();
+public class ListingsMapper {
+    ListingsModel model = new ListingsModel();
 
     /**
      *
      * @param domain
      * @return returning validations and builder.
      */
-    public ListingModel toModel(ListingsEntity domain) {
+    public ListingsModel toModel(ListingsEntity domain) {
         if (domain.getListingId() != null) {
             model.setId(domain.getListingId().toString());
         }
@@ -36,7 +36,7 @@ public class ListingMapper {
      * @param model
      * @return returning as a param model and creating a domain settings attributes
      */
-    public ListingsEntity toDomain(ListingModel model) {
+    public ListingsEntity toDomain(ListingsModel model) {
         ListingsEntity domain = new ListingsEntity();
 
         domain.setListingId(UUID.fromString(model.getId()));

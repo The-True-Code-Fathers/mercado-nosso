@@ -11,30 +11,30 @@ import java.util.stream.Collectors;
 
 @Component
 public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
-    private final SpringListingRepository mongoRepository;
-    private final ListingMapper mapper;
+    private final SpringListingsRepository mongoRepository;
+    private final ListingsMapper mapper;
 
-    public ListingsRepositoryAdapter(SpringListingRepository springListingRepository, ListingMapper mapper) {
-        this.mongoRepository = springListingRepository;
+    public ListingsRepositoryAdapter(SpringListingsRepository springListingsRepository, ListingsMapper mapper) {
+        this.mongoRepository = springListingsRepository;
         this.mapper = mapper;
     }
 
     @Override
     public ListingsEntity save(ListingsEntity listingsEntity) {
-        ListingModel model = mapper.toModel(listingsEntity);
-        ListingModel savedModel = mongoRepository.save(model);
+        ListingsModel model = mapper.toModel(listingsEntity);
+        ListingsModel savedModel = mongoRepository.save(model);
         return listingsEntity;
     }
 
     @Override
     public Optional<ListingsEntity> searchById(UUID id) {
-        Optional<ListingModel> modelOptional = mongoRepository.findById(id.toString());
+        Optional<ListingsModel> modelOptional = mongoRepository.findById(id.toString());
         return modelOptional.map(mapper::toDomain);
     }
 
     @Override
     public List<ListingsEntity> listAll() {
-        List<ListingModel> models = mongoRepository.findAll();
+        List<ListingsModel> models = mongoRepository.findAll();
         return models.stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
@@ -42,7 +42,7 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
 
     @Override
     public void delete(ListingsEntity listingsEntity) {
-        ListingModel model = mapper.toModel(listingsEntity);
+        ListingsModel model = mapper.toModel(listingsEntity);
         mongoRepository.delete(model);
     }
 }

@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Document(collection = "listings")
-public class ListingModel {
+public class ListingsModel {
     @Id
     private String id;
 
