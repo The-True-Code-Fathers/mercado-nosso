@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mercadonosso.users_service.core.ports.in.UserServicePort;
 
 @RestController
-@RequestMapping("/api/users")
 public class UserController {
 
     private final UserServicePort userService;
