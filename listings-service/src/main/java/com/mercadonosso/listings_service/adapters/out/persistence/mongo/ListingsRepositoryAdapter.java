@@ -1,13 +1,14 @@
 package com.mercadonosso.listings_service.adapters.out.persistence.mongo;
 
-import com.mercadonosso.listings_service.core.domain.ListingsEntity;
-import com.mercadonosso.listings_service.core.ports.out.ListingsRepositoryPort;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+
+import com.mercadonosso.listings_service.core.domain.ListingsEntity;
+import com.mercadonosso.listings_service.core.ports.out.ListingsRepositoryPort;
 
 @Component
 public class ListingsRepositoryAdapter implements ListingsRepositoryPort {

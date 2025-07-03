@@ -1,11 +1,12 @@
 package com.mercadonosso.users_service.adapters.out.persistence.jpa;
 
-import com.mercadonosso.users_service.core.domain.User;
-import com.mercadonosso.users_service.core.ports.out.UserRepositoryPort;
-import org.springframework.stereotype.Component;
-
 import java.util.Optional;
 import java.util.UUID;
+
+import org.springframework.stereotype.Component;
+
+import com.mercadonosso.users_service.core.domain.User;
+import com.mercadonosso.users_service.core.ports.out.UserRepositoryPort;
 
 @Component
 public class UserRepositoryAdapter implements UserRepositoryPort {

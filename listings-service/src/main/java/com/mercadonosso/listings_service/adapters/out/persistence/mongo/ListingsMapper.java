@@ -1,8 +1,8 @@
 package com.mercadonosso.listings_service.adapters.out.persistence.mongo;
 
-import com.mercadonosso.listings_service.core.domain.ListingsEntity;
 import org.springframework.stereotype.Component;
-import java.util.UUID;
+
+import com.mercadonosso.listings_service.core.domain.ListingsEntity;
 
 @Component
 public class ListingsMapper {

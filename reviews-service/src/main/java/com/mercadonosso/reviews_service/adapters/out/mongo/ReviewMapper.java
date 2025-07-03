@@ -1,9 +1,9 @@
-package com.mercadonosso.reviews_service.adapters.out.mongo;
+// package com.mercadonosso.reviews_service.adapters.out.mongo;
 
-import org.springframework.stereotype.Component;
+// import org.springframework.stereotype.Component;
 
-@Component
-public class ReviewMapper {
-    public ReviewModel toModel();
+// @Component
+// public class ReviewMapper {
+//     public ReviewModel toModel();
 
-}
+// }
