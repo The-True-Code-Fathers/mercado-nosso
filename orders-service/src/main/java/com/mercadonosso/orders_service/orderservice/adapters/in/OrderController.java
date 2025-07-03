@@ -70,7 +70,7 @@ public class OrderController {
 
     @PostMapping("/{id}")
     public OrderResponse updateOrder(Order order, OrderStatus status) {
-        order.setStatus(status);
-        return toResponse(order);
+        Order orderToUpdate = ordersServicePort.updateOrder(order, status);
+        return toResponse(orderToUpdate);
     }
 }
