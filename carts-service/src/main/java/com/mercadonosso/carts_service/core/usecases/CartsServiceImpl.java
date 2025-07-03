@@ -5,6 +5,9 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.mercadonosso.carts_service.core.domain.CartsEntity;
@@ -20,10 +23,15 @@ public class CartsServiceImpl implements CartsServicePort {
 
     public final CartsRepositoryPort cartsRepositoryPort;
     public final ListingsServicePort listingsServicePort;
+    public final KafkaTemplate<String, String> kafkaTemplate;
+    public final String clearCartTopic;
 
-    public CartsServiceImpl(CartsRepositoryPort cartsRepositoryPort, ListingsServicePort listingsServicePort) {
+    public CartsServiceImpl(CartsRepositoryPort cartsRepositoryPort, ListingsServicePort listingsServicePort,
+            KafkaTemplate<String, String> kafkaTemplate, @Value("${topics.cart-clear.name}") String clearCartTopic) {
         this.cartsRepositoryPort = cartsRepositoryPort;
         this.listingsServicePort = listingsServicePort;
+        this.kafkaTemplate = kafkaTemplate;
+        this.clearCartTopic = clearCartTopic;
     }
 
     @Override
@@ -121,8 +129,18 @@ public class CartsServiceImpl implements CartsServicePort {
     }
 
     @Override
-    public void clear(UUID userId) {
-        
+    public void requestClear(UUID userId) {
+        kafkaTemplate.send(clearCartTopic, userId.toString());
+    }
+
+    @KafkaListener(topics = "${topics.cart-clear.name}", groupId = "${spring.kafka.consumer.group-id}")
+    @Override
+    public void processClear(UUID userId) {
+        try {
+            cartsRepositoryPort.delete(userId);
+        } catch (Exception e) {
+            e.getMessage();
+        }
     }
 
 }
