@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Document(collection = "listings")
 public class ListingsModel {
     @Id
-    private String id;
+    private UUID id;
 
     private UUID productId;
     private UUID sellerId;
