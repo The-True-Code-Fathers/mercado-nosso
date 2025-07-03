@@ -25,11 +25,11 @@ public class OrdersServiceImpl implements OrdersServicePort {
         this.validator = validator;
     }
 
-    public Order create(Order order, UUID buyerId, List<UUID> listing) {
+    public Order create(Order order) {
         validateOrders(order);
         order.setOrderId(UUID.randomUUID());
-        order.setBuyerId(buyerId);
-        order.setListingId(listing);
+        order.setBuyerId(order.getBuyerId());
+        order.setListingId(order.getListingId());
         order.setDate(LocalDateTime.now());
         order.setStatus(OrderStatus.OPEN);
         return ordersRepositoryPort.save(order);
