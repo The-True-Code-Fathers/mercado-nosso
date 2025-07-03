@@ -4,9 +4,13 @@ import java.util.UUID;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class AddItemRequest {
     @NotBlank(message = "Listing ID can not be null")
     private UUID listingId;
