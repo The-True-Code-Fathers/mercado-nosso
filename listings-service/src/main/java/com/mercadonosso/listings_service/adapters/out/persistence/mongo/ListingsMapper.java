@@ -15,7 +15,7 @@ public class ListingsMapper {
      */
     public ListingsModel toModel(ListingsEntity domain) {
         if (domain.getListingId() != null) {
-            model.setId(domain.getListingId().toString());
+            model.setId(domain.getListingId());
         }
 
         model.setProductId(domain.getProductId());
@@ -39,7 +39,7 @@ public class ListingsMapper {
     public ListingsEntity toDomain(ListingsModel model) {
         ListingsEntity domain = new ListingsEntity();
 
-        domain.setListingId(UUID.fromString(model.getId()));
+        domain.setListingId(model.getId());
         domain.setProductId(model.getProductId());
         domain.setSellerId(model.getSellerId());
         domain.setTitle(model.getTitle());
