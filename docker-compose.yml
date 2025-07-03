@@ -183,7 +183,7 @@ services:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_APPLICATION_NAME=users-service
       # Postgres configuration
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://users-db:5432/users_db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://users-service-postgres:5432/users_db
       - SPRING_DATASOURCE_USERNAME=user
       - SPRING_DATASOURCE_PASSWORD=password
     depends_on:
