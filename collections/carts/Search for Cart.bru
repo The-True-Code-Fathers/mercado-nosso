@@ -1,0 +1,22 @@
+meta {
+  name: Search for Cart
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:8080/api/carts/items/
+  body: json
+  auth: inherit
+}
+
+headers {
+  X-User-Id: 3b02ccf3-3154-4eab-9367-9673a718539f
+}
+
+body:json {
+  {
+    "listingId": "0e497b13-cb91-4bf4-81d5-4e456b28d6ce",
+    "quantity": 2
+  }
+}

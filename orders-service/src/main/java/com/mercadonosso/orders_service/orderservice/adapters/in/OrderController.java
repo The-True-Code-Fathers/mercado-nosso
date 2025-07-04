@@ -15,7 +15,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/orders")
 public class OrderController {
     private final OrdersServicePort ordersServicePort;
 
@@ -28,8 +27,11 @@ public class OrderController {
     public OrderResponse createOrder(@RequestBody CreatingOrderRequest request) {
         Order order = new Order();
 
+        order.setOrderId(request.orderId());
+        order.setListingId(request.listing());
         order.setBuyerId(request.buyerId());
         order.setStatus(request.status());
+
 
         Order createdOrder = ordersServicePort.create(order);
 
@@ -46,7 +48,7 @@ public class OrderController {
         );
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("{id}")
     public OrderResponse getOrderById(@PathVariable UUID id) {
         Order orders =  ordersServicePort.findOrderById(id);
         return toResponse(orders);

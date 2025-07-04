@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -25,11 +24,14 @@ import com.mercadonosso.carts_service.core.ports.in.CartsServicePort;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("api/carts")
+@RequestMapping
 public class CartsController {
 
-    @Autowired
-    private CartsServicePort cartsServicePort;
+    private final CartsServicePort cartsServicePort;
+
+    public CartsController(CartsServicePort cartsServicePort) {
+        this.cartsServicePort = cartsServicePort;
+    }
 
     @GetMapping
     public ResponseEntity<CartsResponse> getCartForCurrentUser(@RequestHeader("X-User-Id") String userIdString) {
@@ -39,28 +41,28 @@ public class CartsController {
     }
 
     @PostMapping("/items")
-    public ResponseEntity<CartsResponse> addItemToCart(@RequestHeader("X-User-Id") String userIdString,
+    public ResponseEntity<CartsResponse> addItemToCart(
+            @RequestHeader("X-User-Id") String userIdString,
             @Valid @RequestBody AddItemRequest request) {
         UUID userId = UUID.fromString(userIdString);
         CartsEntity updatedCart = cartsServicePort.add(userId, request.getListingId(), request.getQuantity());
-
         return ResponseEntity.status(HttpStatus.CREATED).body(convertToResponse(updatedCart));
     }
 
-    @PutMapping
-    public ResponseEntity<CartsResponse> updateItemQuantity(@RequestHeader("X-User-Id") String userIdString,
+    @PutMapping("/items")
+    public ResponseEntity<CartsResponse> updateItemQuantity(
+            @RequestHeader("X-User-Id") String userIdString,
             @Valid @RequestBody UpdateItemQuantityRequest request) {
         UUID userId = UUID.fromString(userIdString);
         CartsEntity updatedCart = cartsServicePort.update(userId, request.getListingId(), request.getQuantity());
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(convertToResponse(updatedCart));
+        return ResponseEntity.ok(convertToResponse(updatedCart));
     }
 
     @DeleteMapping
-    public ResponseEntity<CartsResponse> clearCart(@RequestHeader("X-User-Id") String userIdString) {
+    public ResponseEntity<Void> clearCart(@RequestHeader("X-User-Id") String userIdString) {
         UUID userId = UUID.fromString(userIdString);
         cartsServicePort.requestClear(userId);
-        return ResponseEntity.accepted().build();
+        return ResponseEntity.noContent().build();
     }
 
     private CartsResponse convertToResponse(CartsEntity cartsEntity) {
@@ -90,5 +92,4 @@ public class CartsController {
                                 .build()).collect(Collectors.toList()))
                 .build();
     }
-
 }

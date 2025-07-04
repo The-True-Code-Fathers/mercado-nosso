@@ -1,8 +1,5 @@
 services:
   eureka-server:
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
     build:
       context: .
       dockerfile: Dockerfile
@@ -12,6 +9,8 @@ services:
       - "8761:8761"
     environment:
       - SERVER_PORT=8761
+    networks:
+      - my-network
 
   api-gateway:
     build:
@@ -20,9 +19,6 @@ services:
       args:
         SERVICE_NAME: api-gateway
     container_name: api-gateway
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
     ports:
       - "8080:8080"
     environment:
@@ -30,23 +26,39 @@ services:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
     depends_on:
       - eureka-server
-  auth-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        SERVICE_NAME: auth-service
-    container_name: auth-service
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
-    ports:
-      - "8090:8090"
+    networks:
+      - my-network
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.3
+    container_name: zookeeper
+    networks:
+      - my-network
     environment:
-      - SERVER_PORT=8090
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.3
+    container_name: kafka
+    networks:
+      - my-network
     depends_on:
-      - eureka-server
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+    healthcheck:
+      test: ["CMD", "cub", "kafka-ready", "-b", "localhost:29092", "1", "20"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 
   carts-service:
     build:
@@ -55,25 +67,34 @@ services:
       args:
         SERVICE_NAME: carts-service
     container_name: carts-service
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
     environment:
       - SERVER_PORT=8082
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_APPLICATION_NAME=carts-service
       - SPRING_DATA_MONGODB_URI=mongodb://carts-service-mongodb:27017/carts-service-mongodb
+      - APP_SERVICES_LISTINGS-URL=http://listings-service:8084
+      - SPRING_KAFKA_CONSUMER_BOOTSTRAP_SERVERS=kafka:29092 
     depends_on:
-      - eureka-server
-      - carts-service-mongodb
+      eureka-server:
+        condition: service_started
+      carts-service-mongodb:
+        condition: service_started
+      listings-service:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    networks:
+      - my-network
     
   carts-service-mongodb:
       image: mongo:5.0
       container_name: carts-service-mongodb
+      networks:
+        - my-network 
       ports:
-      - "5433:5433"
+        - "5433:5433"
       volumes:
-      - carts_db_data:/data/db
+        - carts_db_data:/data/db
 
   catalog-service:
     build:
@@ -82,15 +103,14 @@ services:
       args:
         SERVICE_NAME: catalog-service
     container_name: catalog-service
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
     environment:
       - SERVER_PORT=8083
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_APPLICATION_NAME=catalog-service
     depends_on:
       - eureka-server
+    networks:
+      - my-network
 
   listings-service:
     build:
@@ -99,16 +119,28 @@ services:
       args:
         SERVICE_NAME: listings-service
     container_name: listings-service
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
     environment:
       - SERVER_PORT=8084
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_APPLICATION_NAME=listings-service
+      # Add this line to connect to the MongoDB container
+      - SPRING_DATA_MONGODB_URI=mongodb://listings-service-mongodb:27017/listings-service-mongodb
       - MAVEN_OPTS="-Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true"
     depends_on:
       - eureka-server
+      - listings-service-mongodb
+    networks:
+      - my-network
+
+  listings-service-mongodb:
+      image: mongo:5.0
+      container_name: listings-service-mongodb
+      networks:
+        - my-network 
+      ports:
+        - "5435:5435"
+      volumes:
+        - listings_db_data:/data/db
 
   orders-service:
     build:
@@ -117,15 +149,24 @@ services:
       args:
         SERVICE_NAME: orders-service
     container_name: orders-service
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
     environment:
       - SERVER_PORT=8085
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_APPLICATION_NAME=orders-service
+      - SPRING_DATA_MONGODB_URI=mongodb://orders-service-mongodb:27017/orders-db
     depends_on:
       - eureka-server
+      - orders-service-mongodb
+    networks:
+      - my-network
+
+  orders-service-mongodb:
+      image: mongo:5.0
+      container_name: orders-service-mongodb
+      ports:
+        - "5434:27017"
+      volumes:
+        - orders_db_data:/data/db
 
   products-recommendations-service:
     build:
@@ -134,15 +175,14 @@ services:
       args:
         SERVICE_NAME: products-recommendations-service
     container_name: products-recommendations-service
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
     environment:
       - SERVER_PORT=8086
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_APPLICATION_NAME=products-recommendations-service
     depends_on:
       - eureka-server
+    networks:
+      - my-network
 
   products-service:
     build:
@@ -151,15 +191,14 @@ services:
       args:
         SERVICE_NAME: products-service
     container_name: products-service
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
     environment:
       - SERVER_PORT=8087
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_APPLICATION_NAME=products-service
     depends_on:
       - eureka-server
+    networks:
+      - my-network
 
   reviews-service:
     build:
@@ -168,15 +207,14 @@ services:
       args:
         SERVICE_NAME: reviews-service
     container_name: reviews-service
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
     environment:
       - SERVER_PORT=8088
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_APPLICATION_NAME=reviews-service
     depends_on:
       - eureka-server
+    networks:
+      - my-network
 
   seller-daily-analytics-service:
     build:
@@ -185,15 +223,14 @@ services:
       args:
         SERVICE_NAME: seller-daily-analytics-service
     container_name: seller-daily-analytics-service
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
     environment:
       - SERVER_PORT=8089
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_APPLICATION_NAME=seller-daily-analytics-service
     depends_on:
       - eureka-server
+    networks:
+      - my-network
 
   users-service:
     build:
@@ -202,9 +239,6 @@ services:
       args:
         SERVICE_NAME: users-service
     container_name: users-service
-    dns:
-      - 8.8.8.8
-      - 8.8.4.4
     environment:
       - SERVER_PORT=8081
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
@@ -216,6 +250,8 @@ services:
     depends_on:
       - eureka-server
       - users-service-postgres
+    networks:
+      - my-network
 
   users-service-postgres:
     image: postgres:17.5-alpine
@@ -232,3 +268,9 @@ services:
 volumes:
   users_db_data:
   carts_db_data:
+  listings_db_data:
+  orders_db_data:
+
+networks:
+  my-network:
+    driver: bridge

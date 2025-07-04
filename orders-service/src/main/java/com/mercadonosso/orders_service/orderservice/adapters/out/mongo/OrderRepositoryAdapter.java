@@ -13,30 +13,30 @@ import java.util.stream.Collectors;
 @Component
 public class OrderRepositoryAdapter implements OrdersRepositoryPort {
 
-    private final SpringOrderRepository mongoRepository;
+    private final SpringOrderRepository orderRepository;
 
 
     public OrderRepositoryAdapter(SpringOrderRepository springOrderRepository) {
-        this.mongoRepository = springOrderRepository;
+        this.orderRepository = springOrderRepository;
     }
 
     @Override
     public Order save(Order order) {
         OrderModel model = OrderMapper.toModel(order);
-        mongoRepository.save(model);
+        orderRepository.save(model);
         return order;
     }
 
     @Override
     public Optional<Order> findById(UUID id) {
-        Optional<OrderModel> modelOptional = mongoRepository.findById(id.toString());
+        Optional<OrderModel> modelOptional = orderRepository.findById(id);
 
         return modelOptional.map(OrderMapper::toDomain);
     }
 
     @Override
     public List<Order> findAll() {
-        List<OrderModel> models = mongoRepository.findAll();
+        List<OrderModel> models = orderRepository.findAll();
         return models.stream()
                 .map(OrderMapper::toDomain)
                 .collect(Collectors.toList());
@@ -45,6 +45,6 @@ public class OrderRepositoryAdapter implements OrdersRepositoryPort {
     @Override
     public void delete(Order order) {
         OrderModel model = OrderMapper.toModel(order);
-        mongoRepository.delete(model);
+        orderRepository.delete(model);
     }
 }
