@@ -107,8 +107,18 @@ services:
       - SERVER_PORT=8085
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_APPLICATION_NAME=orders-service
+      - SPRING_DATA_MONGODB_URI=mongodb://orders-service-mongodb:27017/orders-db
     depends_on:
       - eureka-server
+      - orders-service-mongodb
+
+  orders-service-mongodb:
+      image: mongo:5.0
+      container_name: orders-service-mongodb
+      ports:
+        - "5434:27017"
+      volumes:
+        - orders_db_data:/data/db
 
   products-recommendations-service:
     build:
@@ -215,3 +225,4 @@ services:
 volumes:
   users_db_data:
   carts_db_data:
+  orders_db_data:

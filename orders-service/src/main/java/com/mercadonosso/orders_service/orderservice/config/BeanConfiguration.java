@@ -6,6 +6,7 @@ import com.mercadonosso.orders_service.orderservice.core.usecases.OrdersServiceI
 import jakarta.validation.Validator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class BeanConfiguration {
@@ -16,5 +17,10 @@ public class BeanConfiguration {
             Validator validator
     ) {
         return new OrdersServiceImpl(ordersRepositoryAdapter, validator);
+    }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 }
