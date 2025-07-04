@@ -49,13 +49,13 @@ services:
     depends_on:
       - eureka-server
       - carts-service-mongodb
-    
+
   carts-service-mongodb:
-      image: mongo:5.0
-      container_name: carts-service-mongodb
-      ports:
+    image: mongo:5.0
+    container_name: carts-service-mongodb
+    ports:
       - "5433:5433"
-      volumes:
+    volumes:
       - carts_db_data:/data/db
 
   catalog-service:
@@ -158,8 +158,18 @@ services:
       - SERVER_PORT=8088
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_APPLICATION_NAME=reviews-service
+      - SPRING_DATA_MONGODB_URI=mongodb://reviews-service-mongodb:27017/reviews-service-mongodb
     depends_on:
       - eureka-server
+      - reviews-service-mongodb
+
+  reviews-service-mongodb:
+    image: mongo:5.0
+    container_name: reviews-service-mongodb
+    ports:
+      - "5436:5436"
+    volumes:
+      - reviews_db_data:/data/db
 
   seller-daily-analytics-service:
     build:
@@ -215,3 +225,4 @@ services:
 volumes:
   users_db_data:
   carts_db_data:
+  reviews_db_data:
