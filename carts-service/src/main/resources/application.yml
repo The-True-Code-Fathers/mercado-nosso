@@ -4,6 +4,12 @@ server:
 spring:
   application:
     name: carts-service
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI}
+  kafka:
+    consumer:
+      group-id: "carts-service-group"
 
 eureka:
   client:
@@ -12,3 +18,6 @@ eureka:
   instance:
     prefer-ip-address: true
     instance-id: ${spring.cloud.client.ip-address}:${server.port}
+topics:
+  cart-clear:
+    name: "com.mercadonosso.carts.event.cleared"

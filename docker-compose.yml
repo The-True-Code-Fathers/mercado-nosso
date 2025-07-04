@@ -46,9 +46,11 @@ services:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_APPLICATION_NAME=carts-service
       - SPRING_DATA_MONGODB_URI=mongodb://carts-service-mongodb:27017/carts-service-mongodb
+      - APP_SERVICES_LISTINGS-URL=http://listings-service:8084 
     depends_on:
       - eureka-server
       - carts-service-mongodb
+      - listings-service
     
   carts-service-mongodb:
       image: mongo:5.0

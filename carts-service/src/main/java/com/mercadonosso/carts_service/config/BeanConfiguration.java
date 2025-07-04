@@ -1,8 +1,10 @@
 package com.mercadonosso.carts_service.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.client.RestTemplate;
 
@@ -15,11 +17,13 @@ import com.mercadonosso.carts_service.core.usecases.CartsServiceImpl;
 public class BeanConfiguration {
 
     @Bean
+    @Primary
     public CartsServicePort cartServicePort(CartsRepositoryPort cartRepositoryPort, ListingsServicePort listingsServicePort, KafkaTemplate<String, String> kafkaTemplate, @Value("${topics.cart-clear.name}") String clearCartTopic) {
         return new CartsServiceImpl(cartRepositoryPort, listingsServicePort, kafkaTemplate, clearCartTopic);
     }
     
     @Bean
+    @LoadBalanced
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }

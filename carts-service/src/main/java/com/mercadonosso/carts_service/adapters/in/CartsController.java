@@ -25,7 +25,6 @@ import com.mercadonosso.carts_service.core.ports.in.CartsServicePort;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("api/carts")
 public class CartsController {
 
     @Autowired
