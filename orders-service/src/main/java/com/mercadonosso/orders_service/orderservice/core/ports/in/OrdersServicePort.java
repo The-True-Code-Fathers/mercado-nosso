@@ -8,8 +8,8 @@ import java.util.UUID;
 
 public interface OrdersServicePort {
 
-    Order create(Order order, UUID buyerId, List<UUID> listings);
-    Order updateOrder(Order order, OrderStatus status);
+    Order create(Order order);
+    Order updateOrder(UUID id, OrderStatus status);
     void delete(Order order);
     Order findOrderById(UUID id);
     List<Order> findAllOrders();

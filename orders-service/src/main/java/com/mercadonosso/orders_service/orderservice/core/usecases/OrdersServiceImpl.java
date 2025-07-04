@@ -37,7 +37,8 @@ public class OrdersServiceImpl implements OrdersServicePort {
 
 
     @Override
-    public Order updateOrder(Order order, OrderStatus status) {
+    public Order updateOrder(UUID id, OrderStatus status) {
+        Order order = findOrderById(id);
         order.setStatus(status);
         return ordersRepositoryPort.save(order);
     }
