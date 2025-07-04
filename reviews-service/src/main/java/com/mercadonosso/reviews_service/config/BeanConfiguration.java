@@ -19,6 +19,4 @@ public class BeanConfiguration {
     ) {
         return new ReviewsServiceImpl(reviewsRepositoryAdapter, validator);
     }
-
-
 }
