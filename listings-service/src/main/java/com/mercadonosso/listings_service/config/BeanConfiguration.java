@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Configuration;
 import com.mercadonosso.listings_service.adapters.out.persistence.mongo.ListingsRepositoryAdapter;
 import com.mercadonosso.listings_service.core.ports.in.ListingsServicePort;
 import com.mercadonosso.listings_service.core.usecases.ListingsServiceImpl;
-
 import jakarta.validation.Validator;
 
 @Configuration
