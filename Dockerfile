@@ -9,6 +9,7 @@ WORKDIR /app
 # If only source code changes, Docker will use the cache from this point.
 COPY pom.xml .
 COPY api-gateway/pom.xml ./api-gateway/
+COPY auth-service/pom.xml ./auth-service/
 COPY carts-service/pom.xml ./carts-service/
 COPY catalog-service/pom.xml ./catalog-service/
 COPY eureka-server/pom.xml ./eureka-server/
