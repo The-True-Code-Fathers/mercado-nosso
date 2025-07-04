@@ -3,6 +3,7 @@ package com.mercadonosso.orders_service.orderservice.adapters.in;
 
 import com.mercadonosso.orders_service.orderservice.adapters.in.dto.CreatingOrderRequest;
 import com.mercadonosso.orders_service.orderservice.adapters.in.dto.OrderResponse;
+import com.mercadonosso.orders_service.orderservice.adapters.in.dto.UpdateOrderStatusRequest;
 import com.mercadonosso.orders_service.orderservice.core.domain.Order;
 import com.mercadonosso.orders_service.orderservice.core.domain.enums.OrderStatus;
 import com.mercadonosso.orders_service.orderservice.core.ports.in.OrdersServicePort;
@@ -62,7 +63,7 @@ public class OrderController {
                 .collect(Collectors.toList());
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteOrderById(@PathVariable UUID id) {
         Order ordersToDelete = ordersServicePort.findOrderById(id);
         ordersServicePort.delete(ordersToDelete);
@@ -70,9 +71,9 @@ public class OrderController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{id}")
-    public OrderResponse updateOrder(Order order, OrderStatus status) {
-        Order orderToUpdate = ordersServicePort.updateOrder(order, status);
+    @PatchMapping("{id}")
+    public OrderResponse updateOrder(@PathVariable UUID id, @RequestBody UpdateOrderStatusRequest request) {
+        Order orderToUpdate = ordersServicePort.updateOrder(id, request.getStatus());
         return toResponse(orderToUpdate);
     }
 }

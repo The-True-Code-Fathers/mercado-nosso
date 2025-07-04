@@ -9,7 +9,7 @@ import java.util.UUID;
 public interface OrdersServicePort {
 
     Order create(Order order);
-    Order updateOrder(Order order, OrderStatus status);
+    Order updateOrder(UUID id, OrderStatus status);
     void delete(Order order);
     Order findOrderById(UUID id);
     List<Order> findAllOrders();
