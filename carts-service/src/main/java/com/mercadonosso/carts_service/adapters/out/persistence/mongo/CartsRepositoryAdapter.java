@@ -3,9 +3,12 @@ package com.mercadonosso.carts_service.adapters.out.persistence.mongo;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.stereotype.Component;
+
 import com.mercadonosso.carts_service.core.domain.CartsEntity;
 import com.mercadonosso.carts_service.core.ports.out.CartsRepositoryPort;
 
+@Component
 public class CartsRepositoryAdapter implements CartsRepositoryPort {
 
     private final SpringCartRepository springCartRepository;
