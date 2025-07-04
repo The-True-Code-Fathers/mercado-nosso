@@ -15,8 +15,8 @@ import com.mercadonosso.carts_service.core.usecases.CartsServiceImpl;
 public class BeanConfiguration {
 
     @Bean
-    public CartsServicePort cartServicePort(CartsRepositoryPort cartRepositoryPort, ListingsServicePort listingServicePort, KafkaTemplate<String, String> kafkaTemplate, @Value("${topics.cart-clear.name}") String clearCartTopic) {
-        return new CartsServiceImpl(cartRepositoryPort, listingServicePort, kafkaTemplate, clearCartTopic);
+    public CartsServicePort cartServicePort(CartsRepositoryPort cartRepositoryPort, ListingsServicePort listingsServicePort, KafkaTemplate<String, String> kafkaTemplate, @Value("${topics.cart-clear.name}") String clearCartTopic) {
+        return new CartsServiceImpl(cartRepositoryPort, listingsServicePort, kafkaTemplate, clearCartTopic);
     }
     
     @Bean
