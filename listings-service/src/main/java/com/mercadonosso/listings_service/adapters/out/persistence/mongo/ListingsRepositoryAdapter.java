@@ -6,11 +6,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import com.mercadonosso.listings_service.core.domain.ListingsEntity;
 import com.mercadonosso.listings_service.core.ports.out.ListingsRepositoryPort;
 
 @Component
+@Repository
 public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
     private final SpringListingsRepository mongoRepository;
     private final ListingsMapper mapper;

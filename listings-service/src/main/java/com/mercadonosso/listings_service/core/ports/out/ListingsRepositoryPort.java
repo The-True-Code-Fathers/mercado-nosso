@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.stereotype.Repository;
+
+@Repository
 public interface ListingsRepositoryPort {
     ListingsEntity save(ListingsEntity listingsEntity);
     void delete(ListingsEntity listingsEntity);
