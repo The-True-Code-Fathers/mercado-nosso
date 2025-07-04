@@ -91,6 +91,8 @@ services:
       - SERVER_PORT=8084
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_APPLICATION_NAME=listings-service
+      # Add this line to connect to the MongoDB container
+      - SPRING_DATA_MONGODB_URI=mongodb://listings-service-mongodb:27017/listings-service-mongodb
       - MAVEN_OPTS="-Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true"
     depends_on:
       - eureka-server
