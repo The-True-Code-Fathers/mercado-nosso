@@ -94,6 +94,15 @@ services:
       - MAVEN_OPTS="-Dmaven.wagon.http.ssl.insecure=true -Dmaven.wagon.http.ssl.allowall=true"
     depends_on:
       - eureka-server
+      - listings-service-mongodb
+
+  listings-service-mongodb:
+      image: mongo:5.0
+      container_name: listings-service-mongodb
+      ports:
+      - "5435:5435"
+      volumes:
+      - listings_db_data:/data/db
 
   orders-service:
     build:
@@ -217,3 +226,4 @@ services:
 volumes:
   users_db_data:
   carts_db_data:
+  listings_db_data:

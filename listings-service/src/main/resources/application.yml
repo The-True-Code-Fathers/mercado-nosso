@@ -4,6 +4,9 @@ server:
 spring:
   application:
     name: listings-service
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI}
 
 eureka:
   client:
