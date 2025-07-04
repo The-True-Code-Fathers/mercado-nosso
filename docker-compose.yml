@@ -73,7 +73,7 @@ services:
       - SPRING_APPLICATION_NAME=carts-service
       - SPRING_DATA_MONGODB_URI=mongodb://carts-service-mongodb:27017/carts-service-mongodb
       - APP_SERVICES_LISTINGS-URL=http://listings-service:8084
-      - SPRING_KAFKA_CONSUMER_BOOTSTRAP_SERVERS=kafka:29092 
+      - SPRING_KAFKA_CONSUMER_BOOTSTRAP_SERVERS=kafka:29092
     depends_on:
       eureka-server:
         condition: service_started
@@ -90,7 +90,7 @@ services:
       image: mongo:5.0
       container_name: carts-service-mongodb
       networks:
-        - my-network 
+        - my-network
       ports:
         - "5433:5433"
       volumes:
@@ -136,7 +136,7 @@ services:
       image: mongo:5.0
       container_name: listings-service-mongodb
       networks:
-        - my-network 
+        - my-network
       ports:
         - "5435:5435"
       volumes:
@@ -211,10 +211,20 @@ services:
       - SERVER_PORT=8088
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_APPLICATION_NAME=reviews-service
+      - SPRING_DATA_MONGODB_URI=mongodb://reviews-service-mongodb:27017/reviews-service-mongodb
     depends_on:
       - eureka-server
     networks:
       - my-network
+      - reviews-service-mongodb
+
+  reviews-service-mongodb:
+    image: mongo:5.0
+    container_name: reviews-service-mongodb
+    ports:
+      - "5436:5436"
+    volumes:
+      - reviews_db_data:/data/db
 
   seller-daily-analytics-service:
     build:
@@ -270,6 +280,7 @@ volumes:
   carts_db_data:
   listings_db_data:
   orders_db_data:
+  reviews_db_data:
 
 networks:
   my-network:

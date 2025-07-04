@@ -4,6 +4,7 @@ import com.mercadonosso.reviews_service.core.domain.ReviewsEntity;
 import com.mercadonosso.reviews_service.core.domain.exception.ReviewsNotFoundException;
 import com.mercadonosso.reviews_service.core.ports.in.ReviewsServicePort;
 import com.mercadonosso.reviews_service.core.ports.out.ReviewsRepositoryPort;
+import jakarta.validation.Validator;
 import org.springframework.cglib.core.Local;
 
 import java.time.LocalDateTime;
@@ -12,9 +13,11 @@ import java.util.UUID;
 
 public class ReviewsServiceImpl implements ReviewsServicePort {
     private final ReviewsRepositoryPort reviewsRepositoryPort;
+    private final Validator validator;
 
-    public ReviewsServiceImpl(ReviewsRepositoryPort reviewsRepositoryPort) {
+    public ReviewsServiceImpl(ReviewsRepositoryPort reviewsRepositoryPort, Validator validator) {
         this.reviewsRepositoryPort = reviewsRepositoryPort;
+        this.validator = validator;
     }
 
     @Override
