@@ -42,7 +42,7 @@ public class ReviewsRepositoryAdapter implements ReviewsRepositoryPort {
 
     @Override
     public Optional<ReviewsEntity> findById(UUID id) {
-        Optional<ReviewsModel> modelOptional = mongoRepository.findById(String.valueOf(id));
+        Optional<ReviewsModel> modelOptional = mongoRepository.findById(id);
         return modelOptional.map(mapper::toDomain);
     }
 }

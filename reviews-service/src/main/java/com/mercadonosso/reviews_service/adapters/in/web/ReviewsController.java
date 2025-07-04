@@ -5,13 +5,14 @@ import com.mercadonosso.reviews_service.adapters.in.web.dto.ReviewsResponse;
 import com.mercadonosso.reviews_service.core.domain.ReviewsEntity;
 import com.mercadonosso.reviews_service.core.ports.in.ReviewsServicePort;
 import jakarta.validation.Valid;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 public class ReviewsController {
@@ -48,5 +49,28 @@ public class ReviewsController {
                 reviewsEntity.getImagesUrls(),
                 reviewsEntity.getCreatedAt()
         );
+    }
+
+    @GetMapping("{/id}")
+    public ReviewsResponse findById(@PathVariable UUID id) {
+        ReviewsEntity reviewsEntity = reviewsServicePort.findById(id);
+        return toResponse(reviewsEntity);
+    }
+
+    @GetMapping
+    public List<ReviewsResponse> listAll() {
+        List<ReviewsEntity> reviewsEntities = reviewsServicePort.listAll();
+        return reviewsEntities.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @DeleteMapping("{/id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        ReviewsEntity reviewToDelete = reviewsServicePort.findById(id);
+
+        reviewsServicePort.delete(reviewToDelete);
+
+        return ResponseEntity.noContent().build();
     }
 }

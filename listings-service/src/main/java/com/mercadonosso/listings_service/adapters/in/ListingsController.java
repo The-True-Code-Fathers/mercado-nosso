@@ -38,7 +38,7 @@ public class ListingsController {
 
     @GetMapping("/{id}")
     public ListingResponse getListingById(@PathVariable UUID id) {
-        ListingsEntity listingsEntity =  listingsServicePort.findById(id);
+        ListingsEntity listingsEntity = listingsServicePort.findById(id);
         return toResponse(listingsEntity);
     }
 
@@ -67,7 +67,6 @@ public class ListingsController {
     public ResponseEntity<Void> deleteListingById(@PathVariable UUID id) {
         ListingsEntity listingToDelete = listingsServicePort.findById(id);
         listingsServicePort.delete(listingToDelete);
-
 
         return ResponseEntity.noContent().build();
     }
