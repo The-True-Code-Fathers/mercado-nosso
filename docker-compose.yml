@@ -20,7 +20,7 @@ services:
         SERVICE_NAME: auth-service
     container_name: auth-service
     ports:
-      - "8080:8090"
+      - "8090:8090"
     environment:
       - SERVER_PORT=8090
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
