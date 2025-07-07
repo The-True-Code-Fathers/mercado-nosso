@@ -32,7 +32,10 @@ services:
       - SPRING_DATASOURCE_USERNAME=user
       - SPRING_DATASOURCE_PASSWORD=password
     depends_on:
-      - eureka-server
+      eureka-server:
+        condition: service_started
+      users-service:
+        condition: service_started
     networks:
       - my-network
 
@@ -196,7 +199,7 @@ services:
       - SERVER_PORT=8085
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - SPRING_APPLICATION_NAME=orders-service
-      - SPRING_DATA_MONGODB_URI=mongodb://orders-service-mongodb:27017/orders-db
+      - SPRING_DATA_MONGODB_URI=mongodb://orders-service-mongodb:27017/orders-service-mongodb
     depends_on:
       - eureka-server
       - orders-service-mongodb
@@ -210,6 +213,8 @@ services:
       - "5434:27017"
     volumes:
       - orders_db_data:/data/db
+    networks:
+      - my-network
 
   products-recommendations-service:
     build:
