@@ -1,0 +1,28 @@
+meta {
+  name: Register Duplicate Email
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{base_url}}/auth/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "fullName": "John Duplicate",
+    "email": "john.doe@example.com",
+    "password": "password123",
+    "cpf": "11111111111",
+    "isSeller": false
+  }
+}
+
+tests {
+  test("should return 409 for duplicate email", function() {
+    expect(res.getStatus()).to.equal(409);
+    expect(res.getBody().code).to.equal('USER_ALREADY_EXISTS');
+  });
+}

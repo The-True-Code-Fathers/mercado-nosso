@@ -1,0 +1,27 @@
+meta {
+  name: Get Current User Profile
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/users/me
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+tests {
+  test("should get current user profile", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().id).to.be.a('string');
+    expect(res.getBody().fullName).to.be.a('string');
+    expect(res.getBody().email).to.be.a('string');
+    expect(res.getBody().cpf).to.be.a('string');
+    expect(res.getBody().isSeller).to.be.a('boolean');
+    expect(res.getBody().active).to.equal(true);
+  });
+}

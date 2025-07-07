@@ -1,0 +1,31 @@
+meta {
+  name: Register Regular User
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{base_url}}/api/auth/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "fullName": "Jane Smith",
+    "email": "jane.smith@example.com",
+    "password": "password123",
+    "cpf": "98765432100",
+    "isSeller": false
+  }
+}
+
+tests {
+  test("should register regular user successfully", function() {
+    expect(res.getStatus()).to.equal(201);
+    expect(res.getBody().accessToken).to.be.a('string');
+    expect(res.getBody().refreshToken).to.be.a('string');
+    expect(res.getBody().userId).to.be.a('string');
+    expect(res.getBody().tokenType).to.equal('Bearer');
+  });
+}
