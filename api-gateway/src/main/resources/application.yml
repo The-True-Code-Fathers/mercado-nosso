@@ -10,8 +10,15 @@ spring:
         locator:
           enabled: true
           lower-case-service-id: true
-      
+
       routes:
+        - id: auth_service_route
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=2
+
         - id: users_service_route
           uri: lb://users-service
           predicates:
@@ -90,4 +97,3 @@ management:
   endpoint:
     gateway:
       enabled: true
-

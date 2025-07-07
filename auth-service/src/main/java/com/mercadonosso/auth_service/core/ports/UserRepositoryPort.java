@@ -1,12 +1,12 @@
-package com.mercadonosso.users_service.core.ports.in;
+package com.mercadonosso.auth_service.core.ports;
 
-import com.mercadonosso.users_service.core.domain.User;
+import com.mercadonosso.auth_service.core.domain.User;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface UserServicePort {
+public interface UserRepositoryPort {
     
-    User createUser(User user);
+    User save(User user);
     
     Optional<User> findById(UUID id);
     
@@ -18,7 +18,5 @@ public interface UserServicePort {
     
     boolean existsByCpf(String cpf);
     
-    User updateUser(UUID id, User user);
-    
-    void deleteUser(UUID id);
+    void deleteById(UUID id);
 }

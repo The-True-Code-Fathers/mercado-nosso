@@ -13,27 +13,47 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
 
     private final UserJPARepository jpaRepository;
 
-    private UserRepositoryAdapter(final UserJPARepository jpaRepository) {
+    public UserRepositoryAdapter(final UserJPARepository jpaRepository) {
         this.jpaRepository = jpaRepository;
     }
 
     @Override
     public User save(User user) {
-        return null;
+        UserJPAEntity entity = UserMapper.toJPAEntity(user);
+        UserJPAEntity savedEntity = jpaRepository.save(entity);
+        return UserMapper.toDomain(savedEntity);
     }
 
     @Override
     public Optional<User> findById(UUID id) {
-        return Optional.empty();
+        return jpaRepository.findById(id)
+                .map(UserMapper::toDomain);
     }
 
     @Override
     public Optional<User> findByEmail(String email) {
-        return Optional.empty();
+        return jpaRepository.findByEmail(email)
+                .map(UserMapper::toDomain);
+    }
+
+    @Override
+    public Optional<User> findByCpf(String cpf) {
+        return jpaRepository.findByCpf(cpf)
+                .map(UserMapper::toDomain);
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return jpaRepository.existsByEmail(email);
+    }
+
+    @Override
+    public boolean existsByCpf(String cpf) {
+        return jpaRepository.existsByCpf(cpf);
     }
 
     @Override
     public void deleteById(UUID id) {
-
+        jpaRepository.deleteById(id);
     }
 }

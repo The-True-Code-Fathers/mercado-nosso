@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: users-service
+  datasource:
+    driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
       ddl-auto: update

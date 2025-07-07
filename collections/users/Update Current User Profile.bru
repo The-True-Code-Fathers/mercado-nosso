@@ -1,0 +1,30 @@
+meta {
+  name: Update Current User Profile
+  type: http
+  seq: 2
+}
+
+patch {
+  url: {{base_url}}/users/me
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+body:json {
+  {
+    "fullName": "John Doe Updated",
+    "profilePictureUrl": "https://example.com/profile.jpg"
+  }
+}
+
+tests {
+  test("should update current user profile", function() {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().fullName).to.equal("John Doe Updated");
+    expect(res.getBody().profilePictureUrl).to.equal("https://example.com/profile.jpg");
+  });
+}

@@ -1,0 +1,21 @@
+meta {
+  name: Deactivate Current User
+  type: http
+  seq: 3
+}
+
+delete {
+  url: {{base_url}}/users/me
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{access_token}}
+}
+
+tests {
+  test("should deactivate current user", function() {
+    expect(res.getStatus()).to.equal(204);
+  });
+}

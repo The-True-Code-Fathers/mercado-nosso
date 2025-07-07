@@ -1,0 +1,17 @@
+meta {
+  name: Unauthorized Access
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{base_url}}/users/me
+  body: none
+  auth: none
+}
+
+tests {
+  test("should return 401 for unauthorized access", function() {
+    expect(res.getStatus()).to.equal(401);
+  });
+}
