@@ -8,7 +8,7 @@ import java.util.UUID;
 @Repository
 public interface ReviewsServicePort {
     ReviewsEntity create(ReviewsEntity reviewsEntity);
-    void delete(ReviewsEntity reviewsEntity);
+    void delete(UUID id);
     ReviewsEntity update(UUID id, ReviewsEntity reviewsEntity);
     List<ReviewsEntity> listAll();
     ReviewsEntity findById(UUID id);

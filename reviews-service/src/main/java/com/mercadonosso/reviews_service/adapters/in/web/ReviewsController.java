@@ -25,30 +25,37 @@ public class ReviewsController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ReviewsResponse createReviews(@Valid @RequestBody CreateReviewsRequest request) {
-        ReviewsEntity reviewsEntity = new ReviewsEntity();
-        reviewsEntity.setListingId(request.listingId());
-        reviewsEntity.setBuyerId(request.buyerId());
-        reviewsEntity.setRating(request.rating());
-        reviewsEntity.setMessage(request.message());
-        reviewsEntity.setActive(true);
-        reviewsEntity.setImagesUrls(request.imagesUrls());
-        reviewsEntity.setCreatedAt(request.createdAt());
-        reviewsEntity.setId(request.id());
-        ReviewsEntity createdReview = reviewsServicePort.create(reviewsEntity);
+        System.out.println("CONTROLLER - DTO Recebido: " + request.toString());
 
+        ReviewsEntity reviewToCreate = toDomain(request);
+
+        System.out.println("CONTROLLER - Entidade Mapeada para Enviar ao Serviço: " + reviewToCreate.toString());
+
+        ReviewsEntity createdReview = reviewsServicePort.create(reviewToCreate);
         return toResponse(createdReview);
     }
 
-    private ReviewsResponse toResponse(ReviewsEntity reviewsEntity) {
+    private ReviewsResponse toResponse(ReviewsEntity entity) {
         return new ReviewsResponse(
-                reviewsEntity.getId(),
-                reviewsEntity.getListingId(),
-                reviewsEntity.getBuyerId(),
-                reviewsEntity.getRating(),
-                reviewsEntity.getMessage(),
-                reviewsEntity.getImagesUrls(),
-                reviewsEntity.getCreatedAt()
+                entity.getId(),
+                entity.getListingId(),
+                entity.getBuyerId(),
+                entity.getRating(),
+                entity.getMessage(),
+                entity.getImagesUrls(),
+                entity.getCreatedAt(),
+                entity.getSellerId()
         );
+    }
+
+    private ReviewsEntity toDomain(CreateReviewsRequest dto) {
+        ReviewsEntity domain = new ReviewsEntity();
+        domain.setListingId(dto.listingId());
+        domain.setBuyerId(dto.buyerId());
+        domain.setRating(dto.rating());
+        domain.setMessage(dto.message());
+        domain.setImagesUrls(dto.imagesUrls());
+        return domain;
     }
 
     @GetMapping("/{id}")
@@ -67,15 +74,17 @@ public class ReviewsController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        ReviewsEntity reviewToDelete = reviewsServicePort.findById(id);
-
-        reviewsServicePort.delete(reviewToDelete);
+        reviewsServicePort.delete(id);
 
         return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{id}")
-    public ReviewsResponse update(@PathVariable UUID id, @Valid @RequestBody UpdateReviewsRequest request) {
+    public ReviewsResponse update(
+            @PathVariable UUID id,
+            @Valid
+            @RequestBody
+            UpdateReviewsRequest request) {
         ReviewsEntity reviewWithNewData = new ReviewsEntity();
         reviewWithNewData.setRating(request.rating());
         reviewWithNewData.setMessage(request.message());

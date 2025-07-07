@@ -5,7 +5,7 @@ import com.mercadonosso.reviews_service.core.domain.exception.ReviewsNotFoundExc
 import com.mercadonosso.reviews_service.core.ports.in.ReviewsServicePort;
 import com.mercadonosso.reviews_service.core.ports.out.ReviewsRepositoryPort;
 import jakarta.validation.Validator;
-import org.springframework.cglib.core.Local;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,35 +21,51 @@ public class ReviewsServiceImpl implements ReviewsServicePort {
     }
 
     @Override
-    public ReviewsEntity create(ReviewsEntity reviewsEntity) {
-        reviewsEntity.setCreatedAt(LocalDateTime.now());
-        reviewsEntity.setActive(true);
-        reviewsEntity.setId(UUID.randomUUID());
+    @Transactional
+    public ReviewsEntity create(ReviewsEntity reviewData) {
+        System.out.println("LOGGER 1 COLADO COM CUSPE - Entidade Recebida do Controller: " + reviewData.toString());
 
-        return reviewsRepositoryPort.save(reviewsEntity);
+        ReviewsEntity newReview = ReviewsEntity.builder()
+                .listingId(reviewData.getListingId())
+                .buyerId(reviewData.getBuyerId())
+                .rating(reviewData.getRating())
+                .message(reviewData.getMessage())
+                .imagesUrls(reviewData.getImagesUrls())
+                .id(UUID.randomUUID())
+                .createdAt(LocalDateTime.now())
+                .active(true)
+                .sellerId(UUID.fromString("11111111-1111-1111-1111-111111111111"))
+                .build();
+
+        System.out.println("LOGGER 2 COLADO COM CHICLETE - Entidade Final para Salvar: " + newReview.toString());
+
+        return reviewsRepositoryPort.save(newReview);
     }
 
     @Override
-    public void delete(ReviewsEntity reviewsEntity) {
-        reviewsRepositoryPort.delete(reviewsEntity);
+    @Transactional
+    public void delete(UUID id) {
+        ReviewsEntity reviewToDelete = this.findById(id);
+        reviewsRepositoryPort.delete(reviewToDelete);
     }
 
     @Override
+    @Transactional
     public ReviewsEntity update(UUID id, ReviewsEntity newReviewData) {
         ReviewsEntity existingReview = this.findById(id);
-
         existingReview.setRating(newReviewData.getRating());
         existingReview.setMessage(newReviewData.getMessage());
-
         return reviewsRepositoryPort.save(existingReview);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ReviewsEntity> listAll() {
         return reviewsRepositoryPort.listAll();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ReviewsEntity findById(UUID id) {
         return reviewsRepositoryPort.findById(id).orElseThrow(() ->
                 new ReviewsNotFoundException("Review com o id " + id + " não encontrado."));

@@ -19,28 +19,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CartsEntity {
-    @Id
     private UUID id;
-    @Field("user_id")
     private UUID userId;
-    @Field("listings_id")
     private List<CartItemEntity> items;
-    @Field(name = "shipping_price_total", targetType = FieldType.DECIMAL128)
     private BigDecimal shippingPriceTotal;
-    @Field(name = "sub_total", targetType = FieldType.DECIMAL128)
     private BigDecimal subTotal;
-    @Field(name = "grand_total", targetType = FieldType.DECIMAL128)
     private BigDecimal grandTotal;
-    @Field("updated_at")
     private LocalDateTime updateAt;
-
-    public CartsEntity(UUID userId) {
-        this.userId = userId;
-        this.subTotal = BigDecimal.ZERO;
-        this.shippingPriceTotal = BigDecimal.ZERO;
-        this.grandTotal = BigDecimal.ZERO;
-        this.updateAt = LocalDateTime.now();
-    }
 
     @Data
     @NoArgsConstructor
@@ -52,7 +37,14 @@ public class CartsEntity {
         @Field(targetType = FieldType.DECIMAL128)
         private BigDecimal price;
         @Field(targetType = FieldType.DECIMAL128)
-        private BigDecimal shippingPrice;    
+        private BigDecimal shippingPrice;
     }
 
+    public CartsEntity(UUID userId) {
+        this.userId = userId;
+        this.subTotal = BigDecimal.ZERO;
+        this.shippingPriceTotal = BigDecimal.ZERO;
+        this.grandTotal = BigDecimal.ZERO;
+        this.updateAt = LocalDateTime.now();
+    }
 }

@@ -33,4 +33,6 @@ public class ReviewsModel {
 
     @Field("created_at")
     private LocalDateTime createdAt;
+
+    private boolean active;
 }

@@ -40,7 +40,7 @@ public class CartsServiceImpl implements CartsServicePort {
     }
 
     @Override
-    public CartsEntity add(UUID userId, UUID listingId, int quantity) {
+    public CartsEntity create(UUID userId, UUID listingId, int quantity) {
         ListingDetails listing = listingsServicePort.findListingsById(listingId)
                 .orElseThrow(() -> new BusinessRuleException("Listing not found!"));
         CartsEntity cartsEntity = cartsRepositoryPort.findByUserId(userId).orElse(new CartsEntity(userId));

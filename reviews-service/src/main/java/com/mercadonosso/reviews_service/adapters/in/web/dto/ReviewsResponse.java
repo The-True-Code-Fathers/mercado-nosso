@@ -11,6 +11,7 @@ public record ReviewsResponse(
         Integer rating,
         String message,
         List<String> imagesUrls,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        UUID sellerId
 ) {
 }
