@@ -214,9 +214,9 @@ services:
       - SPRING_DATA_MONGODB_URI=mongodb://products-service-mongodb:27017/products-service-mongodb
       - SPRING_APPLICATION_NAME=products-service
     depends_on:
-      - eureka-server:
+      eureka-server:
           condition: service_started
-      - products-service-mongodb:
+      products-service-mongodb:
           condition: service_started
     networks:
       - my-network

@@ -1,6 +1,7 @@
 package com.mercadonosso.products_service.core.domain;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,16 +18,13 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductsEntity {
-    @NotNull(message = "Product must have a Id.")
-    private UUID id;
-
     @NotBlank(message = "Product must havr a SKU.")
     private String sku;
 
     @NotBlank(message = "Product must have a name.")
     private String name;
 
-    @NotBlank(message = "Product must have a specification")
+    @NotEmpty(message = "Specifications text must not be null.")
     private Map<String, Object> specificationsText;
 
     private String brand;
@@ -35,4 +33,6 @@ public class ProductsEntity {
 
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private UUID id;
 }

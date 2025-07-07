@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@RestController
 public class ProductsController {
     ProductsServicePort productsServicePort;
 
