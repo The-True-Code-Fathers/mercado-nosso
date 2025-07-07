@@ -24,7 +24,6 @@ public class JWTAuthFilter implements GlobalFilter, Ordered {
     private String jwtSecret;
 
     private static final List<String> PUBLIC_PATHS = List.of(
-            "/api/**",
             "/api/auth/login",
             "/api/auth/register",
             "/api/auth/refresh"
