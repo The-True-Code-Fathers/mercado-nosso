@@ -28,8 +28,8 @@ tests {
   
   // Store tokens for other requests
   if (res.getStatus() === 200) {
-    bru.setVar("access_token", res.getBody().accessToken);
-    bru.setVar("refresh_token", res.getBody().refreshToken);
-    bru.setVar("user_id", res.getBody().userId);
+    bru.setGlobalVar("access_token", res.getBody().accessToken);
+    bru.setGlobalVar("refresh_token", res.getBody().refreshToken);
+    bru.setGlobalVar("user_id", res.getBody().userId);
   }
 }
