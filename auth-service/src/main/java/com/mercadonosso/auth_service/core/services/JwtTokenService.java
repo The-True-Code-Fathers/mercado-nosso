@@ -48,6 +48,8 @@ public class JwtTokenService {
     }
     
     public Claims validateToken(String token) {
+        token = token.replace("Bearer ", "");
+        System.out.println("TOKEN: " + token);
         return Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
