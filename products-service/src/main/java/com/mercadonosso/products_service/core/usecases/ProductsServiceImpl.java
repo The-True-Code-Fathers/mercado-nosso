@@ -8,17 +8,17 @@ import com.mercadonosso.products_service.core.ports.out.ProductsRepositoryPort;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.springframework.transaction.annotation.Transactional;
-import scala.collection.immutable.List;
+import java.util.List;
 
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
-public class ProductsRepositoryImpl implements ProductsServicePort {
+public class ProductsServiceImpl implements ProductsServicePort {
     private final ProductsRepositoryPort productsRepositoryPort;
     private final Validator validator;
 
-    public ProductsRepositoryImpl(ProductsRepositoryPort productsRepositoryPort, Validator validator) {
+    public ProductsServiceImpl(ProductsRepositoryPort productsRepositoryPort, Validator validator) {
         this.productsRepositoryPort = productsRepositoryPort;
         this.validator = validator;
     }

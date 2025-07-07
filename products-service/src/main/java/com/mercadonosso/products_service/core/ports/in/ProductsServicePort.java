@@ -2,7 +2,7 @@ package com.mercadonosso.products_service.core.ports.in;
 
 import com.mercadonosso.products_service.core.domain.ProductsEntity;
 import org.springframework.stereotype.Repository;
-import scala.collection.immutable.List;
+import java.util.List;
 
 import java.util.UUID;
 
