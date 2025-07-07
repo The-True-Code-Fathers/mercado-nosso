@@ -65,11 +65,9 @@ public class ReviewsController {
                 .collect(Collectors.toList());
     }
 
-    @DeleteMapping("{/id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
-        ReviewsEntity reviewToDelete = reviewsServicePort.findById(id);
-
-        reviewsServicePort.delete(reviewToDelete);
+        reviewsServicePort.delete(id);
 
         return ResponseEntity.noContent().build();
     }

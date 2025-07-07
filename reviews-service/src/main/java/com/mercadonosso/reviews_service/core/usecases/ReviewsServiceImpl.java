@@ -5,7 +5,7 @@ import com.mercadonosso.reviews_service.core.domain.exception.ReviewsNotFoundExc
 import com.mercadonosso.reviews_service.core.ports.in.ReviewsServicePort;
 import com.mercadonosso.reviews_service.core.ports.out.ReviewsRepositoryPort;
 import jakarta.validation.Validator;
-import org.springframework.cglib.core.Local;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,16 +22,27 @@ public class ReviewsServiceImpl implements ReviewsServicePort {
 
     @Override
     public ReviewsEntity create(ReviewsEntity reviewsEntity) {
-        reviewsEntity.setCreatedAt(LocalDateTime.now());
-        reviewsEntity.setActive(true);
-        reviewsEntity.setId(UUID.randomUUID());
+        ReviewsEntity newReview = ReviewsEntity.builder()
+                .listingId(reviewsEntity.getListingId())
+                .buyerId(reviewsEntity.getBuyerId())
+                .sellerId(reviewsEntity.getSellerId())
+                .rating(reviewsEntity.getRating())
+                .message(reviewsEntity.getMessage())
+                .imagesUrls(reviewsEntity.getImagesUrls())
+                .id(UUID.randomUUID())
+                .createdAt(LocalDateTime.now())
+                .active(true)
+                .build();
 
         return reviewsRepositoryPort.save(reviewsEntity);
     }
 
     @Override
-    public void delete(ReviewsEntity reviewsEntity) {
-        reviewsRepositoryPort.delete(reviewsEntity);
+    @Transactional
+    public void delete(UUID id) {
+        ReviewsEntity reviewToDelete = this.findById(id);
+
+        reviewsRepositoryPort.delete(reviewToDelete);
     }
 
     @Override
