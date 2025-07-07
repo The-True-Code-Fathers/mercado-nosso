@@ -51,7 +51,7 @@ public class ReviewsController {
         );
     }
 
-    @GetMapping("{/id}")
+    @GetMapping("/{id}")
     public ReviewsResponse findById(@PathVariable UUID id) {
         ReviewsEntity reviewsEntity = reviewsServicePort.findById(id);
         return toResponse(reviewsEntity);
@@ -65,7 +65,7 @@ public class ReviewsController {
                 .collect(Collectors.toList());
     }
 
-    @DeleteMapping("{/id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         ReviewsEntity reviewToDelete = reviewsServicePort.findById(id);
 
@@ -74,7 +74,7 @@ public class ReviewsController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("{/id}")
+    @PutMapping("/{id}")
     public ReviewsResponse update(@PathVariable UUID id, @Valid @RequestBody UpdateReviewsRequest request) {
         ReviewsEntity reviewWithNewData = new ReviewsEntity();
         reviewWithNewData.setRating(request.rating());
