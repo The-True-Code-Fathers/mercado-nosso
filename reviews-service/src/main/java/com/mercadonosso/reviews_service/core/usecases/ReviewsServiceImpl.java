@@ -22,18 +22,22 @@ public class ReviewsServiceImpl implements ReviewsServicePort {
 
     @Override
     @Transactional
-    public ReviewsEntity create(ReviewsEntity reviewsEntity) {
+    public ReviewsEntity create(ReviewsEntity reviewData) {
+        System.out.println("LOGGER 1 COLADO COM CUSPE - Entidade Recebida do Controller: " + reviewData.toString());
+
         ReviewsEntity newReview = ReviewsEntity.builder()
-                .listingId(reviewsEntity.getListingId())
-                .buyerId(reviewsEntity.getBuyerId())
-                .rating(reviewsEntity.getRating())
-                .message(reviewsEntity.getMessage())
-                .imagesUrls(reviewsEntity.getImagesUrls())
+                .listingId(reviewData.getListingId())
+                .buyerId(reviewData.getBuyerId())
+                .rating(reviewData.getRating())
+                .message(reviewData.getMessage())
+                .imagesUrls(reviewData.getImagesUrls())
                 .id(UUID.randomUUID())
                 .createdAt(LocalDateTime.now())
                 .active(true)
-                .sellerId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+                .sellerId(UUID.fromString("11111111-1111-1111-1111-111111111111"))
                 .build();
+
+        System.out.println("LOGGER 2 COLADO COM CHICLETE - Entidade Final para Salvar: " + newReview.toString());
 
         return reviewsRepositoryPort.save(newReview);
     }

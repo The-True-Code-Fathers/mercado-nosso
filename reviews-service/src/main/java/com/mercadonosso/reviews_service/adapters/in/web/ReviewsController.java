@@ -25,29 +25,37 @@ public class ReviewsController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ReviewsResponse createReviews(@Valid @RequestBody CreateReviewsRequest request) {
-        ReviewsEntity reviewToCreate = new ReviewsEntity();
-        reviewToCreate.setListingId(request.listingId());
-        reviewToCreate.setBuyerId(request.buyerId());
-        reviewToCreate.setRating(request.rating());
-        reviewToCreate.setMessage(request.message());
-        reviewToCreate.setImagesUrls(request.imagesUrls());
+        System.out.println("CONTROLLER - DTO Recebido: " + request.toString());
+
+        ReviewsEntity reviewToCreate = toDomain(request);
+
+        System.out.println("CONTROLLER - Entidade Mapeada para Enviar ao Serviço: " + reviewToCreate.toString());
 
         ReviewsEntity createdReview = reviewsServicePort.create(reviewToCreate);
-
         return toResponse(createdReview);
     }
 
-    private ReviewsResponse toResponse(ReviewsEntity reviewsEntity) {
+    private ReviewsResponse toResponse(ReviewsEntity entity) {
         return new ReviewsResponse(
-                reviewsEntity.getId(),
-                reviewsEntity.getListingId(),
-                reviewsEntity.getBuyerId(),
-                reviewsEntity.getRating(),
-                reviewsEntity.getMessage(),
-                reviewsEntity.getImagesUrls(),
-                reviewsEntity.getCreatedAt(),
-                reviewsEntity.getSellerId()
+                entity.getId(),
+                entity.getListingId(),
+                entity.getBuyerId(),
+                entity.getRating(),
+                entity.getMessage(),
+                entity.getImagesUrls(),
+                entity.getCreatedAt(),
+                entity.getSellerId()
         );
+    }
+
+    private ReviewsEntity toDomain(CreateReviewsRequest dto) {
+        ReviewsEntity domain = new ReviewsEntity();
+        domain.setListingId(dto.listingId());
+        domain.setBuyerId(dto.buyerId());
+        domain.setRating(dto.rating());
+        domain.setMessage(dto.message());
+        domain.setImagesUrls(dto.imagesUrls());
+        return domain;
     }
 
     @GetMapping("/{id}")

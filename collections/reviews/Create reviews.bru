@@ -1,11 +1,11 @@
 meta {
-  name: Create Listing
+  name: Create review
   type: http
   seq: 1
 }
 
 post {
-  url: http://localhost:8080/api/listing/
+  url: http://localhost:8080/api/reviews/
   body: json
   auth: inherit
 }
@@ -15,7 +15,7 @@ body:json {
     "listingId": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
     "buyerId": "fedcba09-8765-4321-fedc-ba0987654321",
     "rating": 5,
-    "comment": "Este é um teste para o serviço funcionando de forma isolada. Funcionou!",
+    "message": "Este é um teste para o serviço",
     "imagesUrls": [
       "https://example.com/image1.png"
     ]
