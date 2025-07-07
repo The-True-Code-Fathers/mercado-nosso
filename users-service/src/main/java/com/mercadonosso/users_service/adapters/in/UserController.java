@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mercadonosso.users_service.adapters.in.dto.UpdateUserRequest;
 import com.mercadonosso.users_service.core.domain.User;
+import com.mercadonosso.users_service.core.exceptions.InvalidCpfFormatException;
 import com.mercadonosso.users_service.core.ports.in.UserServicePort;
 
 @RestController
@@ -51,6 +52,11 @@ public class UserController {
 
     @GetMapping("/cpf/{cpf}")
     public ResponseEntity<User> findByCpf(@PathVariable String cpf) {
+        // Validate CPF format: must be exactly 11 digits
+        if (cpf == null || !cpf.matches("\\d{11}")) {
+            throw new InvalidCpfFormatException("CPF must be exactly 11 digits and contain only numbers");
+        }
+        
         return userService.findByCpf(cpf)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
