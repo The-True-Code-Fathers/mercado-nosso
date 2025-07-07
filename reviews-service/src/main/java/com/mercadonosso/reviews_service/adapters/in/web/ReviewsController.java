@@ -47,7 +47,8 @@ public class ReviewsController {
                 reviewsEntity.getRating(),
                 reviewsEntity.getMessage(),
                 reviewsEntity.getImagesUrls(),
-                reviewsEntity.getCreatedAt()
+                reviewsEntity.getCreatedAt(),
+                reviewsEntity.getSellerId()
         );
     }
 
@@ -73,7 +74,11 @@ public class ReviewsController {
     }
 
     @PutMapping("{/id}")
-    public ReviewsResponse update(@PathVariable UUID id, @Valid @RequestBody UpdateReviewsRequest request) {
+    public ReviewsResponse update(
+            @PathVariable UUID id,
+            @Valid
+            @RequestBody
+            UpdateReviewsRequest request) {
         ReviewsEntity reviewWithNewData = new ReviewsEntity();
         reviewWithNewData.setRating(request.rating());
         reviewWithNewData.setMessage(request.message());

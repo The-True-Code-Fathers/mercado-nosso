@@ -16,6 +16,9 @@ public record CreateReviewsRequest(
         @NotNull(message = "O ID do comprador é obrigatório.")
         UUID buyerId,
 
+        @NotNull(message = "O ID do vendedor é obrigatório.")
+        UUID sellerId,
+
         @NotNull(message = "A nota (rating) é obrigatória.")
         @Min(value = 1, message = "A nota mínima é 1.")
         @Max(value = 5, message = "A nota máxima é 5.")
