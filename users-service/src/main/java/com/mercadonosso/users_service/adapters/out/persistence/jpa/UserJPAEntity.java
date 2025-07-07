@@ -27,8 +27,8 @@ public class UserJPAEntity {
     @Column(length = 11, unique = true, nullable = false)
     private String cpf;
 
-    @Column(length = 11, unique = true, nullable = false)
-    private String cpnj;
+    @Column(length = 14, unique = true, nullable = false)
+    private String cnpj;
 
     @Column(name = "is_seller", nullable = false)
     private boolean isSeller;

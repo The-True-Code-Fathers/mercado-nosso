@@ -10,7 +10,7 @@ public class UserMapper {
         entity.setEmail(user.getEmail());
         entity.setPasswordHash(user.getPasswordHash());
         entity.setCpf(user.getCpf());
-        entity.setCpnj(user.getCnpj());
+        entity.setCnpj(user.getCnpj());
         entity.setSeller(user.isSeller());
         entity.setProfilePictureUrl(user.getProfilePictureUrl());
         entity.setListingSellingId(user.getListingSellingId());
@@ -28,7 +28,7 @@ public class UserMapper {
         domain.setEmail(jpaEntity.getEmail());
         domain.setPasswordHash(jpaEntity.getPasswordHash());
         domain.setCpf(jpaEntity.getCpf());
-        domain.setCnpj(jpaEntity.getCpnj());
+        domain.setCnpj(jpaEntity.getCnpj());
         domain.setSeller(jpaEntity.isSeller());
         domain.setProfilePictureUrl(jpaEntity.getProfilePictureUrl());
         domain.setListingSellingId(jpaEntity.getListingSellingId());
