@@ -18,7 +18,7 @@ public class UserJPAEntity {
     @Column(name="full_name", length = 255, nullable = false)
     private String fullName;
 
-    @Column(length = 255, nullable = false)
+    @Column(length = 255, nullable = false, unique = true)
     private String email;
 
     @Column(name="password_hash", length = 255, nullable = false)

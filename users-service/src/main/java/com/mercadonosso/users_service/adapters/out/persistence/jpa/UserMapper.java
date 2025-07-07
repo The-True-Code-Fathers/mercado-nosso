@@ -17,6 +17,7 @@ public class UserMapper {
         entity.setListingBoughtId(user.getListingBoughtId());
         entity.setCreatedAt(user.getCreatedAt());
         entity.setUpdatedAt(user.getUpdatedAt());
+        entity.setActive(user.isActive());
         return entity;
     }
 
@@ -34,6 +35,7 @@ public class UserMapper {
         domain.setListingBoughtId(jpaEntity.getListingBoughtId());
         domain.setCreatedAt(jpaEntity.getCreatedAt());
         domain.setUpdatedAt(jpaEntity.getUpdatedAt());
+        domain.setActive(jpaEntity.isActive());
         return domain;
     }
 }
