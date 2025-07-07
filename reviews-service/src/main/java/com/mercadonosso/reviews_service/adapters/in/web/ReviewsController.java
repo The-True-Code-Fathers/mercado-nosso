@@ -25,16 +25,14 @@ public class ReviewsController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ReviewsResponse createReviews(@Valid @RequestBody CreateReviewsRequest request) {
-        ReviewsEntity reviewsEntity = new ReviewsEntity();
-        reviewsEntity.setListingId(request.listingId());
-        reviewsEntity.setBuyerId(request.buyerId());
-        reviewsEntity.setRating(request.rating());
-        reviewsEntity.setMessage(request.message());
-        reviewsEntity.setActive(true);
-        reviewsEntity.setImagesUrls(request.imagesUrls());
-        reviewsEntity.setCreatedAt(request.createdAt());
-        reviewsEntity.setId(request.id());
-        ReviewsEntity createdReview = reviewsServicePort.create(reviewsEntity);
+        ReviewsEntity reviewToCreate = new ReviewsEntity();
+        reviewToCreate.setListingId(request.listingId());
+        reviewToCreate.setBuyerId(request.buyerId());
+        reviewToCreate.setRating(request.rating());
+        reviewToCreate.setMessage(request.message());
+        reviewToCreate.setImagesUrls(request.imagesUrls());
+
+        ReviewsEntity createdReview = reviewsServicePort.create(reviewToCreate);
 
         return toResponse(createdReview);
     }
@@ -52,7 +50,7 @@ public class ReviewsController {
         );
     }
 
-    @GetMapping("{/id}")
+    @GetMapping("/{id}")
     public ReviewsResponse findById(@PathVariable UUID id) {
         ReviewsEntity reviewsEntity = reviewsServicePort.findById(id);
         return toResponse(reviewsEntity);
@@ -73,7 +71,7 @@ public class ReviewsController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("{/id}")
+    @PutMapping("/{id}")
     public ReviewsResponse update(
             @PathVariable UUID id,
             @Valid

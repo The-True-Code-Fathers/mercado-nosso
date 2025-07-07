@@ -21,46 +21,47 @@ public class ReviewsServiceImpl implements ReviewsServicePort {
     }
 
     @Override
+    @Transactional
     public ReviewsEntity create(ReviewsEntity reviewsEntity) {
         ReviewsEntity newReview = ReviewsEntity.builder()
                 .listingId(reviewsEntity.getListingId())
                 .buyerId(reviewsEntity.getBuyerId())
-                .sellerId(reviewsEntity.getSellerId())
                 .rating(reviewsEntity.getRating())
                 .message(reviewsEntity.getMessage())
                 .imagesUrls(reviewsEntity.getImagesUrls())
                 .id(UUID.randomUUID())
                 .createdAt(LocalDateTime.now())
                 .active(true)
+                .sellerId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
                 .build();
 
-        return reviewsRepositoryPort.save(reviewsEntity);
+        return reviewsRepositoryPort.save(newReview);
     }
 
     @Override
     @Transactional
     public void delete(UUID id) {
         ReviewsEntity reviewToDelete = this.findById(id);
-
         reviewsRepositoryPort.delete(reviewToDelete);
     }
 
     @Override
+    @Transactional
     public ReviewsEntity update(UUID id, ReviewsEntity newReviewData) {
         ReviewsEntity existingReview = this.findById(id);
-
         existingReview.setRating(newReviewData.getRating());
         existingReview.setMessage(newReviewData.getMessage());
-
         return reviewsRepositoryPort.save(existingReview);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ReviewsEntity> listAll() {
         return reviewsRepositoryPort.listAll();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ReviewsEntity findById(UUID id) {
         return reviewsRepositoryPort.findById(id).orElseThrow(() ->
                 new ReviewsNotFoundException("Review com o id " + id + " não encontrado."));

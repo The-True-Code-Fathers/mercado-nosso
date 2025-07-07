@@ -244,7 +244,10 @@ services:
       - SPRING_APPLICATION_NAME=reviews-service
       - SPRING_DATA_MONGODB_URI=mongodb://reviews-service-mongodb:27017/reviews-service-mongodb
     depends_on:
-      - eureka-server
+      eureka-server:
+        condition: service_started
+      reviews-service-mongodb:
+        condition: service_started
     networks:
       - my-network
 
@@ -255,6 +258,8 @@ services:
       - "5436:5436"
     volumes:
       - reviews_db_data:/data/db
+    networks:
+      - my-network
 
   seller-daily-analytics-service:
     build:
