@@ -7,7 +7,7 @@ import com.mercadonosso.carts_service.core.domain.CartsEntity;
 public interface CartsServicePort {
     CartsEntity findById(UUID userId);
 
-    CartsEntity add(UUID userId, UUID listingId, int quantity);
+    CartsEntity create(UUID userId, UUID listingId, int quantity);
 
     CartsEntity remove(UUID userId, UUID listingId);
 

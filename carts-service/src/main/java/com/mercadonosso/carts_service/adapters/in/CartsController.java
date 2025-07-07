@@ -45,7 +45,7 @@ public class CartsController {
             @RequestHeader("X-User-Id") String userIdString,
             @Valid @RequestBody AddItemRequest request) {
         UUID userId = UUID.fromString(userIdString);
-        CartsEntity updatedCart = cartsServicePort.add(userId, request.getListingId(), request.getQuantity());
+        CartsEntity updatedCart = cartsServicePort.create(userId, request.getListingId(), request.getQuantity());
         return ResponseEntity.status(HttpStatus.CREATED).body(convertToResponse(updatedCart));
     }
 
