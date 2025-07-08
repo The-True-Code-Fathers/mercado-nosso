@@ -1,17 +1,19 @@
 package com.mercadonosso.reviews_service.core.usecases;
 
-import com.mercadonosso.reviews_service.adapters.out.http.ListingServiceClient;
+import com.mercadonosso.reviews_service.core.ports.out.ListingServiceClient;
 import com.mercadonosso.reviews_service.core.domain.ReviewsEntity;
 import com.mercadonosso.reviews_service.core.domain.exception.ReviewsNotFoundException;
 import com.mercadonosso.reviews_service.core.ports.in.ReviewsServicePort;
 import com.mercadonosso.reviews_service.core.ports.out.ReviewsRepositoryPort;
 import jakarta.validation.Validator;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Service
 public class ReviewsServiceImpl implements ReviewsServicePort {
     private final ReviewsRepositoryPort reviewsRepositoryPort;
     private final Validator validator;
