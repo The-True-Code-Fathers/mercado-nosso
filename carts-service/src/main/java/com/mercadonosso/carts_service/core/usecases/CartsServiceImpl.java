@@ -59,6 +59,7 @@ public class CartsServiceImpl implements CartsServicePort {
             if (listing.getStock() < quantity) {
                 throw new BusinessRuleException("Insufficient stock.");
             }
+            
             CartsEntity.CartItemEntity newItem = CartsEntity.CartItemEntity.builder()
                     .listingId(listing.getListingId())
                     .quantity(quantity)

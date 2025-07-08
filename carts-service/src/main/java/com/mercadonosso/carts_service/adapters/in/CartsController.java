@@ -77,7 +77,7 @@ public class CartsController {
                 : Collections.emptyList();
 
         BigDecimal subtotal = items.stream()
-                .map(item -> item.getPrice().multiply(new BigDecimal(item.getQuantity())))
+                .map(item -> item.getPrice())
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         BigDecimal shippingPrice = cartsEntity.getShippingPriceTotal() != null ? cartsEntity.getShippingPriceTotal()
@@ -94,7 +94,7 @@ public class CartsController {
                         items.stream().map(item -> CartsResponse.CartsItemResponse.builder()
                                 .listingId(item.getListingId())
                                 .quantity(item.getQuantity())
-                                .price(item.getPrice().multiply(new BigDecimal(item.getQuantity())))
+                                .price(item.getPrice())
                                 .build()).collect(Collectors.toList()))
                 .build();
     }
