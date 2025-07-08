@@ -93,7 +93,7 @@ services:
     networks:
       - my-network
     ports:
-      - "5433:5433"
+      - "5433:27017"
     volumes:
       - carts_db_data:/data/db
 
@@ -139,7 +139,7 @@ services:
     networks:
       - my-network
     ports:
-      - "5435:5435"
+      - "5435:27017"
     volumes:
       - listings_db_data:/data/db
 
@@ -213,7 +213,7 @@ services:
     networks:
       - my-network
     ports:
-      - "5437:5437"
+      - "5437:27017"
     volumes:
       - products_db_data:/data/db
 
@@ -241,7 +241,7 @@ services:
     image: mongo:5.0
     container_name: reviews-service-mongodb
     ports:
-      - "5436:5436"
+      - "5436:27017"
     volumes:
       - reviews_db_data:/data/db
     networks:
