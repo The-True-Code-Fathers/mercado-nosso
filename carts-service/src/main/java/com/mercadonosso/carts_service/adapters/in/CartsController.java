@@ -1,6 +1,8 @@
 package com.mercadonosso.carts_service.adapters.in;
 
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -70,7 +72,11 @@ public class CartsController {
             return new CartsResponse();
         }
 
-        BigDecimal subtotal = cartsEntity.getItems().stream()
+        // Use an empty list if getItems() returns null
+        List<CartsEntity.CartItemEntity> items = cartsEntity.getItems() != null ? cartsEntity.getItems()
+                : Collections.emptyList();
+
+        BigDecimal subtotal = items.stream()
                 .map(item -> item.getPrice().multiply(new BigDecimal(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
@@ -85,7 +91,7 @@ public class CartsController {
                 .shippingPriceTotal(shippingPrice)
                 .grandTotal(total)
                 .items(
-                        cartsEntity.getItems().stream().map(item -> CartsResponse.CartsItemResponse.builder()
+                        items.stream().map(item -> CartsResponse.CartsItemResponse.builder()
                                 .listingId(item.getListingId())
                                 .quantity(item.getQuantity())
                                 .price(item.getPrice().multiply(new BigDecimal(item.getQuantity())))

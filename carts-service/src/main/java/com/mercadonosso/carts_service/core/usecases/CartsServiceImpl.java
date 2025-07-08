@@ -63,6 +63,7 @@ public class CartsServiceImpl implements CartsServicePort {
                     .listingId(listing.getListingId())
                     .quantity(quantity)
                     .price(listing.getPrice())
+                    .shippingPrice(listing.getPrice().multiply(BigDecimal.valueOf(5/100)))
                     .build();
             cartsEntity.getItems().add(newItem);
         }

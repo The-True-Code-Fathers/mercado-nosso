@@ -2,10 +2,10 @@ package com.mercadonosso.carts_service.core.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 
@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 public class CartsEntity {
     private UUID id;
     private UUID userId;
-    private List<CartItemEntity> items;
+    private List<CartItemEntity> items = new ArrayList<>();
     private BigDecimal shippingPriceTotal;
     private BigDecimal subTotal;
     private BigDecimal grandTotal;
@@ -41,6 +41,7 @@ public class CartsEntity {
     }
 
     public CartsEntity(UUID userId) {
+        this.id = UUID.randomUUID();
         this.userId = userId;
         this.subTotal = BigDecimal.ZERO;
         this.shippingPriceTotal = BigDecimal.ZERO;
