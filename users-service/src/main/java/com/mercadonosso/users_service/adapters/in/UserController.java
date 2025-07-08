@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/users")
 public class UserController {
 
     private final UserServicePort userService;
@@ -67,7 +66,12 @@ public class UserController {
             @RequestHeader("X-User-Id") UUID userId,
             @Valid @RequestBody UpdateUserRequest request) {
 
-        User updatedUser = userService.updateUser(userId, request);
+        User userWithNewData = new User();
+        userWithNewData.setFullName(request.fullName());
+        userWithNewData.setProfilePictureUrl(request.profilePictureUrl()); // Isso aqui converte a entidade pra DTO
+
+        User updatedUser = userService.updateUser(userId, userWithNewData);
+
         return ResponseEntity.ok(toResponse(updatedUser));
     }
 
