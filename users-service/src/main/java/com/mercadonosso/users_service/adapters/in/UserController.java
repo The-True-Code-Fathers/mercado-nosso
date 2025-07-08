@@ -1,25 +1,19 @@
 package com.mercadonosso.users_service.adapters.in;
 
-import java.util.UUID;
-
+import com.mercadonosso.users_service.adapters.in.dto.CreateUserRequest;
+import com.mercadonosso.users_service.adapters.in.dto.UpdateUserRequest;
+import com.mercadonosso.users_service.adapters.in.dto.UserResponse;
+import com.mercadonosso.users_service.core.domain.User;
+import com.mercadonosso.users_service.core.ports.in.UserServicePort;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.mercadonosso.users_service.adapters.in.dto.UpdateUserRequest;
-import com.mercadonosso.users_service.core.domain.User;
-import com.mercadonosso.users_service.core.exceptions.InvalidCpfFormatException;
-import com.mercadonosso.users_service.core.ports.in.UserServicePort;
+import java.util.UUID;
 
 @RestController
+@RequestMapping("/api/users")
 public class UserController {
 
     private final UserServicePort userService;
@@ -30,77 +24,88 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public User createUser(@RequestBody User user) {
-        return userService.createUser(user);
+    public UserResponse createUser(@Valid @RequestBody CreateUserRequest request) {
+        User userToCreate = toDomain(request);
+        User createdUser = userService.createUser(userToCreate);
+        return toResponse(createdUser);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable UUID id) {
+    public ResponseEntity<UserResponse> getUserById(@PathVariable UUID id) {
         return userService.findById(id)
+                .map(this::toResponse)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/email/{email}")
-    public ResponseEntity<User> findByEmail(@PathVariable String email) {
+    public ResponseEntity<UserResponse> findByEmail(@PathVariable String email) {
         return userService.findByEmail(email)
+                .map(this::toResponse)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/cpf/{cpf}")
-    public ResponseEntity<User> findByCpf(@PathVariable String cpf) {
-        // Validate CPF format: must be exactly 11 digits
-        if (cpf == null || !cpf.matches("\\d{11}")) {
-            throw new InvalidCpfFormatException("CPF must be exactly 11 digits and contain only numbers");
-        }
-        
+    public ResponseEntity<UserResponse> findByCpf(@PathVariable String cpf) {
         return userService.findByCpf(cpf)
+                .map(this::toResponse)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/me")
-    public ResponseEntity<User> getCurrentUser(@RequestHeader("X-User-Id") UUID userId) {
+    public ResponseEntity<UserResponse> getCurrentUser(@RequestHeader("X-User-Id") UUID userId) {
         return userService.findById(userId)
+                .map(this::toResponse)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PatchMapping("/me")
-    public ResponseEntity<User> patchCurrentUser(
+    public ResponseEntity<UserResponse> patchCurrentUser(
             @RequestHeader("X-User-Id") UUID userId,
-            @RequestBody UpdateUserRequest request) {
-        
-        return userService.findById(userId)
-                .map(user -> {
-                    // Update only the fields that are provided (PATCH)
-                    if (request.fullName() != null) {
-                        user.setFullName(request.fullName());
-                    }
-                    if (request.profilePictureUrl() != null) {
-                        user.setProfilePictureUrl(request.profilePictureUrl());
-                    }
-                    
-                    User updatedUser = userService.updateUser(userId, user);
-                    return ResponseEntity.ok(updatedUser);
-                })
-                .orElse(ResponseEntity.notFound().build());
+            @Valid @RequestBody UpdateUserRequest request) {
+
+        User updatedUser = userService.updateUser(userId, request);
+        return ResponseEntity.ok(toResponse(updatedUser));
     }
 
     @DeleteMapping("/me")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void inactivateUser(@RequestHeader("X-User-Id") UUID userId) {
-        userService.findById(userId)
-                .ifPresent(user -> {
-                    user.setActive(false);
-                    userService.updateUser(userId, user);
-                });
+    public void inactivateCurrentUser(@RequestHeader("X-User-Id") UUID userId) {
+        userService.deleteUser(userId);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteUser(@PathVariable UUID id) {
         userService.deleteUser(id);
+    }
+
+    private UserResponse toResponse(User user) {
+        return new UserResponse(
+                user.getId(),
+                user.getFullName(),
+                user.getEmail(),
+                user.isSeller(),
+                user.getProfilePictureUrl(),
+                user.getListingSellingId(),
+                user.getListingBoughtId(),
+                user.getCreatedAt(),
+                user.getUpdatedAt(),
+                user.isActive()
+        );
+    }
+
+    private User toDomain(CreateUserRequest request) {
+        User domain = new User();
+        domain.setFullName(request.fullName());
+        domain.setEmail(request.email());
+        domain.setPasswordHash(request.password());
+        domain.setCpf(request.cpf());
+        domain.setCnpj(request.cnpj());
+        domain.setSeller(request.isSeller());
+        return domain;
     }
 }

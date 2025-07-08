@@ -18,15 +18,24 @@ public class UserService implements UserServicePort {
     public UserService(UserRepositoryPort userRepository) {
         this.userRepository = userRepository;
     }
-    
+
     @Override
     public User createUser(User user) {
-        if (user.getId() == null) {
-            user.setId(UUID.randomUUID());
+        // Lógica de negócio: validar se email/CPF já existem
+        if (userRepository.existsByEmail(user.getEmail())) {
+            throw new IllegalStateException("Email already in use");
         }
+        if (userRepository.existsByCpf(user.getCpf())) {
+            throw new IllegalStateException("CPF already in use");
+        }
+
+        // Definir os dados
+        user.setId(UUID.randomUUID());
+        user.setActive(true);
+
         return userRepository.save(user);
     }
-    
+
     @Override
     public Optional<User> findById(UUID id) {
         return userRepository.findById(id);
@@ -51,24 +60,22 @@ public class UserService implements UserServicePort {
     public boolean existsByCpf(String cpf) {
         return userRepository.existsByCpf(cpf);
     }
-    
+
     @Override
-    public User updateUser(UUID id, User user) {
-        user.setId(id);
-        return userRepository.save(user);
+    public User updateUser(UUID id, User userWithNewData) {
+        User existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+
+        // Atualiza apenas os campos permitidos
+        existingUser.setFullName(userWithNewData.getFullName());
+        return userRepository.save(existingUser);
     }
-    
+
     @Override
     public void deleteUser(UUID id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
-        
-        // Check if user is already inactive
-        if (!user.isActive()) {
-            throw new IllegalStateException("User is already deactivated");
-        }
-        
-        // Soft delete - set active to false
+
         user.setActive(false);
         userRepository.save(user);
     }
