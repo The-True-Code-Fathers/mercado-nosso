@@ -1,5 +1,6 @@
 package com.mercadonosso.reviews_service.core.usecases;
 
+import com.mercadonosso.reviews_service.adapters.out.http.ListingServiceClient;
 import com.mercadonosso.reviews_service.core.domain.ReviewsEntity;
 import com.mercadonosso.reviews_service.core.domain.exception.ReviewsNotFoundException;
 import com.mercadonosso.reviews_service.core.ports.in.ReviewsServicePort;
@@ -14,16 +15,20 @@ import java.util.UUID;
 public class ReviewsServiceImpl implements ReviewsServicePort {
     private final ReviewsRepositoryPort reviewsRepositoryPort;
     private final Validator validator;
+    private final ListingServiceClient listingsServiceClient;
 
-    public ReviewsServiceImpl(ReviewsRepositoryPort reviewsRepositoryPort, Validator validator) {
+    public ReviewsServiceImpl(ReviewsRepositoryPort reviewsRepositoryPort,
+                              Validator validator,
+                              ListingServiceClient listingsServiceClient) {
         this.reviewsRepositoryPort = reviewsRepositoryPort;
         this.validator = validator;
+        this.listingsServiceClient = listingsServiceClient;
     }
 
     @Override
     @Transactional
     public ReviewsEntity create(ReviewsEntity reviewData) {
-        System.out.println("LOGGER 1 COLADO COM CUSPE - Entidade Recebida do Controller: " + reviewData.toString());
+        var listing = listingsServiceClient.findListingById(reviewData.getListingId());
 
         ReviewsEntity newReview = ReviewsEntity.builder()
                 .listingId(reviewData.getListingId())
@@ -34,10 +39,8 @@ public class ReviewsServiceImpl implements ReviewsServicePort {
                 .id(UUID.randomUUID())
                 .createdAt(LocalDateTime.now())
                 .active(true)
-                .sellerId(UUID.fromString("11111111-1111-1111-1111-111111111111"))
+                .sellerId(listing.sellerId())
                 .build();
-
-        System.out.println("LOGGER 2 COLADO COM CHICLETE - Entidade Final para Salvar: " + newReview.toString());
 
         return reviewsRepositoryPort.save(newReview);
     }

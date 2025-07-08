@@ -1,5 +1,6 @@
 package com.mercadonosso.reviews_service.config;
 
+import com.mercadonosso.reviews_service.adapters.out.http.ListingServiceClient;
 import com.mercadonosso.reviews_service.adapters.out.persistence.mongo.ReviewsRepositoryAdapter;
 import com.mercadonosso.reviews_service.core.ports.in.ReviewsServicePort;
 import com.mercadonosso.reviews_service.core.usecases.ReviewsServiceImpl;
@@ -15,8 +16,9 @@ public class BeanConfiguration {
     @Primary
     public ReviewsServicePort reviewsServicePort(
             ReviewsRepositoryAdapter reviewsRepositoryAdapter,
-            Validator validator
+            Validator validator,
+            ListingServiceClient listingServiceClient
     ) {
-        return new ReviewsServiceImpl(reviewsRepositoryAdapter, validator);
+        return new ReviewsServiceImpl(reviewsRepositoryAdapter, validator, listingServiceClient);
     }
 }
