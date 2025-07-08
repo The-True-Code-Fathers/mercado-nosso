@@ -7,11 +7,16 @@ meta {
 post {
   url: http://localhost:8080/api/users/
   body: json
-  auth: inherit
+  auth: none
 }
 
 body:json {
   {
-    
+      "fullName": "Gustavo Barez",
+      "email": "gustavo.barez@email.com",
+      "passwordHash": "password1234540985458",
+      "cpf": "12345678901",
+      "cnpj": "1234567891234",
+      "isSeller": true
   }
 }

@@ -19,18 +19,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException e) {
         ErrorResponse error = new ErrorResponse("USER_NOT_FOUND", e.getMessage());
+        e.printStackTrace();
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
     }
     
     @ExceptionHandler(InvalidCpfFormatException.class)
     public ResponseEntity<ErrorResponse> handleInvalidCpfFormat(InvalidCpfFormatException e) {
         ErrorResponse error = new ErrorResponse("INVALID_CPF_FORMAT", e.getMessage());
+        e.printStackTrace();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
     
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException e) {
         ErrorResponse error = new ErrorResponse("INVALID_ARGUMENT", e.getMessage());
+        e.printStackTrace();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
     
@@ -42,12 +45,14 @@ public class GlobalExceptionHandler {
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
+        e.printStackTrace();
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
     }
     
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGenericException(Exception e) {
         ErrorResponse error = new ErrorResponse("INTERNAL_ERROR", "An unexpected error occurred");
+        e.printStackTrace();
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
     }
     
