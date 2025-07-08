@@ -5,13 +5,13 @@ meta {
 }
 
 get {
-  url: {{base_url}}/users/me
+  url: {{base_url}}/api/users/me
   body: none
-  auth: bearer
+  auth: none
 }
 
-auth:bearer {
-  token: {{access_token}}
+headers {
+  Authorization: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI1Y2RhNTI3OC02ZDNmLTQ3YzgtOGIxMC1mNGZjNjk5NzhlMzMiLCJlbWFpbCI6ImpvaG4uZG9lQGV4YW1wbGUuY29tIiwiaXNTZWxsZXIiOmZhbHNlLCJpYXQiOjE3NTE5MDk5ODcsImV4cCI6MTc1MTkxMzU4N30.F3ZQcbFoTZuwQbvS58mhVMI0V-zOUFXOdtaP9ZTmFzpN9Qy1zKJWRnyit7fD7L3WVjO_3Zd44kRh0Z_k172OSQ
 }
 
 tests {

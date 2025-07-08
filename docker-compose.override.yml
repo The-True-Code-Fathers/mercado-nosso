@@ -15,14 +15,6 @@ services:
       sh -c "cd api-gateway &&
              mvn spring-boot:run"
 
-  auth-service:
-    volumes:
-      - ./auth-service:/app/auth-service
-      - ~/.m2:/root/.m2
-    command: >
-      sh -c "cd auth-service &&
-             mvn spring-boot:run"
-
   carts-service:
     volumes:
       - ./carts-service:/app/carts-service

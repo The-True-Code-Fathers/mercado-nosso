@@ -12,52 +12,6 @@ services:
     networks:
       - my-network
 
-  auth-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        SERVICE_NAME: auth-service
-    container_name: auth-service
-    ports:
-      - "8090:8090"
-    environment:
-      - SERVER_PORT=8090
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - SPRING_APPLICATION_NAME=auth-service
-      - SPRING_SECURITY_USER_NAME=admin
-      - SPRING_SECURITY_USER_PASSWORD=admin
-      # Postgres configuration
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://auth-service-postgres:5432/auth_db
-      - SPRING_DATASOURCE_USERNAME=user
-      - SPRING_DATASOURCE_PASSWORD=password
-      # JWT configuration
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_EXPIRATION=${JWT_EXPIRATION}
-    depends_on:
-      eureka-server:
-        condition: service_started
-      users-service:
-        condition: service_started
-    networks:
-      - my-network
-
-  auth-service-postgres:
-    image: postgres:17.5-alpine
-    container_name: auth-service-postgres
-    environment:
-      - POSTGRES_DB=auth_db
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=password
-    ports:
-      - "5431:5432"
-    volumes:
-      - auth_db_data:/var/lib/postgresql/data
-    depends_on:
-      - eureka-server
-    networks:
-      - my-network
-
   api-gateway:
     build:
       context: .
@@ -70,8 +24,6 @@ services:
     environment:
       - SERVER_PORT=8080
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - JWT_SECRET=${JWT_SECRET}
-      - JWT_EXPIRATION=${JWT_EXPIRATION}
     depends_on:
       - eureka-server
     networks:
@@ -347,7 +299,6 @@ services:
       - my-network
 
 volumes:
-  auth_db_data:
   users_db_data:
   carts_db_data:
   listings_db_data:
