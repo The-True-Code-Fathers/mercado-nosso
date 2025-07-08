@@ -1,16 +1,18 @@
 server:
-  port: 0
+  port: 8088
 
 spring:
   application:
     name: reviews-service
   data:
     mongodb:
-      uri: ${SPRING_DATA_MONGODB_URI}
+      uri: mongodb://reviews-service-mongodb:27017/reviews_db
+
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
-  instance:
-    prefer-ip-address: true
-    instance-id: ${spring.cloud.client.ip-address}:${server.port}
+      defaultZone: http://eureka-server:8761/eureka/
+
+app:
+  services:
+    listings-url: http://listings-service:8084
