@@ -1,15 +1,15 @@
-package com.mercadonosso.products_service.adapters.in.web.handler;
+package com.mercadonosso.orders_service.adapters.in.handler;
 
-import java.time.LocalDateTime;
+import com.mercadonosso.orders_service.adapters.in.dto.ErrorResponse;
+import com.mercadonosso.orders_service.core.domain.exceptions.BusinessRuleException;
+import com.mercadonosso.orders_service.core.domain.exceptions.OrderNotFoundException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.mercadonosso.products_service.adapters.in.web.dto.ErrorResponse;
-import com.mercadonosso.products_service.core.domain.exception.BusinessRuleException;
-import com.mercadonosso.products_service.core.domain.exception.ProductsNotFoundException;
+import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -25,14 +25,16 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(ProductsNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleProductsNotFoundException(ProductsNotFoundException ex) {
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleListingNotFoundException(OrderNotFoundException ex) {
         ErrorResponse errorResponse = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.NOT_FOUND.value(),
                 "Not found",
                 ex.getMessage()
         );
-        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }
+

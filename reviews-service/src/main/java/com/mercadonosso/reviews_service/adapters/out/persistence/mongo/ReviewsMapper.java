@@ -1,13 +1,14 @@
 package com.mercadonosso.reviews_service.adapters.out.persistence.mongo;
 
-import com.mercadonosso.reviews_service.core.domain.ReviewsEntity;
 import org.springframework.stereotype.Component;
-import java.util.UUID;
+
+import com.mercadonosso.reviews_service.core.domain.ReviewsEntity;
 
 @Component
 public class ReviewsMapper {
     public ReviewsModel toModel(ReviewsEntity domain) {
-        if (domain == null) return null;
+        if (domain == null)
+            return null;
         ReviewsModel model = new ReviewsModel();
 
         if (domain.getId() != null) {
@@ -26,7 +27,8 @@ public class ReviewsMapper {
     }
 
     public ReviewsEntity toDomain(ReviewsModel model) {
-        if (model == null) return null;
+        if (model == null)
+            return null;
         ReviewsEntity domain = new ReviewsEntity();
 
         domain.setId(model.getId());
