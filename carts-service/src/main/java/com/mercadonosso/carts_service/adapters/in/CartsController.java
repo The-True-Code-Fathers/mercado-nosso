@@ -72,7 +72,6 @@ public class CartsController {
             return new CartsResponse();
         }
 
-        // Use an empty list if getItems() returns null
         List<CartsEntity.CartItemEntity> items = cartsEntity.getItems() != null ? cartsEntity.getItems()
                 : Collections.emptyList();
 

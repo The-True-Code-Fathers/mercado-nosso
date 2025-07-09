@@ -75,6 +75,7 @@ services:
       - SPRING_DATA_MONGODB_URI=mongodb://carts-service-mongodb:27017/carts-service-mongodb
       - APP_SERVICES_LISTINGS-URL=http://listings-service:8084
       - SPRING_KAFKA_CONSUMER_BOOTSTRAP_SERVERS=kafka:29092
+      - SPRING_KAFKA_PRODUCER_BOOTSTRAP_SERVERS=kafka:29092
     depends_on:
       eureka-server:
         condition: service_started
