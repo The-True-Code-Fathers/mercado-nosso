@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.client.RestTemplate;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mercadonosso.carts_service.core.ports.in.CartsServicePort;
 import com.mercadonosso.carts_service.core.ports.out.CartsRepositoryPort;
 import com.mercadonosso.carts_service.core.ports.out.ListingsServicePort;
@@ -18,10 +19,14 @@ public class BeanConfiguration {
 
     @Bean
     @Primary
-    public CartsServicePort cartServicePort(CartsRepositoryPort cartRepositoryPort, ListingsServicePort listingsServicePort, KafkaTemplate<String, String> kafkaTemplate, @Value("${topics.cart-clear.name}") String clearCartTopic) {
-        return new CartsServiceImpl(cartRepositoryPort, listingsServicePort, kafkaTemplate, clearCartTopic);
+    public CartsServicePort cartServicePort(CartsRepositoryPort cartRepositoryPort,
+            ListingsServicePort listingsServicePort, KafkaTemplate<String, String> kafkaTemplate,
+            @Value("${topics.cart-clear.name}") String clearCartTopic,
+            @Value("${topics.cart-remove.name}") String removeCartTopic, ObjectMapper objectMapper) {
+        return new CartsServiceImpl(cartRepositoryPort, listingsServicePort, kafkaTemplate, clearCartTopic,
+                removeCartTopic, objectMapper);
     }
-    
+
     @Bean
     @LoadBalanced
     public RestTemplate restTemplate() {

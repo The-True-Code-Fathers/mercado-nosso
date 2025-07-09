@@ -21,3 +21,5 @@ eureka:
 topics:
   cart-clear:
     name: "com.mercadonosso.carts.event.cleared"
+  cart-remove:
+    name: "com.mercadonosso.carts.event.remove"
