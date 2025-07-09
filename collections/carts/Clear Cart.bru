@@ -1,17 +1,17 @@
 meta {
-  name: Add to Cart
+  name: Clear Cart
   type: http
-  seq: 1
+  seq: 4
 }
 
-post {
+delete {
   url: http://localhost:8080/api/carts/
   body: json
   auth: inherit
 }
 
 headers {
-  X-User-Id: ad5c9bde-74e0-470c-bd55-fdd0d9d1ad43
+  X-User-Id: 3b02ccf3-3154-4eab-9367-9673a718539f
 }
 
 body:json {
