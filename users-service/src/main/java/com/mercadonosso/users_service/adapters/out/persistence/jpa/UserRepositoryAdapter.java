@@ -10,7 +10,6 @@ import com.mercadonosso.users_service.core.ports.out.UserRepositoryPort;
 
 @Component
 public class UserRepositoryAdapter implements UserRepositoryPort {
-
     private final UserJPARepository jpaRepository;
 
     public UserRepositoryAdapter(final UserJPARepository jpaRepository) {
@@ -40,6 +39,11 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
     public Optional<User> findByCpf(String cpf) {
         return jpaRepository.findByCpf(cpf)
                 .map(UserMapper::toDomain);
+    }
+
+    @Override
+    public Optional<User> findByEmailAndPassword(String email, String password) {
+        return jpaRepository.findByEmailAndPassword(email,password).map(UserMapper::toDomain);
     }
 
     @Override

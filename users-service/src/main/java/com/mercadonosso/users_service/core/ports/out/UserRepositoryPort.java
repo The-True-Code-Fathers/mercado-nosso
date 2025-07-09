@@ -10,6 +10,7 @@ public interface UserRepositoryPort {
     Optional<User> findById(UUID id);
     Optional<User> findByEmail(String email);
     Optional<User> findByCpf(String cpf);
+    Optional<User> findByEmailAndPassword(String email, String password);
     boolean existsByEmail(String email);
     boolean existsByCpf(String cpf);
     void deleteById(UUID id);

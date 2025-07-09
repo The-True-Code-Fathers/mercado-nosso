@@ -21,4 +21,6 @@ public interface UserServicePort {
     User updateUser(UUID id, User user);
     
     void deleteUser(UUID id);
+
+    User login(String email, String password);
 }

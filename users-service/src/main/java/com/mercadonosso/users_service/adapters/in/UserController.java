@@ -1,20 +1,23 @@
 package com.mercadonosso.users_service.adapters.in;
 
 import com.mercadonosso.users_service.adapters.in.dto.CreateUserRequest;
+import com.mercadonosso.users_service.adapters.in.dto.LoginRequest;
 import com.mercadonosso.users_service.adapters.in.dto.UpdateUserRequest;
 import com.mercadonosso.users_service.adapters.in.dto.UserResponse;
 import com.mercadonosso.users_service.core.domain.User;
 import com.mercadonosso.users_service.core.ports.in.UserServicePort;
 import jakarta.validation.Valid;
+import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
 public class UserController {
-
     private final UserServicePort userService;
 
     public UserController(UserServicePort userService) {
@@ -111,5 +114,25 @@ public class UserController {
         domain.setCnpj(request.cnpj());
         domain.setSeller(request.isSeller());
         return domain;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<UserResponse> login(@RequestBody LoginRequest request) {
+        User authenticatedUser = userService.login(request.email(), request.password());
+
+        UserResponse response = new UserResponse(
+                authenticatedUser.getId(),
+                authenticatedUser.getFullName(),
+                authenticatedUser.getEmail(),
+                authenticatedUser.isSeller(),
+                authenticatedUser.getProfilePictureUrl(),
+                authenticatedUser.getListingSellingId(),
+                authenticatedUser.getListingBoughtId(),
+                authenticatedUser.getCreatedAt(),
+                authenticatedUser.getUpdatedAt(),
+                authenticatedUser.isActive()
+        );
+
+       return ResponseEntity.ok(response);
     }
 }

@@ -79,4 +79,10 @@ public class UserService implements UserServicePort {
         user.setActive(false);
         userRepository.save(user);
     }
+
+    @Override
+    public User login(String email, String password) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado."));
+    }
 }
