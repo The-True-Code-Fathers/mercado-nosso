@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mercadonosso.carts_service.adapters.in.web.dto.AddItemRequest;
 import com.mercadonosso.carts_service.adapters.in.web.dto.CartsResponse;
+import com.mercadonosso.carts_service.adapters.in.web.dto.RemoveListingRequest;
 import com.mercadonosso.carts_service.adapters.in.web.dto.UpdateItemQuantityRequest;
 import com.mercadonosso.carts_service.core.domain.CartsEntity;
 import com.mercadonosso.carts_service.core.ports.in.CartsServicePort;
@@ -64,6 +65,13 @@ public class CartsController {
     public ResponseEntity<Void> clearCart(@RequestHeader("X-User-Id") String userIdString) {
         UUID userId = UUID.fromString(userIdString);
         cartsServicePort.requestClear(userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/remove")
+    public ResponseEntity<Void> removeItemCart(@RequestHeader("X-User-Id") String userIdString, @Valid @RequestBody RemoveListingRequest request) {
+        UUID userId = UUID.fromString(userIdString);
+        cartsServicePort.requestRemove(userId, request.getListingsIds());
         return ResponseEntity.noContent().build();
     }
 
