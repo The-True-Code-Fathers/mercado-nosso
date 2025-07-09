@@ -95,6 +95,7 @@ public class CartsController {
                                 .listingId(item.getListingId())
                                 .quantity(item.getQuantity())
                                 .price(item.getPrice())
+                                .shippingPrice(item.getShippingPrice())
                                 .build()).collect(Collectors.toList()))
                 .build();
     }
