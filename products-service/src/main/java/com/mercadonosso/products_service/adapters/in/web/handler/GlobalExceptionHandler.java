@@ -2,6 +2,7 @@ package com.mercadonosso.products_service.adapters.in.web.handler;
 
 import com.mercadonosso.products_service.adapters.in.web.dto.ErrorResponse;
 import com.mercadonosso.products_service.core.domain.exception.BusinessRuleException;
+import com.mercadonosso.products_service.core.domain.exception.ProductsAlreadyExistsException;
 import com.mercadonosso.products_service.core.domain.exception.ProductsNotFoundException;
 import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
@@ -34,5 +35,16 @@ public class GlobalExceptionHandler {
                 ex.getMessage()
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ProductsAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleProductsAlreadyExistsException(ProductsAlreadyExistsException ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.EXPECTATION_FAILED.value(),
+                "Product already exists",
+                ex.getMessage()
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.EXPECTATION_FAILED);
     }
 }

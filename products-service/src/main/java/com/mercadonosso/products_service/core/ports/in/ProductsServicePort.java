@@ -13,4 +13,5 @@ public interface ProductsServicePort {
     void delete(UUID id);
     List<ProductsEntity> listAll();
     ProductsEntity findById(UUID id);
+    ProductsEntity findBySku(String sku);
 }

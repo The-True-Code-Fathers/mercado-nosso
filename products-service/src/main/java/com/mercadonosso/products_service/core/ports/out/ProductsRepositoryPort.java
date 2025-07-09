@@ -14,4 +14,5 @@ public interface ProductsRepositoryPort {
     void delete(ProductsEntity productsEntity);
     Optional<ProductsEntity> findById(UUID id);
     List<ProductsEntity> listAll();
+    Optional<ProductsEntity> findBySku(String sku);
 }

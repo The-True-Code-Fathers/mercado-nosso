@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -27,6 +28,7 @@ public class ProductsServiceImpl implements ProductsServicePort {
     @Transactional
     public ProductsEntity create(ProductsEntity productData) {
         validate(productData);
+        String existingSku = productData.getSku();
 
         ProductsEntity newProduct = ProductsEntity.builder()
                 .sku(productData.getSku())
@@ -38,6 +40,12 @@ public class ProductsServiceImpl implements ProductsServicePort {
                 .id(UUID.randomUUID())
                 .createdAt(LocalDateTime.now())
                 .build();
+
+        Optional<ProductsEntity> existingProduct = productsRepositoryPort.findBySku(existingSku);
+
+        if (existingProduct.isPresent()) {
+            throw new BusinessRuleException("Product with id " + existingSku + " already exists");
+        }
 
         return productsRepositoryPort.save(newProduct);
     }
@@ -77,6 +85,12 @@ public class ProductsServiceImpl implements ProductsServicePort {
     public ProductsEntity findById(UUID id) {
         return productsRepositoryPort.findById(id)
                 .orElseThrow(() -> new ProductsNotFoundException("Produto com ID " + id + " não encontrado."));
+    }
+
+    @Override
+    public ProductsEntity findBySku(String sku) {
+        return productsRepositoryPort.findBySku(sku)
+                .orElseThrow(() -> new ProductsNotFoundException("Product with SKU" + sku + " not found"));
     }
 
     private void validate(ProductsEntity productsEntity) {

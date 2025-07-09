@@ -1,7 +1,9 @@
 package com.mercadonosso.products_service.adapters.out.persistence.mongo;
 
 import com.mercadonosso.products_service.core.domain.ProductsEntity;
+import com.mercadonosso.products_service.core.domain.exception.BusinessRuleException;
 import com.mercadonosso.products_service.core.ports.out.ProductsRepositoryPort;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -47,5 +49,12 @@ public class ProductsRepositoryAdapter implements ProductsRepositoryPort {
         return mongoRepository.findAll().stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<ProductsEntity> findBySku(String sku) {
+        Optional<ProductsModel> modelOptional = mongoRepository.findBySku(sku);
+
+        return modelOptional.map(mapper::toDomain);
     }
 }

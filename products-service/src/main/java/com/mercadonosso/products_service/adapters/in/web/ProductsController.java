@@ -4,6 +4,7 @@ import com.mercadonosso.products_service.adapters.in.web.dto.CreateProductsReque
 import com.mercadonosso.products_service.adapters.in.web.dto.ProductsResponse;
 import com.mercadonosso.products_service.adapters.in.web.dto.UpdateProductsRequest;
 import com.mercadonosso.products_service.core.domain.ProductsEntity;
+import com.mercadonosso.products_service.core.domain.exception.BusinessRuleException;
 import com.mercadonosso.products_service.core.ports.in.ProductsServicePort;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
