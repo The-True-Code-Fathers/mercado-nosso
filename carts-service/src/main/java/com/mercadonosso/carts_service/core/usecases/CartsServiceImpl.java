@@ -83,33 +83,34 @@ public class CartsServiceImpl implements CartsServicePort {
             cartsEntity.getItems().add(newItem);
             cartsEntity.setShippingPriceTotal(cartsEntity.getShippingPriceTotal().add(newItem.getShippingPrice()));
         }
-        recalculateCart(cartsEntity, listing);
+        recalculateCart(cartsEntity);
         return cartsRepositoryPort.save(cartsEntity);
     }
 
-    private void recalculateCart(CartsEntity cart, ListingDetails listing) {
+    private void recalculateCart(CartsEntity cart) {
         BigDecimal subTotal = BigDecimal.ZERO;
+        BigDecimal totalShipping = BigDecimal.ZERO; // A variável é zerada aqui
         int currencyScale = 2;
         RoundingMode roundingMode = RoundingMode.HALF_UP;
 
         for (CartsEntity.CartItemEntity item : cart.getItems()) {
-            if (listing.getListingId().equals(item.getListingId())) {
-                BigDecimal itemTotal = listing.getPrice().multiply(new BigDecimal(item.getQuantity()));
-                item.setPrice(itemTotal.setScale(currencyScale, roundingMode));
+            ListingDetails listing = listingsServicePort.findListingsById(item.getListingId())
+                    .orElseThrow(
+                            () -> new BusinessRuleException("Listing " + item.getListingId() + " não existe mais."));
 
-                BigDecimal shippingPrice = itemTotal.multiply(new BigDecimal("0.05"));
-                item.setShippingPrice(shippingPrice.setScale(currencyScale, roundingMode));
+            BigDecimal itemTotal = listing.getPrice().multiply(new BigDecimal(item.getQuantity()));
+            item.setPrice(itemTotal.setScale(currencyScale, roundingMode));
 
-                subTotal = subTotal.add(item.getPrice());
-            }
+            BigDecimal shippingPrice = itemTotal.multiply(new BigDecimal("0.05"));
+            item.setShippingPrice(shippingPrice.setScale(currencyScale, roundingMode));
+
+            subTotal = subTotal.add(item.getPrice());
+            totalShipping = totalShipping.add(item.getShippingPrice());
         }
 
-        BigDecimal totalShipping = cart.getItems().stream()
-                .map(CartsEntity.CartItemEntity::getShippingPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
         cart.setSubTotal(subTotal.setScale(currencyScale, roundingMode));
-        cart.setShippingPriceTotal(totalShipping.setScale(currencyScale, roundingMode));
+        cart.setShippingPriceTotal(totalShipping.setScale(currencyScale, roundingMode)); // O valor correto é setado
+                                                                                         // aqui
         cart.setGrandTotal(cart.getSubTotal().add(cart.getShippingPriceTotal()));
         cart.setUpdateAt(LocalDateTime.now());
     }
@@ -129,7 +130,7 @@ public class CartsServiceImpl implements CartsServicePort {
         }
         cart.getItems().removeIf(item -> item.getListingId().equals(listingId));
 
-        recalculateCart(cart, listing);
+        recalculateCart(cart);
 
         return cartsRepositoryPort.save(cart);
     }
@@ -159,7 +160,7 @@ public class CartsServiceImpl implements CartsServicePort {
 
         itemToUpdate.setQuantity(newQuantity);
 
-        recalculateCart(cart, listing);
+        recalculateCart(cart);
 
         return cartsRepositoryPort.save(cart);
     }
@@ -198,7 +199,7 @@ public class CartsServiceImpl implements CartsServicePort {
         boolean removed = cart.getItems().removeIf(item -> listingsIds.contains(item.getListingId()));
 
         if (removed) {
-            // recalculateCart(cart); // adjust later
+            recalculateCart(cart);
             cartsRepositoryPort.save(cart);
         }
 
