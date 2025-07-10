@@ -117,7 +117,7 @@ public class UserController {
         User domain = new User();
         domain.setFullName(request.fullName());
         domain.setEmail(request.email());
-        domain.setPasswordHash(request.password());
+        domain.setPasswordHash(request.passwordHash());
         domain.setCpf(request.cpf());
         domain.setCnpj(request.cnpj());
         domain.setSeller(request.isSeller());
@@ -126,7 +126,7 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<UserResponse> login(@RequestBody LoginRequest request) {
-        User authenticatedUser = userService.login(request.email(), request.password());
+        User authenticatedUser = userService.login(request.email(), request.passwordHash());
 
         UserResponse response = new UserResponse(
                 authenticatedUser.getId(),

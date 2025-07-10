@@ -42,8 +42,8 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
     }
 
     @Override
-    public Optional<User> findByEmailAndPassword(String email, String password) {
-        return jpaRepository.findByEmailAndPassword(email,password).map(UserMapper::toDomain);
+    public Optional<User> findByEmailAndPasswordHash(String email, String passwordHash) {
+        return jpaRepository.findByEmailAndPasswordHash(email,passwordHash).map(UserMapper::toDomain);
     }
 
     @Override

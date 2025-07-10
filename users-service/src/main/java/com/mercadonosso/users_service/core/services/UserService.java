@@ -14,7 +14,7 @@ import com.mercadonosso.users_service.core.ports.out.UserRepositoryPort;
 public class UserService implements UserServicePort {
     
     private final UserRepositoryPort userRepository;
-    
+
     public UserService(UserRepositoryPort userRepository) {
         this.userRepository = userRepository;
     }
@@ -81,8 +81,9 @@ public class UserService implements UserServicePort {
     }
 
     @Override
-    public User login(String email, String password) {
-        return userRepository.findByEmail(email)
+    public User login(String email, String passwordHash) {
+        System.out.println("a " + email + " b " + passwordHash);
+        return userRepository.findByEmailAndPasswordHash(email, passwordHash)
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado."));
     }
 }
