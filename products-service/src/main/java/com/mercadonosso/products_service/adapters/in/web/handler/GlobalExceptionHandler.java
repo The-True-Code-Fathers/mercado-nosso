@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.mercadonosso.products_service.adapters.in.web.dto.ErrorResponse;
 import com.mercadonosso.products_service.core.domain.exception.BusinessRuleException;
+import com.mercadonosso.products_service.core.domain.exception.ProductsAlreadyExistsException;
 import com.mercadonosso.products_service.core.domain.exception.ProductsNotFoundException;
 
 @RestControllerAdvice
@@ -20,8 +21,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
                 "Bad request",
-                ex.getMessage()
-        );
+                ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
@@ -31,8 +31,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.NOT_FOUND.value(),
                 "Not found",
-                ex.getMessage()
-        );
+                ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
@@ -42,8 +41,7 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.EXPECTATION_FAILED.value(),
                 "Product already exists",
-                ex.getMessage()
-        );
+                ex.getMessage());
         return new ResponseEntity<>(errorResponse, HttpStatus.EXPECTATION_FAILED);
     }
 }
