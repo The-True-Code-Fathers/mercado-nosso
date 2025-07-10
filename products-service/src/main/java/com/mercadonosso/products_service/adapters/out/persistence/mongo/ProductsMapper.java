@@ -1,14 +1,14 @@
 package com.mercadonosso.products_service.adapters.out.persistence.mongo;
 
-import com.mercadonosso.products_service.core.domain.ProductsEntity;
 import org.springframework.stereotype.Component;
 
-import java.util.UUID;
+import com.mercadonosso.products_service.core.domain.ProductsEntity;
 
 @Component
 public class ProductsMapper {
     public ProductsModel toModel(ProductsEntity domain) {
-        if (domain == null) return null;
+        if (domain == null)
+            return null;
         ProductsModel model = new ProductsModel();
         if (domain.getId() != null) {
             model.setId(domain.getId());
@@ -25,7 +25,8 @@ public class ProductsMapper {
     }
 
     public ProductsEntity toDomain(ProductsModel model) {
-        if (model == null) return null;
+        if (model == null)
+            return null;
         ProductsEntity domain = new ProductsEntity();
         domain.setId(model.getId());
         domain.setSku(model.getSku());

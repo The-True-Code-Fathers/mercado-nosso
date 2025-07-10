@@ -5,19 +5,20 @@ meta {
 }
 
 post {
-  url: http://localhost:8080/api/listing/
+  url: http://localhost:8080/api/listings/
   body: json
   auth: inherit
 }
 
 body:json {
   {
-    "listingId": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-    "buyerId": "fedcba09-8765-4321-fedc-ba0987654321",
-    "rating": 5,
-    "comment": "Este é um teste para o serviço funcionando de forma isolada. Funcionou!",
-    "imagesUrls": [
-      "https://example.com/image1.png"
-    ]
+    "productId": "e2e0b4cc-91f3-4d28-bc3a-34d9a08a2b4b",
+    "sellerId": "a1f5c2a7-d9e6-4c78-8f5f-43a1d4f88f65",
+    "title": "Cadeira Gamer",
+    "description": "Cadeira ergonômica com apoio lombar e ajuste de altura.",
+    "price": 40000,
+    "stock": 50,
+    "productCondition": "NEW"
   }
+  
 }

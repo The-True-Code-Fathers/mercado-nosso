@@ -20,8 +20,8 @@ public class ReviewsServiceImpl implements ReviewsServicePort {
     private final ListingServiceClient listingsServiceClient;
 
     public ReviewsServiceImpl(ReviewsRepositoryPort reviewsRepositoryPort,
-                              Validator validator,
-                              ListingServiceClient listingsServiceClient) {
+            Validator validator,
+            ListingServiceClient listingsServiceClient) {
         this.reviewsRepositoryPort = reviewsRepositoryPort;
         this.validator = validator;
         this.listingsServiceClient = listingsServiceClient;
@@ -72,7 +72,7 @@ public class ReviewsServiceImpl implements ReviewsServicePort {
     @Override
     @Transactional(readOnly = true)
     public ReviewsEntity findById(UUID id) {
-        return reviewsRepositoryPort.findById(id).orElseThrow(() ->
-                new ReviewsNotFoundException("Review com o id " + id + " não encontrado."));
+        return reviewsRepositoryPort.findById(id)
+                .orElseThrow(() -> new ReviewsNotFoundException("Review com o id " + id + " não encontrado."));
     }
 }

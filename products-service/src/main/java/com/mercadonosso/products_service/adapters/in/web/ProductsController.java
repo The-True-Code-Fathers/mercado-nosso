@@ -1,20 +1,31 @@
 package com.mercadonosso.products_service.adapters.in.web;
 
-import com.mercadonosso.products_service.adapters.in.web.dto.CreateProductsRequest;
-import com.mercadonosso.products_service.adapters.in.web.dto.ProductsResponse;
-import com.mercadonosso.products_service.adapters.in.web.dto.UpdateProductsRequest;
-import com.mercadonosso.products_service.core.domain.ProductsEntity;
-import com.mercadonosso.products_service.core.domain.exception.BusinessRuleException;
-import com.mercadonosso.products_service.core.ports.in.ProductsServicePort;
-import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.mercadonosso.products_service.adapters.in.web.dto.CreateProductsRequest;
+import com.mercadonosso.products_service.adapters.in.web.dto.ProductsResponse;
+import com.mercadonosso.products_service.adapters.in.web.dto.UpdateProductsRequest;
+import com.mercadonosso.products_service.core.domain.ProductsEntity;
+import com.mercadonosso.products_service.core.ports.in.ProductsServicePort;
+
+import jakarta.validation.Valid;
+
 @RestController
+@CrossOrigin(origins = "http://localhost:4200")
 public class ProductsController {
     ProductsServicePort productsServicePort;
 
@@ -24,9 +35,7 @@ public class ProductsController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ProductsResponse createProduct(@Valid
-                                          @RequestBody
-                                          CreateProductsRequest request) {
+    public ProductsResponse createProduct(@Valid @RequestBody CreateProductsRequest request) {
         ProductsEntity product = toDomain(request);
         ProductsEntity createdProduct = productsServicePort.create(product);
         return toResponse(createdProduct);
@@ -48,9 +57,7 @@ public class ProductsController {
     @PutMapping("/{id}")
     public ProductsResponse updateProduct(
             @PathVariable UUID id,
-            @Valid
-            @RequestBody
-            UpdateProductsRequest request) {
+            @Valid @RequestBody UpdateProductsRequest request) {
         ProductsEntity productToUpdate = toDomain(request);
         ProductsEntity updatedProduct = productsServicePort.update(id, productToUpdate);
         return toResponse(updatedProduct);
@@ -95,7 +102,6 @@ public class ProductsController {
                 domain.getBrand(),
                 domain.getCategory(),
                 domain.getCreatedAt(),
-                domain.getUpdatedAt()
-        );
+                domain.getUpdatedAt());
     }
 }
