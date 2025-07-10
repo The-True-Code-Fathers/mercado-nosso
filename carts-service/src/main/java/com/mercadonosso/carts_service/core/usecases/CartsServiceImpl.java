@@ -1,15 +1,22 @@
 package com.mercadonosso.carts_service.core.usecases;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mercadonosso.carts_service.core.domain.CartsEntity;
 import com.mercadonosso.carts_service.core.domain.exception.BusinessRuleException;
 import com.mercadonosso.carts_service.core.domain.exception.CartNotFoundException;
@@ -18,6 +25,8 @@ import com.mercadonosso.carts_service.core.ports.out.CartsRepositoryPort;
 import com.mercadonosso.carts_service.core.ports.out.ListingDetails;
 import com.mercadonosso.carts_service.core.ports.out.ListingsServicePort;
 
+import lombok.SneakyThrows;
+
 @Service
 public class CartsServiceImpl implements CartsServicePort {
 
@@ -25,13 +34,18 @@ public class CartsServiceImpl implements CartsServicePort {
     public final ListingsServicePort listingsServicePort;
     public final KafkaTemplate<String, String> kafkaTemplate;
     public final String clearCartTopic;
+    public final String removeCartTopic;
+    public final ObjectMapper objectMapper;
 
     public CartsServiceImpl(CartsRepositoryPort cartsRepositoryPort, ListingsServicePort listingsServicePort,
-            KafkaTemplate<String, String> kafkaTemplate, @Value("${topics.cart-clear.name}") String clearCartTopic) {
+            KafkaTemplate<String, String> kafkaTemplate, @Value("${topics.cart-clear.name}") String clearCartTopic,
+            @Value("${topics.cart-remove.name}") String removeCartTopic, ObjectMapper objectMapper) {
         this.cartsRepositoryPort = cartsRepositoryPort;
         this.listingsServicePort = listingsServicePort;
         this.kafkaTemplate = kafkaTemplate;
         this.clearCartTopic = clearCartTopic;
+        this.removeCartTopic = removeCartTopic;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -59,31 +73,54 @@ public class CartsServiceImpl implements CartsServicePort {
             if (listing.getStock() < quantity) {
                 throw new BusinessRuleException("Insufficient stock.");
             }
+
             CartsEntity.CartItemEntity newItem = CartsEntity.CartItemEntity.builder()
                     .listingId(listing.getListingId())
                     .quantity(quantity)
                     .price(listing.getPrice())
+                    .shippingPrice(listing.getPrice().multiply(new BigDecimal(quantity)).multiply(new BigDecimal(0.05)))
                     .build();
             cartsEntity.getItems().add(newItem);
+            cartsEntity.setShippingPriceTotal(cartsEntity.getShippingPriceTotal().add(newItem.getShippingPrice()));
         }
-
         recalculateCart(cartsEntity);
         return cartsRepositoryPort.save(cartsEntity);
     }
 
     private void recalculateCart(CartsEntity cart) {
         BigDecimal subTotal = BigDecimal.ZERO;
+        BigDecimal totalShipping = BigDecimal.ZERO; // A variável é zerada aqui
+        int currencyScale = 2;
+        RoundingMode roundingMode = RoundingMode.HALF_UP;
+
         for (CartsEntity.CartItemEntity item : cart.getItems()) {
-            item.setPrice(item.getPrice().multiply(new BigDecimal(item.getQuantity())));
+            ListingDetails listing = listingsServicePort.findListingsById(item.getListingId())
+                    .orElseThrow(
+                            () -> new BusinessRuleException("Listing " + item.getListingId() + " não existe mais."));
+
+            BigDecimal itemTotal = listing.getPrice().multiply(new BigDecimal(item.getQuantity()));
+            item.setPrice(itemTotal.setScale(currencyScale, roundingMode));
+
+            BigDecimal shippingPrice = itemTotal.multiply(new BigDecimal("0.05"));
+            item.setShippingPrice(shippingPrice.setScale(currencyScale, roundingMode));
+
             subTotal = subTotal.add(item.getPrice());
+            totalShipping = totalShipping.add(item.getShippingPrice());
         }
-        cart.setSubTotal(subTotal);
+
+        cart.setSubTotal(subTotal.setScale(currencyScale, roundingMode));
+        cart.setShippingPriceTotal(totalShipping.setScale(currencyScale, roundingMode)); // O valor correto é setado
+                                                                                         // aqui
         cart.setGrandTotal(cart.getSubTotal().add(cart.getShippingPriceTotal()));
         cart.setUpdateAt(LocalDateTime.now());
     }
 
     @Override
     public CartsEntity remove(UUID userId, UUID listingId) {
+
+        ListingDetails listing = listingsServicePort.findListingsById(listingId)
+                .orElseThrow(() -> new BusinessRuleException("Listing " + listingId + " didnt exist more."));
+
         CartsEntity cart = cartsRepositoryPort.findByUserId(userId)
                 .orElseThrow(() -> new CartNotFoundException("Cart not found."));
         boolean itemExists = cart.getItems().stream().anyMatch(item -> item.getListingId().equals(listingId));
@@ -143,4 +180,28 @@ public class CartsServiceImpl implements CartsServicePort {
         }
     }
 
+    @SneakyThrows
+    @Override
+    public void requestRemove(UUID userId, List<UUID> listingsIds) {
+        String payload = objectMapper.writeValueAsString(listingsIds);
+        kafkaTemplate.send(removeCartTopic, userId.toString(), payload);
+    }
+
+    @KafkaListener(topics = "${topics.cart-remove.name}", groupId = "${spring.kafka.consumer.group-id}")
+    @Override
+    @SneakyThrows
+    public void processRemove(@Header(KafkaHeaders.RECEIVED_KEY) UUID userId, @Payload String listingsIdsJson) {
+        List<UUID> listingsIds = objectMapper.readValue(listingsIdsJson, new TypeReference<List<UUID>>() {
+        });
+        CartsEntity cart = cartsRepositoryPort.findByUserId(userId)
+                .orElseThrow(() -> new CartNotFoundException("Cart not found for user: " + userId));
+
+        boolean removed = cart.getItems().removeIf(item -> listingsIds.contains(item.getListingId()));
+
+        if (removed) {
+            recalculateCart(cart);
+            cartsRepositoryPort.save(cart);
+        }
+
+    }
 }

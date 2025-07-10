@@ -1,18 +1,19 @@
 package com.mercadonosso.reviews_service.config;
 
-import com.mercadonosso.reviews_service.adapters.out.http.ListingsServiceAdapter;
-import com.mercadonosso.reviews_service.core.ports.out.ListingServiceClient;
-import com.mercadonosso.reviews_service.adapters.out.persistence.mongo.ReviewsRepositoryAdapter;
-import com.mercadonosso.reviews_service.core.ports.in.ReviewsServicePort;
-import com.mercadonosso.reviews_service.core.ports.out.ReviewsRepositoryPort;
-import com.mercadonosso.reviews_service.core.usecases.ReviewsServiceImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import jakarta.validation.Validator;
 import org.springframework.web.client.RestTemplate;
+
+import com.mercadonosso.reviews_service.adapters.out.http.ListingsServiceAdapter;
+import com.mercadonosso.reviews_service.core.ports.in.ReviewsServicePort;
+import com.mercadonosso.reviews_service.core.ports.out.ListingServiceClient;
+import com.mercadonosso.reviews_service.core.ports.out.ReviewsRepositoryPort;
+import com.mercadonosso.reviews_service.core.usecases.ReviewsServiceImpl;
+
+import jakarta.validation.Validator;
 
 @Configuration
 public class BeanConfiguration {
@@ -21,16 +22,14 @@ public class BeanConfiguration {
     public ReviewsServicePort reviewsServicePort(
             ReviewsRepositoryPort reviewsRepositoryPort,
             Validator validator,
-            ListingServiceClient listingServiceClient
-    ) {
+            ListingServiceClient listingServiceClient) {
         return new ReviewsServiceImpl(reviewsRepositoryPort, validator, listingServiceClient);
     }
 
     @Bean
     public ListingServiceClient listingServiceClient(
             RestTemplate restTemplate,
-            @Value("${app.services.listings-url}") String listingsServiceUrl
-    ) {
+            @Value("${app.services.listings-url}") String listingsServiceUrl) {
         return new ListingsServiceAdapter(restTemplate, listingsServiceUrl);
     }
 

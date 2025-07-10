@@ -75,6 +75,7 @@ services:
       - SPRING_DATA_MONGODB_URI=mongodb://carts-service-mongodb:27017/carts-service-mongodb
       - APP_SERVICES_LISTINGS-URL=http://listings-service:8084
       - SPRING_KAFKA_CONSUMER_BOOTSTRAP_SERVERS=kafka:29092
+      - SPRING_KAFKA_PRODUCER_BOOTSTRAP_SERVERS=kafka:29092
     depends_on:
       eureka-server:
         condition: service_started
@@ -93,7 +94,7 @@ services:
     networks:
       - my-network
     ports:
-      - "5433:5433"
+      - "5433:27017"
     volumes:
       - carts_db_data:/data/db
 
@@ -139,7 +140,7 @@ services:
     networks:
       - my-network
     ports:
-      - "5435:5435"
+      - "5435:27017"
     volumes:
       - listings_db_data:/data/db
 

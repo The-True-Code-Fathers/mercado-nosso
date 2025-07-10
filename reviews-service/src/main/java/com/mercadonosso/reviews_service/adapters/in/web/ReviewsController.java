@@ -15,6 +15,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:4200")
 public class ReviewsController {
     private final ReviewsServicePort reviewsServicePort;
 
@@ -44,8 +45,7 @@ public class ReviewsController {
                 entity.getMessage(),
                 entity.getImagesUrls(),
                 entity.getCreatedAt(),
-                entity.getSellerId()
-        );
+                entity.getSellerId());
     }
 
     private ReviewsEntity toDomain(CreateReviewsRequest dto) {
@@ -82,9 +82,7 @@ public class ReviewsController {
     @PutMapping("/{id}")
     public ReviewsResponse update(
             @PathVariable UUID id,
-            @Valid
-            @RequestBody
-            UpdateReviewsRequest request) {
+            @Valid @RequestBody UpdateReviewsRequest request) {
         ReviewsEntity reviewWithNewData = new ReviewsEntity();
         reviewWithNewData.setRating(request.rating());
         reviewWithNewData.setMessage(request.message());

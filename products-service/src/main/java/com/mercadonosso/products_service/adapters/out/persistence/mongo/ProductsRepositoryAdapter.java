@@ -1,15 +1,14 @@
 package com.mercadonosso.products_service.adapters.out.persistence.mongo;
 
-import com.mercadonosso.products_service.core.domain.ProductsEntity;
-import com.mercadonosso.products_service.core.domain.exception.BusinessRuleException;
-import com.mercadonosso.products_service.core.ports.out.ProductsRepositoryPort;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+
+import com.mercadonosso.products_service.core.domain.ProductsEntity;
+import com.mercadonosso.products_service.core.ports.out.ProductsRepositoryPort;
 
 @Component
 public class ProductsRepositoryAdapter implements ProductsRepositoryPort {

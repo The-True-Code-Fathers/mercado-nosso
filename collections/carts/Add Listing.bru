@@ -1,0 +1,22 @@
+meta {
+  name: Add Listing
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:8080/api/carts/items
+  body: json
+  auth: inherit
+}
+
+headers {
+  X-User-Id: 3b02ccf3-3154-4eab-9367-9673a718539f
+}
+
+body:json {
+  {
+    "listingId": "846fdb46-1a9b-4b2e-93d7-6568a0a7a9bd",
+    "quantity": 5
+  }
+}
