@@ -25,9 +25,8 @@ public class ListingsEntity {
     @Id
     private UUID listingId;
 
-    @NotNull(message = "O ID do produto é obrigatório.")
     @Field("product_id")
-    private UUID productId;
+    private String productSku;
 
     @NotNull(message = "O ID do vendedor é obrigatório.")
     @Field("seller_id")

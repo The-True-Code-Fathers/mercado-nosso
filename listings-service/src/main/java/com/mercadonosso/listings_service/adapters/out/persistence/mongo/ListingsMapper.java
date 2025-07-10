@@ -18,7 +18,7 @@ public class ListingsMapper {
             model.setId(domain.getListingId());
         }
 
-        model.setProductId(domain.getProductId());
+        model.setProductId(domain.getProductSku());
         model.setSellerId(domain.getSellerId());
         model.setTitle(domain.getTitle());
         model.setDescription(domain.getDescription());
@@ -40,7 +40,7 @@ public class ListingsMapper {
         ListingsEntity domain = new ListingsEntity();
 
         domain.setListingId(model.getId());
-        domain.setProductId(model.getProductId());
+        domain.setProductSku(model.getProductId());
         domain.setSellerId(model.getSellerId());
         domain.setTitle(model.getTitle());
         domain.setDescription(model.getDescription());
