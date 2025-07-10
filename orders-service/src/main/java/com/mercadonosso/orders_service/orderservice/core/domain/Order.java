@@ -20,7 +20,6 @@ public class Order {
     private UUID orderId;
 
     @NotNull(message = "Must have buyer ID.")
-    @Field("buyer_id")
     private UUID buyerId;
 
     @Field("created_at")

@@ -13,5 +13,5 @@ public interface OrdersServicePort {
     void delete(Order order);
     Order findOrderById(UUID id);
     List<Order> findAllOrders();
-
+    List<Order> findByBuyerId(UUID id);
 }

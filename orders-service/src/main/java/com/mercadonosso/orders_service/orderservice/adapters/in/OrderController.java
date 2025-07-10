@@ -5,7 +5,6 @@ import com.mercadonosso.orders_service.orderservice.adapters.in.dto.CreatingOrde
 import com.mercadonosso.orders_service.orderservice.adapters.in.dto.OrderResponse;
 import com.mercadonosso.orders_service.orderservice.adapters.in.dto.UpdateOrderStatusRequest;
 import com.mercadonosso.orders_service.orderservice.core.domain.Order;
-import com.mercadonosso.orders_service.orderservice.core.domain.enums.OrderStatus;
 import com.mercadonosso.orders_service.orderservice.core.ports.in.OrdersServicePort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,6 +58,14 @@ public class OrderController {
     @GetMapping
     public List<OrderResponse> getAllOrders() {
         List<Order> orders = ordersServicePort.findAllOrders();
+        return orders.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/all/{id}")
+    public List<OrderResponse> getByBuyerId(@PathVariable UUID id) {
+        List<Order> orders = ordersServicePort.findByBuyerId(id);
         return orders.stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
