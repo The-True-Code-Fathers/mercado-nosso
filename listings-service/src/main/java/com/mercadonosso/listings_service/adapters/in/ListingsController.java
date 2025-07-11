@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -34,7 +35,7 @@ public class ListingsController {
     public ListingResponse createListing(@RequestBody CreatingListingRequest request) {
         ListingsEntity listingsEntity = new ListingsEntity();
         listingsEntity.setProductSku(String.valueOf(request.productId()));
-        listingsEntity.setSellerId(request.sellerId());
+        listingsEntity.setSellerId(String.valueOf(request.sellerId()));
         listingsEntity.setTitle(request.title());
         listingsEntity.setDescription(request.description());
         listingsEntity.setPrice(request.price());
@@ -46,7 +47,7 @@ public class ListingsController {
     }
 
     @GetMapping("/{id}")
-    public ListingResponse getListingById(@PathVariable UUID id) {
+    public ListingResponse getListingById(@PathVariable ObjectId id) {
         ListingsEntity listingsEntity = listingsServicePort.findById(id);
         return toResponse(listingsEntity);
     }
@@ -61,7 +62,7 @@ public class ListingsController {
 
     private ListingResponse toResponse(ListingsEntity listingsEntity) {
         return new ListingResponse(
-                listingsEntity.getListingId(),
+                listingsEntity.getListingId() != null ? listingsEntity.getListingId().toHexString() : null,
                 listingsEntity.getTitle(),
                 listingsEntity.getDescription(),
                 listingsEntity.getPrice(),
@@ -72,7 +73,7 @@ public class ListingsController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteListingById(@PathVariable UUID id) {
+    public ResponseEntity<Void> deleteListingById(@PathVariable ObjectId id) {
         ListingsEntity listingToDelete = listingsServicePort.findById(id);
         listingsServicePort.delete(listingToDelete);
 

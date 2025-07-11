@@ -20,8 +20,8 @@ public class ListingsMapper {
             model.setId(domain.getListingId());
         }
 
-        model.setProductId(UUID.fromString(domain.getProductSku()));
-        model.setSellerId(domain.getSellerId());
+        model.setProductId(domain.getProductSku());
+        model.setSellerId(String.valueOf(UUID.fromString(domain.getSellerId())));
         model.setTitle(domain.getTitle());
         model.setDescription(domain.getDescription());
         model.setPrice(domain.getPrice());
@@ -43,7 +43,7 @@ public class ListingsMapper {
 
         domain.setListingId(model.getId());
         domain.setProductSku(String.valueOf(model.getProductId()));
-        domain.setSellerId(model.getSellerId());
+        domain.setSellerId(String.valueOf(model.getSellerId()));
         domain.setTitle(model.getTitle());
         domain.setDescription(model.getDescription());
         domain.setPrice(model.getPrice());

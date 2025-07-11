@@ -2,6 +2,7 @@ package com.mercadonosso.listings_service.adapters.out.persistence.mongo;
 
 import com.mercadonosso.listings_service.core.domain.enums.ProductCondition;
 import lombok.Data;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -15,10 +16,10 @@ import java.time.LocalDateTime;
 @Document(collection = "listings")
 public class ListingsModel {
     @Id
-    private UUID id;
+    private ObjectId id;
 
-    private UUID productId;
-    private UUID sellerId;
+    private String productId;
+    private String sellerId;
     private String title;
     private String description;
 

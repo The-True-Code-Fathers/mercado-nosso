@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
@@ -30,7 +31,7 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
     }
 
     @Override
-    public Optional<ListingsEntity> findById(UUID id) {
+    public Optional<ListingsEntity> findById(ObjectId id) {
         Optional<ListingsModel> modelOptional = mongoRepository.findById(id);
         return modelOptional.map(mapper::toDomain);
     }

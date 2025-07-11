@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
@@ -23,14 +24,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ListingsEntity {
     @Id
-    private UUID listingId;
+    private ObjectId listingId;
 
     @Field("product_id")
     private String productSku;
 
     @NotNull(message = "O ID do vendedor é obrigatório.")
     @Field("seller_id")
-    private UUID sellerId;
+    private String sellerId;
 
     @NotBlank(message = "O título do anúncio é obrigatório!")
     @Size(min = 10, max = 80, message = "O titulo deve conter entre 10 e 80 caracteres.")

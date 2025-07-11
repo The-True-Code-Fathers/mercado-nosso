@@ -5,6 +5,7 @@ import com.mercadonosso.listings_service.core.domain.exception.BusinessRuleExcep
 import com.mercadonosso.listings_service.core.domain.exception.ListingsNotFoundException;
 import com.mercadonosso.listings_service.core.ports.in.ListingsServicePort;
 import com.mercadonosso.listings_service.core.ports.out.ListingsRepositoryPort;
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -25,14 +26,14 @@ public class ListingsServiceImpl implements ListingsServicePort {
 
     public ListingsEntity create(ListingsEntity listingsEntity) {
         validateListing(listingsEntity);
-        listingsEntity.setListingId(UUID.randomUUID());
+        listingsEntity.setListingId(new ObjectId());
         listingsEntity.setCreatedAt(LocalDateTime.now());
         listingsEntity.setActive(true);
         return listingsRepositoryPort.save(listingsEntity);
     }
 
     @Override
-    public ListingsEntity update(UUID id, ListingsEntity newListingData) {
+    public ListingsEntity update(ObjectId id, ListingsEntity newListingData) {
         ListingsEntity existingListing = this.findById(id);
 
         validateListing(newListingData);
@@ -52,7 +53,7 @@ public class ListingsServiceImpl implements ListingsServicePort {
     }
 
     @Override
-    public ListingsEntity findById(UUID id) {
+    public ListingsEntity findById(ObjectId id) {
         return listingsRepositoryPort.findById(id).orElseThrow(() ->
                 new ListingsNotFoundException("Anúncio com ID " + id + " não encontrado."));
     }
