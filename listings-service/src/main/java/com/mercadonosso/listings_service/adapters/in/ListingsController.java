@@ -33,7 +33,7 @@ public class ListingsController {
     @ResponseStatus(HttpStatus.CREATED)
     public ListingResponse createListing(@RequestBody CreatingListingRequest request) {
         ListingsEntity listingsEntity = new ListingsEntity();
-        listingsEntity.setProductSku(request.productId());
+        listingsEntity.setProductSku(String.valueOf(request.productId()));
         listingsEntity.setSellerId(request.sellerId());
         listingsEntity.setTitle(request.title());
         listingsEntity.setDescription(request.description());

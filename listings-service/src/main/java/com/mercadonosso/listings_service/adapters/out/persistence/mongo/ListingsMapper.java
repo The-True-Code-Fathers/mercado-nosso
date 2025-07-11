@@ -4,6 +4,8 @@ import org.springframework.stereotype.Component;
 
 import com.mercadonosso.listings_service.core.domain.ListingsEntity;
 
+import java.util.UUID;
+
 @Component
 public class ListingsMapper {
     ListingsModel model = new ListingsModel();
@@ -18,7 +20,7 @@ public class ListingsMapper {
             model.setId(domain.getListingId());
         }
 
-        model.setProductId(domain.getProductSku());
+        model.setProductId(UUID.fromString(domain.getProductSku()));
         model.setSellerId(domain.getSellerId());
         model.setTitle(domain.getTitle());
         model.setDescription(domain.getDescription());
@@ -40,7 +42,7 @@ public class ListingsMapper {
         ListingsEntity domain = new ListingsEntity();
 
         domain.setListingId(model.getId());
-        domain.setProductSku(model.getProductId());
+        domain.setProductSku(String.valueOf(model.getProductId()));
         domain.setSellerId(model.getSellerId());
         domain.setTitle(model.getTitle());
         domain.setDescription(model.getDescription());
