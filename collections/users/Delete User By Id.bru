@@ -1,0 +1,15 @@
+meta {
+  name: Delete User By Id
+  type: http
+  seq: 8
+}
+
+delete {
+  url: {{base_url}}/api/users/{{user_id}}
+  body: none
+  auth: inherit
+}
+
+vars {
+  user_id: 550e8400-e29b-41d4-a716-446655440000
+}

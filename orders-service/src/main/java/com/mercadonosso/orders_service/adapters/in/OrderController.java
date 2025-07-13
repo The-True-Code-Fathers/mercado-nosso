@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,7 +42,6 @@ public class OrderController {
         order.setBuyerId(request.buyerId());
         order.setStatus(request.status());
 
-
         Order createdOrder = ordersServicePort.create(order);
 
         return toResponse(createdOrder);
@@ -53,13 +53,12 @@ public class OrderController {
                 order.getBuyerId(),
                 order.getListingId(),
                 order.getStatus(),
-                order.getDate()
-        );
+                order.getDate());
     }
 
     @GetMapping("{id}")
     public OrderResponse getOrderById(@PathVariable UUID id) {
-        Order orders =  ordersServicePort.findOrderById(id);
+        Order orders = ordersServicePort.findOrderById(id);
         return toResponse(orders);
     }
 

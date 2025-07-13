@@ -1,0 +1,15 @@
+meta {
+  name: Get User By CPF
+  type: http
+  seq: 7
+}
+
+get {
+  url: {{base_url}}/api/users/cpf/{{user_cpf}}
+  body: none
+  auth: inherit
+}
+
+vars {
+  user_cpf: 12345678901
+}

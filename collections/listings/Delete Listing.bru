@@ -1,0 +1,15 @@
+meta {
+  name: Delete Listing
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{base_url}}/api/listings/{{listing_id}}
+  body: none
+  auth: inherit
+}
+
+vars {
+  listing_id: 676b4a644b22ac52bb06e4f5
+}

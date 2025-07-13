@@ -5,22 +5,18 @@ meta {
 }
 
 post {
-  url: http://localhost:8080/api/products/
+  url: {{base_url}}/api/products
   body: json
-  auth: none
+  auth: inherit
 }
 
 body:json {
-    {
+  {
     "sku": "TASC-MEC-003",
     "name": "Monitor Ultrawide 34 polegadas",
     "description": "Monitor curvo para maior imersão e produtividade.",
     "brand": "Marca Display",
     "category": "Monitores",
-    "specificationsText": {
-      "resolucao": "3440x1440",
-      "taxa_atualizacao": "144Hz",
-      "painel": "VA"
-    }
+    "specificationsText": "Resolução: 3440x1440, Taxa de atualização: 144Hz, Painel: VA"
   }
 }

@@ -1,0 +1,15 @@
+meta {
+  name: Get Orders By Buyer Id
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{base_url}}/api/orders/all/{{buyer_id}}
+  body: none
+  auth: inherit
+}
+
+vars {
+  buyer_id: 550e8400-e29b-41d4-a716-446655440000
+}

@@ -1,0 +1,30 @@
+meta {
+  name: Update Product
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{base_url}}/api/products/{{product_id}}
+  body: json
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "sku": "PROD-UPD-001",
+    "name": "Produto Atualizado",
+    "description": "Descrição atualizada do produto",
+    "brand": "Nova Marca",
+    "category": "Nova Categoria",
+    "specificationsText": "Especificações atualizadas"
+  }
+}
+
+vars {
+  product_id: 550e8400-e29b-41d4-a716-446655440000
+}

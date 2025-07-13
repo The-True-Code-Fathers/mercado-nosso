@@ -1,0 +1,15 @@
+meta {
+  name: Get User By Email
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{base_url}}/api/users/email/{{user_email}}
+  body: none
+  auth: inherit
+}
+
+vars {
+  user_email: usuario@example.com
+}
