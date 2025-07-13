@@ -10,17 +10,6 @@ spring:
         locator:
           enabled: true
           lower-case-service-id: true
-      globalcors:
-        cors-configuration:
-          '[/**]':
-          allowedOrigins: "http://localhost:4200"
-          allowedMethods:
-            - GET
-            - POST
-            - PUT
-            - DELETE
-            - OPTIONS
-          allowedHeaders: "*"
       routes:
         - id: users_service_route
           uri: lb://users-service
@@ -35,6 +24,10 @@ spring:
             - Path=/api/carts/**
           filters:
             - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: carts-service-cb
+                fallbackUri: forward:/fallback/carts
 
         - id: catalog_service_route
           uri: lb://catalog-service
@@ -84,6 +77,11 @@ spring:
             - Path=/api/analytics/**
           filters:
             - StripPrefix=2
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web.cors: DEBUG
 
 eureka:
   client:
