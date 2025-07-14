@@ -44,7 +44,7 @@ public class ListingsServiceAdapter implements ListingsServicePort {
                         response.listingId(), response.price(), response.stock());
 
                 ListingDetails details = new ListingDetails(
-                        listingId,
+                        new ObjectId(response.listingId()),
                         response.price(),
                         response.stock());
                 logger.info("ListingDetails criado com sucesso: {}", details);

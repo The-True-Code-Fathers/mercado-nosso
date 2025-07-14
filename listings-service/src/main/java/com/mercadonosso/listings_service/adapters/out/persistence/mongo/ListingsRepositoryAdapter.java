@@ -25,8 +25,8 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
     @Override
     public ListingsEntity save(ListingsEntity listingsEntity) {
         ListingsModel model = mapper.toModel(listingsEntity);
-        mongoRepository.save(model);
-        return listingsEntity;
+        ListingsModel savedModel = mongoRepository.save(model);
+        return mapper.toDomain(savedModel);
     }
 
     @Override
