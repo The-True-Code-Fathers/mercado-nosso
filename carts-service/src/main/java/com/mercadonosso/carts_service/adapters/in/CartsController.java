@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,10 +17,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.mercadonosso.carts_service.adapters.in.web.dto.AddItemRequest;
 import com.mercadonosso.carts_service.adapters.in.web.dto.CartsResponse;
@@ -65,13 +63,15 @@ public class CartsController {
     public ResponseEntity<CartsResponse> addItemToCart(
             @RequestHeader("X-User-Id") String userIdString,
             @Valid @RequestBody AddItemRequest request) {
-        logger.info("POST /items - Adicionando item ao carrinho para usuário: {}, listingId: {}, quantidade: {}",
-                userIdString, request.getListingId(), request.getQuantity());
+        logger.info(
+                "POST /items - Adicionando item ao carrinho para usuário: {}, listingId: {}, quantidade: {}, preço: {}",
+                userIdString, request.getListingId(), request.getQuantity(), request.getPrice());
         try {
             UUID userId = UUID.fromString(userIdString);
             logger.debug("POST /items - UUID parseado com sucesso: {}", userId);
 
-            CartsEntity updatedCart = cartsServicePort.create(userId, request.getListingId(), request.getQuantity());
+            CartsEntity updatedCart = cartsServicePort.create(userId, request.getListingId(), request.getQuantity(),
+                    request.getPrice());
             logger.debug("POST /items - Item adicionado com sucesso, carrinho ID: {}", updatedCart.getId());
 
             CartsResponse response = convertToResponse(updatedCart);
@@ -186,7 +186,7 @@ public class CartsController {
                     .grandTotal(total)
                     .items(
                             items.stream().map(item -> CartsResponse.CartsItemResponse.builder()
-                                    .listingId(item.getListingId())
+                                    .listingId(item.getListingId() != null ? item.getListingId().toHexString() : null)
                                     .quantity(item.getQuantity())
                                     .price(item.getPrice())
                                     .shippingPrice(item.getShippingPrice())

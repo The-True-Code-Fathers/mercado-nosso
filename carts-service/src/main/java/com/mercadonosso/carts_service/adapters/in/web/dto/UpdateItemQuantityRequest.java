@@ -2,6 +2,8 @@ package com.mercadonosso.carts_service.adapters.in.web.dto;
 
 import java.util.UUID;
 
+import org.bson.types.ObjectId;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,6 +13,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class UpdateItemQuantityRequest {
     private UUID userId;
-    private UUID listingId;
+    private ObjectId listingId;
     private int quantity;
 }

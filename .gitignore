@@ -31,5 +31,6 @@ build/
 
 ### Arch Linux ###
 .tool-versions
+import.sh
 
 **/target

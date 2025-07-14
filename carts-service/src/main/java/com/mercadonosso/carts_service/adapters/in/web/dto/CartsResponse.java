@@ -26,7 +26,7 @@ public class CartsResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CartsItemResponse {
-        private UUID listingId;
+        private String listingId;
         private int quantity;
         private BigDecimal price;
         private BigDecimal shippingPrice;

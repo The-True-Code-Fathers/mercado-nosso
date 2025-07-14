@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -54,7 +55,7 @@ public class CartsServiceImpl implements CartsServicePort {
     }
 
     @Override
-    public CartsEntity create(UUID userId, UUID listingId, int quantity) {
+    public CartsEntity create(UUID userId, ObjectId listingId, int quantity, BigDecimal price) {
         ListingDetails listing = listingsServicePort.findListingsById(listingId)
                 .orElseThrow(() -> new BusinessRuleException("Listing not found!"));
         CartsEntity cartsEntity = cartsRepositoryPort.findByUserId(userId).orElse(new CartsEntity(userId));
@@ -77,8 +78,8 @@ public class CartsServiceImpl implements CartsServicePort {
             CartsEntity.CartItemEntity newItem = CartsEntity.CartItemEntity.builder()
                     .listingId(listing.getListingId())
                     .quantity(quantity)
-                    .price(listing.getPrice())
-                    .shippingPrice(listing.getPrice().multiply(new BigDecimal(quantity)).multiply(new BigDecimal(0.05)))
+                    .price(price.multiply(new BigDecimal(quantity)))
+                    .shippingPrice(price.multiply(new BigDecimal(quantity)).multiply(new BigDecimal(0.05)))
                     .build();
             cartsEntity.getItems().add(newItem);
             cartsEntity.setShippingPriceTotal(cartsEntity.getShippingPriceTotal().add(newItem.getShippingPrice()));
@@ -116,10 +117,7 @@ public class CartsServiceImpl implements CartsServicePort {
     }
 
     @Override
-    public CartsEntity remove(UUID userId, UUID listingId) {
-
-        ListingDetails listing = listingsServicePort.findListingsById(listingId)
-                .orElseThrow(() -> new BusinessRuleException("Listing " + listingId + " didnt exist more."));
+    public CartsEntity remove(UUID userId, ObjectId listingId) {
 
         CartsEntity cart = cartsRepositoryPort.findByUserId(userId)
                 .orElseThrow(() -> new CartNotFoundException("Cart not found."));
@@ -136,7 +134,7 @@ public class CartsServiceImpl implements CartsServicePort {
     }
 
     @Override
-    public CartsEntity update(UUID userId, UUID listingId, int newQuantity) {
+    public CartsEntity update(UUID userId, ObjectId listingId, int newQuantity) {
         if (newQuantity <= 0) {
             throw new BusinessRuleException(
                     "The quantity needs to be higher than zero.");
@@ -182,7 +180,7 @@ public class CartsServiceImpl implements CartsServicePort {
 
     @SneakyThrows
     @Override
-    public void requestRemove(UUID userId, List<UUID> listingsIds) {
+    public void requestRemove(UUID userId, List<ObjectId> listingsIds) {
         String payload = objectMapper.writeValueAsString(listingsIds);
         kafkaTemplate.send(removeCartTopic, userId.toString(), payload);
     }
@@ -191,7 +189,7 @@ public class CartsServiceImpl implements CartsServicePort {
     @Override
     @SneakyThrows
     public void processRemove(@Header(KafkaHeaders.RECEIVED_KEY) UUID userId, @Payload String listingsIdsJson) {
-        List<UUID> listingsIds = objectMapper.readValue(listingsIdsJson, new TypeReference<List<UUID>>() {
+        List<ObjectId> listingsIds = objectMapper.readValue(listingsIdsJson, new TypeReference<List<ObjectId>>() {
         });
         CartsEntity cart = cartsRepositoryPort.findByUserId(userId)
                 .orElseThrow(() -> new CartNotFoundException("Cart not found for user: " + userId));

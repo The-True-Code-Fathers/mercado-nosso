@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 
@@ -32,7 +33,7 @@ public class CartsEntity {
     @AllArgsConstructor
     @Builder
     public static class CartItemEntity {
-        private UUID listingId;
+        private ObjectId listingId;
         private int quantity;
         @Field(targetType = FieldType.DECIMAL128)
         private BigDecimal price;

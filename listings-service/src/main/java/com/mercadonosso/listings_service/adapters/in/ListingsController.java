@@ -1,19 +1,18 @@
 package com.mercadonosso.listings_service.adapters.in;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.bson.types.ObjectId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,8 +22,9 @@ import com.mercadonosso.listings_service.core.domain.ListingsEntity;
 import com.mercadonosso.listings_service.core.ports.in.ListingsServicePort;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:4200")
 public class ListingsController {
+
+    private static final Logger logger = LoggerFactory.getLogger(ListingsController.class);
     private final ListingsServicePort listingsServicePort;
 
     public ListingsController(ListingsServicePort listingsServicePort) {
@@ -49,8 +49,25 @@ public class ListingsController {
 
     @GetMapping("/{id}")
     public ListingResponse getListingById(@PathVariable ObjectId id) {
-        ListingsEntity listingsEntity = listingsServicePort.findById(id);
-        return toResponse(listingsEntity);
+        logger.info("GET /{} - Recebida requisição para buscar listing com ID: {}", id, id);
+        logger.info("GET /{} - ObjectId recebido como string: {}", id, id.toHexString());
+
+        try {
+            ListingsEntity listingsEntity = listingsServicePort.findById(id);
+            logger.info("GET /{} - Listing encontrado no banco: {}", id,
+                    listingsEntity != null ? listingsEntity.getListingId() : "null");
+
+            if (listingsEntity == null) {
+                logger.warn("GET /{} - Listing não encontrado no banco de dados", id);
+            }
+
+            ListingResponse response = toResponse(listingsEntity);
+            logger.info("GET /{} - Resposta gerada: {}", id, response);
+            return response;
+        } catch (Exception e) {
+            logger.error("GET /{} - Erro ao buscar listing", id, e);
+            throw e;
+        }
     }
 
     @GetMapping

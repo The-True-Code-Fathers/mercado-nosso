@@ -29,6 +29,10 @@ eureka:
     prefer-ip-address: true
     instance-id: ${spring.cloud.client.ip-address}:${server.port}
 
+app:
+  services:
+    listings-url: http://listings-service
+
 topics:
   cart-clear:
     name: "com.mercadonosso.carts.event.cleared"
