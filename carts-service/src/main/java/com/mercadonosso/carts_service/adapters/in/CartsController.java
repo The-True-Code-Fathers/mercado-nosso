@@ -63,13 +63,15 @@ public class CartsController {
     public ResponseEntity<CartsResponse> addItemToCart(
             @RequestHeader("X-User-Id") String userIdString,
             @Valid @RequestBody AddItemRequest request) {
-        logger.info("POST /items - Adicionando item ao carrinho para usuário: {}, listingId: {}, quantidade: {}",
-                userIdString, request.getListingId(), request.getQuantity());
+        logger.info(
+                "POST /items - Adicionando item ao carrinho para usuário: {}, listingId: {}, quantidade: {}, preço: {}",
+                userIdString, request.getListingId(), request.getQuantity(), request.getPrice());
         try {
             UUID userId = UUID.fromString(userIdString);
             logger.debug("POST /items - UUID parseado com sucesso: {}", userId);
 
-            CartsEntity updatedCart = cartsServicePort.create(userId, request.getListingId(), request.getQuantity());
+            CartsEntity updatedCart = cartsServicePort.create(userId, request.getListingId(), request.getQuantity(),
+                    request.getPrice());
             logger.debug("POST /items - Item adicionado com sucesso, carrinho ID: {}", updatedCart.getId());
 
             CartsResponse response = convertToResponse(updatedCart);

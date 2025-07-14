@@ -55,7 +55,7 @@ public class CartsServiceImpl implements CartsServicePort {
     }
 
     @Override
-    public CartsEntity create(UUID userId, ObjectId listingId, int quantity) {
+    public CartsEntity create(UUID userId, ObjectId listingId, int quantity, BigDecimal price) {
         ListingDetails listing = listingsServicePort.findListingsById(listingId)
                 .orElseThrow(() -> new BusinessRuleException("Listing not found!"));
         CartsEntity cartsEntity = cartsRepositoryPort.findByUserId(userId).orElse(new CartsEntity(userId));
@@ -78,8 +78,8 @@ public class CartsServiceImpl implements CartsServicePort {
             CartsEntity.CartItemEntity newItem = CartsEntity.CartItemEntity.builder()
                     .listingId(listing.getListingId())
                     .quantity(quantity)
-                    .price(listing.getPrice())
-                    .shippingPrice(listing.getPrice().multiply(new BigDecimal(quantity)).multiply(new BigDecimal(0.05)))
+                    .price(price.multiply(new BigDecimal(quantity)))
+                    .shippingPrice(price.multiply(new BigDecimal(quantity)).multiply(new BigDecimal(0.05)))
                     .build();
             cartsEntity.getItems().add(newItem);
             cartsEntity.setShippingPriceTotal(cartsEntity.getShippingPriceTotal().add(newItem.getShippingPrice()));
@@ -118,9 +118,6 @@ public class CartsServiceImpl implements CartsServicePort {
 
     @Override
     public CartsEntity remove(UUID userId, ObjectId listingId) {
-
-        ListingDetails listing = listingsServicePort.findListingsById(listingId)
-                .orElseThrow(() -> new BusinessRuleException("Listing " + listingId + " didnt exist more."));
 
         CartsEntity cart = cartsRepositoryPort.findByUserId(userId)
                 .orElseThrow(() -> new CartNotFoundException("Cart not found."));
@@ -192,7 +189,7 @@ public class CartsServiceImpl implements CartsServicePort {
     @Override
     @SneakyThrows
     public void processRemove(@Header(KafkaHeaders.RECEIVED_KEY) UUID userId, @Payload String listingsIdsJson) {
-        List<UUID> listingsIds = objectMapper.readValue(listingsIdsJson, new TypeReference<List<UUID>>() {
+        List<ObjectId> listingsIds = objectMapper.readValue(listingsIdsJson, new TypeReference<List<ObjectId>>() {
         });
         CartsEntity cart = cartsRepositoryPort.findByUserId(userId)
                 .orElseThrow(() -> new CartNotFoundException("Cart not found for user: " + userId));
