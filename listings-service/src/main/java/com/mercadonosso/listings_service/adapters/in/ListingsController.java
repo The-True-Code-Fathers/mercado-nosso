@@ -1,7 +1,6 @@
 package com.mercadonosso.listings_service.adapters.in;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.bson.types.ObjectId;

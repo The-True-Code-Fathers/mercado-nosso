@@ -1,18 +1,20 @@
 package com.mercadonosso.listings_service.core.usecases;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+
+import org.bson.types.ObjectId;
+import org.springframework.stereotype.Service;
+
 import com.mercadonosso.listings_service.core.domain.ListingsEntity;
 import com.mercadonosso.listings_service.core.domain.exception.BusinessRuleException;
 import com.mercadonosso.listings_service.core.domain.exception.ListingsNotFoundException;
 import com.mercadonosso.listings_service.core.ports.in.ListingsServicePort;
 import com.mercadonosso.listings_service.core.ports.out.ListingsRepositoryPort;
-import org.bson.types.ObjectId;
-import org.springframework.stereotype.Service;
+
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 
 @Service
 public class ListingsServiceImpl implements ListingsServicePort {
@@ -54,8 +56,8 @@ public class ListingsServiceImpl implements ListingsServicePort {
 
     @Override
     public ListingsEntity findById(ObjectId id) {
-        return listingsRepositoryPort.findById(id).orElseThrow(() ->
-                new ListingsNotFoundException("Anúncio com ID " + id + " não encontrado."));
+        return listingsRepositoryPort.findById(id)
+                .orElseThrow(() -> new ListingsNotFoundException("Anúncio com ID " + id + " não encontrado."));
     }
 
     @Override
