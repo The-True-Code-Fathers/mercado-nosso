@@ -48,12 +48,23 @@ public class ListingsController {
     }
 
     @GetMapping("/{id}")
-    public ListingResponse getListingById(@PathVariable ObjectId id) {
+    public ListingResponse getListingById(@PathVariable String id) {
         logger.info("GET /{} - Recebida requisição para buscar listing com ID: {}", id, id);
-        logger.info("GET /{} - ObjectId recebido como string: {}", id, id.toHexString());
+
+        // Validação do formato do ObjectId
+        if (!ObjectId.isValid(id)) {
+            logger.error(
+                    "GET /{} - ID inválido fornecido. ObjectId deve ter 24 caracteres hexadecimais, mas recebeu: {}",
+                    id, id);
+            throw new IllegalArgumentException(
+                    "ID inválido: " + id + ". ObjectId deve ter 24 caracteres hexadecimais.");
+        }
+
+        ObjectId objectId = new ObjectId(id);
+        logger.info("GET /{} - ObjectId parseado com sucesso: {}", id, objectId.toHexString());
 
         try {
-            ListingsEntity listingsEntity = listingsServicePort.findById(id);
+            ListingsEntity listingsEntity = listingsServicePort.findById(objectId);
             logger.info("GET /{} - Listing encontrado no banco: {}", id,
                     listingsEntity != null ? listingsEntity.getListingId() : "null");
 
@@ -91,8 +102,20 @@ public class ListingsController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteListingById(@PathVariable ObjectId id) {
-        ListingsEntity listingToDelete = listingsServicePort.findById(id);
+    public ResponseEntity<Void> deleteListingById(@PathVariable String id) {
+        logger.info("DELETE /{} - Recebida requisição para deletar listing com ID: {}", id, id);
+
+        // Validação do formato do ObjectId
+        if (!ObjectId.isValid(id)) {
+            logger.error(
+                    "DELETE /{} - ID inválido fornecido. ObjectId deve ter 24 caracteres hexadecimais, mas recebeu: {}",
+                    id, id);
+            throw new IllegalArgumentException(
+                    "ID inválido: " + id + ". ObjectId deve ter 24 caracteres hexadecimais.");
+        }
+
+        ObjectId objectId = new ObjectId(id);
+        ListingsEntity listingToDelete = listingsServicePort.findById(objectId);
         listingsServicePort.delete(listingToDelete);
 
         return ResponseEntity.noContent().build();
