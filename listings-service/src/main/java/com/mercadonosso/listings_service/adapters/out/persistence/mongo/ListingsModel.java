@@ -1,16 +1,17 @@
 package com.mercadonosso.listings_service.adapters.out.persistence.mongo;
 
-import com.mercadonosso.listings_service.core.domain.enums.ProductCondition;
-import lombok.Data;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 
-import java.math.BigDecimal;
-import java.util.UUID;
-import java.time.LocalDateTime;
+import com.mercadonosso.listings_service.core.domain.enums.ProductCondition;
+
+import lombok.Data;
 
 @Data
 @Document(collection = "listings")

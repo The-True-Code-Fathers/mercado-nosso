@@ -2,7 +2,6 @@ package com.mercadonosso.listings_service.adapters.out.persistence.mongo;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.bson.types.ObjectId;
@@ -26,8 +25,8 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
     @Override
     public ListingsEntity save(ListingsEntity listingsEntity) {
         ListingsModel model = mapper.toModel(listingsEntity);
-        ListingsModel savedModel = mongoRepository.save(model);
-        return mapper.toDomain(savedModel);
+        mongoRepository.save(model);
+        return listingsEntity;
     }
 
     @Override

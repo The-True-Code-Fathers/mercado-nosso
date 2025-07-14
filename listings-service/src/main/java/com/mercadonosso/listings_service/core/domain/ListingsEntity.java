@@ -2,7 +2,6 @@ package com.mercadonosso.listings_service.core.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
