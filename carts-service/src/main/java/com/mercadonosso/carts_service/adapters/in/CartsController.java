@@ -184,7 +184,7 @@ public class CartsController {
                     .grandTotal(total)
                     .items(
                             items.stream().map(item -> CartsResponse.CartsItemResponse.builder()
-                                    .listingId(item.getListingId())
+                                    .listingId(item.getListingId() != null ? item.getListingId().toHexString() : null)
                                     .quantity(item.getQuantity())
                                     .price(item.getPrice())
                                     .shippingPrice(item.getShippingPrice())
