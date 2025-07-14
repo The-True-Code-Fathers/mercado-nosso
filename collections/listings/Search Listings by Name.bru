@@ -1,0 +1,11 @@
+meta {
+  name: Search Listings by Name
+  type: http
+  seq: 7
+}
+
+get {
+  url: http://localhost:8080/api/listings/search?name=PC
+  body: none
+  auth: inherit
+}

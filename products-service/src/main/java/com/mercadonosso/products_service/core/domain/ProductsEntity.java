@@ -1,7 +1,6 @@
 package com.mercadonosso.products_service.core.domain;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.UUID;
 
 import jakarta.validation.constraints.NotBlank;
@@ -23,7 +22,7 @@ public class ProductsEntity {
     private String name;
 
     @NotEmpty(message = "Specifications text must not be null.")
-    private Map<String, Object> specificationsText;
+    private String specificationsText;
 
     private String brand;
     private String category;

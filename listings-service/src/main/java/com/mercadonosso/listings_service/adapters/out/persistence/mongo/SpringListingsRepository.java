@@ -1,14 +1,18 @@
 package com.mercadonosso.listings_service.adapters.out.persistence.mongo;
 
+import java.util.List;
+
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
-import java.util.UUID;
 
 @Repository
 public interface SpringListingsRepository extends MongoRepository<ListingsModel, ObjectId> {
 
-//    Optional<ListingsModel> findById(ObjectId id);
+    /**
+     * Finds all active listings.
+     */
+    @Query("{ 'active': true }")
+    List<ListingsModel> findAllActiveListings();
 }

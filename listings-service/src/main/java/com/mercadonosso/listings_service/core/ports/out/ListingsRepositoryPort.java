@@ -1,5 +1,6 @@
 package com.mercadonosso.listings_service.core.ports.out;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -7,6 +8,7 @@ import org.bson.types.ObjectId;
 import org.springframework.stereotype.Repository;
 
 import com.mercadonosso.listings_service.core.domain.ListingsEntity;
+import com.mercadonosso.listings_service.core.domain.enums.ProductCondition;
 
 @Repository
 public interface ListingsRepositoryPort {
@@ -17,4 +19,7 @@ public interface ListingsRepositoryPort {
     List<ListingsEntity> listAll();
 
     Optional<ListingsEntity> findById(ObjectId id);
+
+    List<ListingsEntity> searchListings(String partialName, ProductCondition productCondition,
+            BigDecimal minPrice, BigDecimal maxPrice);
 }
