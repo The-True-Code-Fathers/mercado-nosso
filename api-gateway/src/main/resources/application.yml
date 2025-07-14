@@ -43,6 +43,7 @@ spring:
           filters:
             - StripPrefix=2
 
+
         - id: orders_service_route
           uri: lb://orders-service
           predicates:

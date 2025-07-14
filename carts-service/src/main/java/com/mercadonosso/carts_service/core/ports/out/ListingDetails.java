@@ -1,7 +1,8 @@
 package com.mercadonosso.carts_service.core.ports.out;
 
 import java.math.BigDecimal;
-import java.util.UUID;
+
+import org.bson.types.ObjectId;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ListingDetails {
-    private UUID listingId;
+    private ObjectId listingId;
     private BigDecimal price;
     private int stock;
 }

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -54,7 +55,7 @@ public class CartsServiceImpl implements CartsServicePort {
     }
 
     @Override
-    public CartsEntity create(UUID userId, UUID listingId, int quantity) {
+    public CartsEntity create(UUID userId, ObjectId listingId, int quantity) {
         ListingDetails listing = listingsServicePort.findListingsById(listingId)
                 .orElseThrow(() -> new BusinessRuleException("Listing not found!"));
         CartsEntity cartsEntity = cartsRepositoryPort.findByUserId(userId).orElse(new CartsEntity(userId));
@@ -116,7 +117,7 @@ public class CartsServiceImpl implements CartsServicePort {
     }
 
     @Override
-    public CartsEntity remove(UUID userId, UUID listingId) {
+    public CartsEntity remove(UUID userId, ObjectId listingId) {
 
         ListingDetails listing = listingsServicePort.findListingsById(listingId)
                 .orElseThrow(() -> new BusinessRuleException("Listing " + listingId + " didnt exist more."));
@@ -136,7 +137,7 @@ public class CartsServiceImpl implements CartsServicePort {
     }
 
     @Override
-    public CartsEntity update(UUID userId, UUID listingId, int newQuantity) {
+    public CartsEntity update(UUID userId, ObjectId listingId, int newQuantity) {
         if (newQuantity <= 0) {
             throw new BusinessRuleException(
                     "The quantity needs to be higher than zero.");
@@ -182,7 +183,7 @@ public class CartsServiceImpl implements CartsServicePort {
 
     @SneakyThrows
     @Override
-    public void requestRemove(UUID userId, List<UUID> listingsIds) {
+    public void requestRemove(UUID userId, List<ObjectId> listingsIds) {
         String payload = objectMapper.writeValueAsString(listingsIds);
         kafkaTemplate.send(removeCartTopic, userId.toString(), payload);
     }

@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
+import org.bson.types.ObjectId;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,7 +28,7 @@ public class CartsResponse {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class CartsItemResponse {
-        private UUID listingId;
+        private ObjectId listingId;
         private int quantity;
         private BigDecimal price;
         private BigDecimal shippingPrice;

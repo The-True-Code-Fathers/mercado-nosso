@@ -1,8 +1,8 @@
 package com.mercadonosso.carts_service.adapters.out.rest.listings;
 
 import java.util.Optional;
-import java.util.UUID;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -24,7 +24,7 @@ public class ListingsServiceAdapter implements ListingsServicePort {
     }
 
     @Override
-    public Optional<ListingDetails> findListingsById(UUID listingId) {
+    public Optional<ListingDetails> findListingsById(ObjectId listingId) {
         try {
             String url = listingsServiceUrl + "/" + listingId;
             ListingDetails details = restTemplate.getForObject(url, ListingDetails.class);
