@@ -1,5 +1,6 @@
 package com.mercadonosso.listings_service.adapters.in;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,12 +14,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mercadonosso.listings_service.adapters.in.web.dto.CreatingListingRequest;
 import com.mercadonosso.listings_service.adapters.in.web.dto.ListingResponse;
 import com.mercadonosso.listings_service.core.domain.ListingsEntity;
+import com.mercadonosso.listings_service.core.domain.enums.ProductCondition;
 import com.mercadonosso.listings_service.core.ports.in.ListingsServicePort;
 
 @RestController
@@ -68,6 +71,20 @@ public class ListingsController {
             logger.error("GET /{} - Erro ao buscar listing", id, e);
             throw e;
         }
+    }
+
+    @GetMapping("/search")
+    public List<ListingResponse> searchListings(@RequestParam(required = false) String name,
+            @RequestParam(required = false) ProductCondition condition,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice) {
+
+        logger.info("GET /search - Recebida requisição para buscar listings com nome parcial: {}, condição: {}, "
+                + "preço mínimo: {}, preço máximo: {}", name, condition, minPrice, maxPrice);
+
+        return listingsServicePort.searchListings(name, condition, minPrice, maxPrice).stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
     @GetMapping

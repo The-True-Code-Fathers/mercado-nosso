@@ -1,5 +1,6 @@
 package com.mercadonosso.listings_service.core.usecases;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -8,6 +9,7 @@ import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import com.mercadonosso.listings_service.core.domain.ListingsEntity;
+import com.mercadonosso.listings_service.core.domain.enums.ProductCondition;
 import com.mercadonosso.listings_service.core.domain.exception.BusinessRuleException;
 import com.mercadonosso.listings_service.core.domain.exception.ListingsNotFoundException;
 import com.mercadonosso.listings_service.core.ports.in.ListingsServicePort;
@@ -70,5 +72,12 @@ public class ListingsServiceImpl implements ListingsServicePort {
         if (!violations.isEmpty()) {
             throw new BusinessRuleException(violations.iterator().next().getMessage());
         }
+    }
+
+    @Override
+    public List<ListingsEntity> searchListings(String partialName, ProductCondition productCondition,
+            BigDecimal minPrice, BigDecimal maxPrice) {
+
+        return listingsRepositoryPort.searchListings(partialName, productCondition, minPrice, maxPrice);
     }
 }
