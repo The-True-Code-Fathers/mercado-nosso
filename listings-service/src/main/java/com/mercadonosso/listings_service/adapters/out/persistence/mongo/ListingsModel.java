@@ -20,8 +20,9 @@ public class ListingsModel {
     @Id
     private ObjectId id;
 
-    private String productId;
     private String sellerId;
+    private String sku;
+    private List<String> productRecommendation;
     private String title;
     private String description;
 

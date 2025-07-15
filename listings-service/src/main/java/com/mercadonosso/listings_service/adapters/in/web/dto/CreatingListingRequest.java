@@ -10,8 +10,9 @@ import org.springframework.data.mongodb.core.mapping.FieldType;
 
 import com.mercadonosso.listings_service.core.domain.enums.ProductCondition;
 
-public record CreatingListingRequest(UUID productId,
-                UUID sellerId,
+public record CreatingListingRequest(UUID sellerId,
+                String sku,
+                List<String> productRecommendation,
                 String title,
                 String description,
                 @Field(targetType = FieldType.DECIMAL128) BigDecimal price,
