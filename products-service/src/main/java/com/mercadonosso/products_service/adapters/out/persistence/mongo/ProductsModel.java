@@ -21,7 +21,7 @@ public class ProductsModel {
 
     private String name;
 
-    private Map<String, Object> specifications;
+    private String specifications;
 
     private String brand;
     private String category;
