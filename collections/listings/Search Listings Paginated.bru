@@ -1,0 +1,11 @@
+meta {
+  name: Search Listings Paginated
+  type: http
+  seq: 8
+}
+
+get {
+  url: http://localhost:8080/api/listings/search/paginated?name=PC&condition=NEW&page=0&size=10&ordering=PRICE_ASC
+  body: none
+  auth: inherit
+}
