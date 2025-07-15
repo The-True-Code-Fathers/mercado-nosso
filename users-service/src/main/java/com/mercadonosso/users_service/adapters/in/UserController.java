@@ -2,6 +2,7 @@ package com.mercadonosso.users_service.adapters.in;
 
 import java.util.UUID;
 
+import com.mercadonosso.users_service.core.exceptions.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -94,12 +95,15 @@ public class UserController {
             userWithNewData.setCnpj(request.cnpj());
         }
 
-        if (request.isSeller()) {
-            userWithNewData.setSeller(true);
-        }
-
         if (request.socialReason() != null) {
             userWithNewData.setSocialReason(request.socialReason());
+        }
+
+        if (request.isSeller()) {
+            System.out.println("False -> true");
+            userWithNewData.setSeller(true);
+        } else {
+            System.out.println("Nao atualizou, ficou como false mesmo");
         }
 
         User updatedUser = userService.updateUser(userId, userWithNewData);

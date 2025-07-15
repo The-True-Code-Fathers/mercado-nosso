@@ -66,8 +66,27 @@ public class UserService implements UserServicePort {
         User existingUser = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
 
-        // Atualiza apenas os campos permitidos
-        existingUser.setFullName(userWithNewData.getFullName());
+        if (userWithNewData.getFullName() != null) {
+            existingUser.setFullName(userWithNewData.getFullName());
+        }
+        if (userWithNewData.getEmail() != null) {
+            existingUser.setEmail(userWithNewData.getEmail());
+        }
+        if (userWithNewData.getCnpj() != null) {
+            existingUser.setCnpj(userWithNewData.getCnpj());
+        }
+        if (userWithNewData.getSocialReason() != null) {
+            existingUser.setSocialReason(userWithNewData.getSocialReason());
+        }
+        if (userWithNewData.getTelephoneNumber() != null) {
+            existingUser.setTelephoneNumber(userWithNewData.getTelephoneNumber());
+        }
+        if (userWithNewData.getProfilePictureUrl() != null) {
+            existingUser.setProfilePictureUrl(userWithNewData.getProfilePictureUrl());
+        }
+
+        existingUser.setSeller(userWithNewData.isSeller());
+
         return userRepository.save(existingUser);
     }
 
