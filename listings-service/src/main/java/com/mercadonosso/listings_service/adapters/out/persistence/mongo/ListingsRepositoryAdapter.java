@@ -9,11 +9,15 @@ import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import com.mercadonosso.listings_service.core.domain.ListingsEntity;
+import com.mercadonosso.listings_service.core.domain.PagedResult;
+import com.mercadonosso.listings_service.core.domain.Pagination;
 import com.mercadonosso.listings_service.core.domain.enums.ProductCondition;
+import com.mercadonosso.listings_service.core.domain.enums.SearchOrdering;
 import com.mercadonosso.listings_service.core.ports.out.ListingsRepositoryPort;
 
 import lombok.extern.slf4j.Slf4j;
@@ -63,8 +67,60 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
 
     @Override
     public List<ListingsEntity> searchListings(String partialName, ProductCondition productCondition,
-            BigDecimal minPrice, BigDecimal maxPrice) {
+            BigDecimal minPrice, BigDecimal maxPrice, SearchOrdering ordering) {
 
+        Criteria criteria = buildSearchCriteria(partialName, productCondition, minPrice, maxPrice);
+        Query query = new Query(criteria);
+        
+        // Add sorting based on SearchOrdering
+        if (ordering != null) {
+            Sort sort = getSort(ordering);
+            query.with(sort);
+        }
+
+        List<ListingsModel> models = mongoTemplate.find(query, ListingsModel.class);
+
+        log.info("Search Listings - Criteria: {}, Ordering: {}, Found: {}", criteria, ordering, models.size());
+
+        return models.stream()
+                .map(mapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public PagedResult<ListingsEntity> searchListingsPaginated(String partialName, ProductCondition productCondition,
+            BigDecimal minPrice, BigDecimal maxPrice, SearchOrdering ordering, Pagination pagination) {
+
+        Criteria criteria = buildSearchCriteria(partialName, productCondition, minPrice, maxPrice);
+
+        // Count total elements
+        Query countQuery = new Query(criteria);
+        long totalElements = mongoTemplate.count(countQuery, ListingsModel.class);
+
+        // Build the main query with pagination and sorting
+        Query query = new Query(criteria);
+        
+        if (ordering != null) {
+            Sort sort = getSort(ordering);
+            query.with(sort);
+        }
+        
+        query.skip(pagination.getOffset()).limit(pagination.getSize());
+
+        List<ListingsModel> models = mongoTemplate.find(query, ListingsModel.class);
+
+        log.info("Search Listings Paginated - Criteria: {}, Ordering: {}, Pagination: {}, Total: {}, Found: {}", 
+                criteria, ordering, pagination, totalElements, models.size());
+
+        List<ListingsEntity> entities = models.stream()
+                .map(mapper::toDomain)
+                .collect(Collectors.toList());
+
+        return new PagedResult<>(entities, pagination, totalElements);
+    }
+
+    private Criteria buildSearchCriteria(String partialName, ProductCondition productCondition, 
+            BigDecimal minPrice, BigDecimal maxPrice) {
         Criteria criteria = Criteria.where("active").is(true);
 
         if (partialName != null && !partialName.trim().isEmpty()) {
@@ -85,13 +141,17 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
             criteria = criteria.and("price").lte(maxPrice);
         }
 
-        Query query = new Query(criteria);
-        List<ListingsModel> models = mongoTemplate.find(query, ListingsModel.class);
+        return criteria;
+    }
 
-        log.info("Search Listings - Criteria: {}, Found: {}", criteria, models);
-
-        return models.stream()
-                .map(mapper::toDomain)
-                .collect(Collectors.toList());
+    private Sort getSort(SearchOrdering ordering) {
+        return switch (ordering) {
+            case PRICE_ASC -> Sort.by(Sort.Direction.ASC, "price");
+            case PRICE_DESC -> Sort.by(Sort.Direction.DESC, "price");
+            case NAME_ASC -> Sort.by(Sort.Direction.ASC, "title");
+            case NAME_DESC -> Sort.by(Sort.Direction.DESC, "title");
+            case CREATED_AT_ASC -> Sort.by(Sort.Direction.ASC, "createdAt");
+            case CREATED_AT_DESC -> Sort.by(Sort.Direction.DESC, "createdAt");
+        };
     }
 }
