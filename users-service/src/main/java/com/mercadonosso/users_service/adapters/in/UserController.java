@@ -76,9 +76,31 @@ public class UserController {
             @RequestHeader("X-User-Id") UUID userId,
             @Valid @RequestBody UpdateUserRequest request) {
 
+        System.out.println("=== BACKEND DEBUG ===");
+        System.out.println("User ID: " + userId);
+        System.out.println("Request: " + request);
+        System.out.println("isSeller: " + request.isSeller());
+        System.out.println("CNPJ: " + request.cnpj());
+        System.out.println("Social Reason: " + request.socialReason());
+        System.out.println("====================");
+
         User userWithNewData = new User();
         userWithNewData.setFullName(request.fullName());
+        userWithNewData.setEmail(request.email());
+        userWithNewData.setTelephoneNumber(request.telephoneNumber());
         userWithNewData.setProfilePictureUrl(request.profilePictureUrl()); // Isso aqui converte a entidade pra DTO
+
+        if (request.cnpj() != null) {
+            userWithNewData.setCnpj(request.cnpj());
+        }
+
+        if (request.isSeller()) {
+            userWithNewData.setSeller(true);
+        }
+
+        if (request.socialReason() != null) {
+            userWithNewData.setSocialReason(request.socialReason());
+        }
 
         User updatedUser = userService.updateUser(userId, userWithNewData);
 

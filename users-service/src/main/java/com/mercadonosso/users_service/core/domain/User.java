@@ -18,6 +18,8 @@ public class User {
     private String passwordHash;
     private String cpf;
     private String cnpj;
+    private String telephoneNumber;
+    private String socialReason;
     private boolean isSeller;
     private String profilePictureUrl;
     private List<UUID> listingSellingId;

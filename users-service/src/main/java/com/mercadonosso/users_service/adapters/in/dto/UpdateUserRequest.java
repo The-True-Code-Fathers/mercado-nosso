@@ -2,6 +2,11 @@ package com.mercadonosso.users_service.adapters.in.dto;
 
 public record UpdateUserRequest(
     String fullName,
-    String profilePictureUrl
+    String profilePictureUrl,
+    String email,
+    String telephoneNumber,
+    String cnpj,
+    String socialReason,
+    boolean isSeller
 ) {
 }
