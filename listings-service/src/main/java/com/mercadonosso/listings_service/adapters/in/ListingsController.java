@@ -20,8 +20,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mercadonosso.listings_service.adapters.in.web.dto.CreatingListingRequest;
 import com.mercadonosso.listings_service.adapters.in.web.dto.ListingResponse;
+import com.mercadonosso.listings_service.adapters.in.web.dto.PagedListingResponse;
 import com.mercadonosso.listings_service.core.domain.ListingsEntity;
+import com.mercadonosso.listings_service.core.domain.PagedResult;
+import com.mercadonosso.listings_service.core.domain.Pagination;
 import com.mercadonosso.listings_service.core.domain.enums.ProductCondition;
+import com.mercadonosso.listings_service.core.domain.enums.SearchOrdering;
 import com.mercadonosso.listings_service.core.ports.in.ListingsServicePort;
 
 @RestController
@@ -51,12 +55,23 @@ public class ListingsController {
     }
 
     @GetMapping("/{id}")
-    public ListingResponse getListingById(@PathVariable ObjectId id) {
+    public ListingResponse getListingById(@PathVariable String id) {
         logger.info("GET /{} - Recebida requisição para buscar listing com ID: {}", id, id);
-        logger.info("GET /{} - ObjectId recebido como string: {}", id, id.toHexString());
+
+        // Validação do formato do ObjectId
+        if (!ObjectId.isValid(id)) {
+            logger.error(
+                    "GET /{} - ID inválido fornecido. ObjectId deve ter 24 caracteres hexadecimais, mas recebeu: {}",
+                    id, id);
+            throw new IllegalArgumentException(
+                    "ID inválido: " + id + ". ObjectId deve ter 24 caracteres hexadecimais.");
+        }
+
+        ObjectId objectId = new ObjectId(id);
+        logger.info("GET /{} - ObjectId parseado com sucesso: {}", id, objectId.toHexString());
 
         try {
-            ListingsEntity listingsEntity = listingsServicePort.findById(id);
+            ListingsEntity listingsEntity = listingsServicePort.findById(objectId);
             logger.info("GET /{} - Listing encontrado no banco: {}", id,
                     listingsEntity != null ? listingsEntity.getListingId() : "null");
 
@@ -75,14 +90,15 @@ public class ListingsController {
 
     @GetMapping("/search")
     public List<ListingResponse> searchListings(@RequestParam(required = false) String name,
+            @RequestParam(required = false) SearchOrdering ordering,
             @RequestParam(required = false) ProductCondition condition,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice) {
 
         logger.info("GET /search - Recebida requisição para buscar listings com nome parcial: {}, condição: {}, "
-                + "preço mínimo: {}, preço máximo: {}", name, condition, minPrice, maxPrice);
+                + "preço mínimo: {}, preço máximo: {}, ordenação: {}", name, condition, minPrice, maxPrice, ordering);
 
-        return listingsServicePort.searchListings(name, condition, minPrice, maxPrice).stream()
+        return listingsServicePort.searchListings(name, condition, minPrice, maxPrice, ordering).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
@@ -108,10 +124,55 @@ public class ListingsController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteListingById(@PathVariable ObjectId id) {
-        ListingsEntity listingToDelete = listingsServicePort.findById(id);
+    public ResponseEntity<Void> deleteListingById(@PathVariable String id) {
+        logger.info("DELETE /{} - Recebida requisição para deletar listing com ID: {}", id, id);
+
+        // Validação do formato do ObjectId
+        if (!ObjectId.isValid(id)) {
+            logger.error(
+                    "DELETE /{} - ID inválido fornecido. ObjectId deve ter 24 caracteres hexadecimais, mas recebeu: {}",
+                    id, id);
+            throw new IllegalArgumentException(
+                    "ID inválido: " + id + ". ObjectId deve ter 24 caracteres hexadecimais.");
+        }
+
+        ObjectId objectId = new ObjectId(id);
+        ListingsEntity listingToDelete = listingsServicePort.findById(objectId);
         listingsServicePort.delete(listingToDelete);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/search/paginated")
+    public PagedListingResponse searchListingsPaginated(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) SearchOrdering ordering,
+            @RequestParam(required = false) ProductCondition condition,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+
+        logger.info("GET /search/paginated - Recebida requisição para buscar listings paginados com nome: {}, " +
+                "condição: {}, preço mínimo: {}, preço máximo: {}, ordenação: {}, página: {}, tamanho: {}",
+                name, condition, minPrice, maxPrice, ordering, page, size);
+
+        Pagination pagination = Pagination.of(page, size);
+        PagedResult<ListingsEntity> pagedResult = listingsServicePort.searchListingsPaginated(
+                name, condition, minPrice, maxPrice, ordering, pagination);
+
+        List<ListingResponse> listingResponses = pagedResult.getContent().stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+
+        return new PagedListingResponse(
+                listingResponses,
+                pagedResult.getPagination().getPage(),
+                pagedResult.getPagination().getSize(),
+                pagedResult.getTotalElements(),
+                pagedResult.getTotalPages(),
+                pagedResult.hasNext(),
+                pagedResult.hasPrevious(),
+                pagedResult.isEmpty());
     }
 }

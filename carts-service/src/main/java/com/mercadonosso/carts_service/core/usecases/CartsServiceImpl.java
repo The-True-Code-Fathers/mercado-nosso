@@ -55,7 +55,7 @@ public class CartsServiceImpl implements CartsServicePort {
     }
 
     @Override
-    public CartsEntity create(UUID userId, ObjectId listingId, int quantity) {
+    public CartsEntity create(UUID userId, ObjectId listingId, int quantity, BigDecimal price) {
         ListingDetails listing = listingsServicePort.findListingsById(listingId)
                 .orElseThrow(() -> new BusinessRuleException("Listing not found!"));
         CartsEntity cartsEntity = cartsRepositoryPort.findByUserId(userId).orElse(new CartsEntity(userId));
@@ -119,9 +119,6 @@ public class CartsServiceImpl implements CartsServicePort {
     @Override
     public CartsEntity remove(UUID userId, ObjectId listingId) {
 
-        ListingDetails listing = listingsServicePort.findListingsById(listingId)
-                .orElseThrow(() -> new BusinessRuleException("Listing " + listingId + " didnt exist more."));
-
         CartsEntity cart = cartsRepositoryPort.findByUserId(userId)
                 .orElseThrow(() -> new CartNotFoundException("Cart not found."));
         boolean itemExists = cart.getItems().stream().anyMatch(item -> item.getListingId().equals(listingId));
@@ -184,25 +181,54 @@ public class CartsServiceImpl implements CartsServicePort {
     @SneakyThrows
     @Override
     public void requestRemove(UUID userId, List<ObjectId> listingsIds) {
-        String payload = objectMapper.writeValueAsString(listingsIds);
+        // Converte ObjectIds para strings para serialização
+        List<String> listingIdStrings = listingsIds.stream()
+                .map(ObjectId::toHexString)
+                .collect(java.util.stream.Collectors.toList());
+
+        String payload = objectMapper.writeValueAsString(listingIdStrings);
+        System.out.println("=== ENVIANDO MENSAGEM KAFKA ===");
+        System.out.println("Tópico: " + removeCartTopic);
+        System.out.println("UserId: " + userId.toString());
+        System.out.println("Payload: " + payload);
         kafkaTemplate.send(removeCartTopic, userId.toString(), payload);
+        System.out.println("Mensagem enviada para Kafka!");
     }
 
     @KafkaListener(topics = "${topics.cart-remove.name}", groupId = "${spring.kafka.consumer.group-id}")
     @Override
     @SneakyThrows
     public void processRemove(@Header(KafkaHeaders.RECEIVED_KEY) UUID userId, @Payload String listingsIdsJson) {
-        List<UUID> listingsIds = objectMapper.readValue(listingsIdsJson, new TypeReference<List<UUID>>() {
+        System.out.println("=== PROCESSANDO REMOÇÃO KAFKA ===");
+        System.out.println("UserId: " + userId);
+        System.out.println("ListingsIds JSON: " + listingsIdsJson);
+
+        // Deserializa como strings e converte para ObjectIds
+        List<String> listingIdStrings = objectMapper.readValue(listingsIdsJson, new TypeReference<List<String>>() {
         });
+
+        List<ObjectId> listingsIds = listingIdStrings.stream()
+                .map(ObjectId::new)
+                .collect(java.util.stream.Collectors.toList());
+
+        System.out.println("ListingsIds parseados: " + listingsIds);
+
         CartsEntity cart = cartsRepositoryPort.findByUserId(userId)
                 .orElseThrow(() -> new CartNotFoundException("Cart not found for user: " + userId));
 
+        System.out.println("Carrinho encontrado com " + cart.getItems().size() + " itens");
+        System.out.println("IDs dos itens no carrinho: " + cart.getItems().stream()
+                .map(item -> item.getListingId().toHexString())
+                .collect(java.util.stream.Collectors.toList()));
+
         boolean removed = cart.getItems().removeIf(item -> listingsIds.contains(item.getListingId()));
+
+        System.out.println("Items removidos: " + removed);
 
         if (removed) {
             recalculateCart(cart);
             cartsRepositoryPort.save(cart);
+            System.out.println("Carrinho salvo após remoção");
         }
-
     }
 }

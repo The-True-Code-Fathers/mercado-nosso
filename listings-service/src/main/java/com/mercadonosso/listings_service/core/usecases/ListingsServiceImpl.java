@@ -9,7 +9,10 @@ import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import com.mercadonosso.listings_service.core.domain.ListingsEntity;
+import com.mercadonosso.listings_service.core.domain.PagedResult;
+import com.mercadonosso.listings_service.core.domain.Pagination;
 import com.mercadonosso.listings_service.core.domain.enums.ProductCondition;
+import com.mercadonosso.listings_service.core.domain.enums.SearchOrdering;
 import com.mercadonosso.listings_service.core.domain.exception.BusinessRuleException;
 import com.mercadonosso.listings_service.core.domain.exception.ListingsNotFoundException;
 import com.mercadonosso.listings_service.core.ports.in.ListingsServicePort;
@@ -76,8 +79,16 @@ public class ListingsServiceImpl implements ListingsServicePort {
 
     @Override
     public List<ListingsEntity> searchListings(String partialName, ProductCondition productCondition,
-            BigDecimal minPrice, BigDecimal maxPrice) {
+            BigDecimal minPrice, BigDecimal maxPrice, SearchOrdering ordering) {
 
-        return listingsRepositoryPort.searchListings(partialName, productCondition, minPrice, maxPrice);
+        return listingsRepositoryPort.searchListings(partialName, productCondition, minPrice, maxPrice, ordering);
+    }
+
+    @Override
+    public PagedResult<ListingsEntity> searchListingsPaginated(String partialName, ProductCondition productCondition,
+            BigDecimal minPrice, BigDecimal maxPrice, SearchOrdering ordering, Pagination pagination) {
+
+        return listingsRepositoryPort.searchListingsPaginated(partialName, productCondition, minPrice, maxPrice,
+                ordering, pagination);
     }
 }
