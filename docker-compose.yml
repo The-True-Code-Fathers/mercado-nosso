@@ -188,36 +188,6 @@ services:
     networks:
       - my-network
 
-  products-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        SERVICE_NAME: products-service
-    container_name: products-service
-    environment:
-      - SERVER_PORT=8087
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - SPRING_DATA_MONGODB_URI=mongodb://products-service-mongodb:27017/products-service-mongodb
-      - SPRING_APPLICATION_NAME=products-service
-    depends_on:
-      eureka-server:
-          condition: service_started
-      products-service-mongodb:
-          condition: service_started
-    networks:
-      - my-network
-
-  products-service-mongodb:
-    image: mongo:5.0
-    container_name: products-service-mongodb
-    networks:
-      - my-network
-    ports:
-      - "5437:27017"
-    volumes:
-      - products_db_data:/data/db
-
   reviews-service:
     build:
       context: .
@@ -305,7 +275,6 @@ volumes:
   listings_db_data:
   orders_db_data:
   reviews_db_data:
-  products_db_data:
 
 networks:
   my-network:

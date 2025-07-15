@@ -58,13 +58,6 @@ spring:
           filters:
             - StripPrefix=2
 
-        - id: products_service_route
-          uri: lb://products-service
-          predicates:
-            - Path=/api/products/**
-          filters:
-            - StripPrefix=2
-
         - id: reviews_service_route
           uri: lb://reviews-service
           predicates:
