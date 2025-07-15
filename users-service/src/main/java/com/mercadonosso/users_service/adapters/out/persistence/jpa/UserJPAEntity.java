@@ -17,7 +17,7 @@ public class UserJPAEntity {
 
     @Column(name = "social_reason", length = 255)
     private String socialReason;
-    
+
     @Column(name="full_name", length = 255, nullable = false)
     private String fullName;
 
@@ -33,6 +33,9 @@ public class UserJPAEntity {
     @Column(length = 14)
     private String cnpj;
 
+    @Column(name = "telephone_number", length = 15)
+    private String telephoneNumber;
+    
     @Column(name = "is_seller", nullable = false)
     private boolean isSeller;
 

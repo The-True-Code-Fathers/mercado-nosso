@@ -89,7 +89,8 @@ public class UserController {
         userWithNewData.setFullName(request.fullName());
         userWithNewData.setEmail(request.email());
         userWithNewData.setTelephoneNumber(request.telephoneNumber());
-        userWithNewData.setProfilePictureUrl(request.profilePictureUrl()); // Isso aqui converte a entidade pra DTO
+        userWithNewData.setProfilePictureUrl(request.profilePictureUrl());
+        userWithNewData.setSocialReason(request.socialReason()); // Isso aqui converte a entidade pra DTO
 
         if (request.cnpj() != null) {
             userWithNewData.setCnpj(request.cnpj());
