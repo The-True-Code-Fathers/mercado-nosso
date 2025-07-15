@@ -11,15 +11,15 @@ import org.springframework.data.mongodb.core.mapping.FieldType;
 import com.mercadonosso.listings_service.core.domain.enums.ProductCondition;
 
 public record CreatingListingRequest(UUID sellerId,
-                String sku,
-                List<String> productRecommendation,
-                String title,
-                String description,
-                @Field(targetType = FieldType.DECIMAL128) BigDecimal price,
-                Integer rating,
-                List<ObjectId> reviewsId,
-                List<String> imagesUrl,
-                String category,
-                Integer stock,
-                ProductCondition productCondition) {
+        String sku,
+        List<String> productRecommendation,
+        String title,
+        String description,
+        @Field(targetType = FieldType.DECIMAL128) BigDecimal price,
+        Integer rating,
+        List<ObjectId> reviewsId,
+        List<String> imagesUrl,
+        String category,
+        Integer stock,
+        ProductCondition productCondition) {
 }

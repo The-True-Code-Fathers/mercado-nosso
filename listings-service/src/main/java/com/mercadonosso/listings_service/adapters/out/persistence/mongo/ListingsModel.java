@@ -34,6 +34,5 @@ public class ListingsModel {
     private String category;
     private Integer stock;
     private boolean active;
-    private LocalDateTime createdAt;
     private ProductCondition productCondition;
 }

@@ -109,7 +109,7 @@ public class ListingsController {
         }
 
         ObjectId objectId = new ObjectId(id);
-        
+
         // Criar entity com os dados atualizados
         ListingsEntity updateData = new ListingsEntity();
         updateData.setSku(request.sku());
@@ -123,7 +123,7 @@ public class ListingsController {
         updateData.setImagesUrl(request.imagesUrl());
         updateData.setStock(request.stock());
         updateData.setProductCondition(request.productCondition());
-        
+
         ListingsEntity updatedListing = listingsServicePort.update(objectId, updateData);
         return toResponse(updatedListing);
     }
