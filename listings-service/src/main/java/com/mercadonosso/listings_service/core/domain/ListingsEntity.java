@@ -2,6 +2,7 @@ package com.mercadonosso.listings_service.core.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
@@ -43,10 +44,13 @@ public class ListingsEntity {
     @Field(name = "active")
     private boolean active;
 
-    private String brand;
+    private Integer rating;
 
-    @Field(name = "image_url")
-    private String imageUrl;
+    @Field(name = "reviews_id")
+    private List<ObjectId> reviewsId;
+
+    @Field(name = "images_url")
+    private List<String> imagesUrl;
 
     private String category;
 

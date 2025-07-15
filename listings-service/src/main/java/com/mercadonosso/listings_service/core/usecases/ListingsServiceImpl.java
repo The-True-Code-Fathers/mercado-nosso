@@ -34,7 +34,7 @@ public class ListingsServiceImpl implements ListingsServicePort {
     public ListingsEntity create(ListingsEntity listingsEntity) {
         validateListing(listingsEntity);
         listingsEntity.setListingId(new ObjectId());
-        listingsEntity.setCreatedAt(LocalDateTime.now());
+        listingsEntity.setUpdatedAt(LocalDateTime.now());
         listingsEntity.setActive(true);
         return listingsRepositoryPort.save(listingsEntity);
     }
@@ -48,6 +48,9 @@ public class ListingsServiceImpl implements ListingsServicePort {
         existingListing.setTitle(newListingData.getTitle());
         existingListing.setDescription(newListingData.getDescription());
         existingListing.setPrice(newListingData.getPrice());
+        existingListing.setRating(newListingData.getRating());
+        existingListing.setReviewsId(newListingData.getReviewsId());
+        existingListing.setImagesUrl(newListingData.getImagesUrl());
         existingListing.setStock(newListingData.getStock());
         existingListing.setProductCondition(newListingData.getProductCondition());
 

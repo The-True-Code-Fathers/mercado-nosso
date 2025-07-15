@@ -2,6 +2,7 @@ package com.mercadonosso.listings_service.adapters.out.persistence.mongo;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
@@ -26,6 +27,10 @@ public class ListingsModel {
 
     @Field(targetType = FieldType.DECIMAL128)
     private BigDecimal price;
+    private Integer rating;
+    private List<ObjectId> reviewsId;
+    private List<String> imagesUrl;
+    private String category;
     private Integer stock;
     private boolean active;
     private LocalDateTime createdAt;

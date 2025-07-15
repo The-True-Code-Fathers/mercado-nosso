@@ -42,11 +42,14 @@ public class ListingsController {
     @ResponseStatus(HttpStatus.CREATED)
     public ListingResponse createListing(@RequestBody CreatingListingRequest request) {
         ListingsEntity listingsEntity = new ListingsEntity();
-        listingsEntity.setProductSku(String.valueOf(request.productId()));
         listingsEntity.setSellerId(String.valueOf(request.sellerId()));
         listingsEntity.setTitle(request.title());
         listingsEntity.setDescription(request.description());
         listingsEntity.setPrice(request.price());
+        listingsEntity.setRating(request.rating());
+        listingsEntity.setReviewsId(request.reviewsId());
+        listingsEntity.setImagesUrl(request.imagesUrl());
+        listingsEntity.setCategory(request.category());
         listingsEntity.setStock(request.stock());
         listingsEntity.setProductCondition(request.productCondition());
         ListingsEntity createdListingsEntity = listingsServicePort.create(listingsEntity);
@@ -117,10 +120,13 @@ public class ListingsController {
                 listingsEntity.getTitle(),
                 listingsEntity.getDescription(),
                 listingsEntity.getPrice(),
+                listingsEntity.getRating(),
                 listingsEntity.getStock(),
+                listingsEntity.getReviewsId(),
+                listingsEntity.getImagesUrl(),
+                listingsEntity.getCategory(),
                 listingsEntity.isActive(),
-                listingsEntity.getProductCondition(),
-                listingsEntity.getCreatedAt());
+                listingsEntity.getProductCondition());
     }
 
     @DeleteMapping("/{id}")
