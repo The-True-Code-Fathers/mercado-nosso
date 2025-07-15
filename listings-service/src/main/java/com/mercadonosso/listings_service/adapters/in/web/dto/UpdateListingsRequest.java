@@ -9,9 +9,11 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.UUID;
 import org.bson.types.ObjectId;
 
 public record UpdateListingsRequest(
+                @NotNull(message = "O ID do vendedor é obrigatório.") UUID sellerId,
                 String sku,
                 List<String> productRecommendation,
                 @NotBlank(message = "O título do anúncio é obrigatório!") @Size(min = 10, max = 80, message = "O titulo deve conter entre 10 e 80 caracteres.") String title,

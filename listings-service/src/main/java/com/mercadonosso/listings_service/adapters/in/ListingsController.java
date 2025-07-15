@@ -110,8 +110,8 @@ public class ListingsController {
 
         ObjectId objectId = new ObjectId(id);
 
-        // Criar entity com os dados atualizados
         ListingsEntity updateData = new ListingsEntity();
+        updateData.setSellerId(String.valueOf(request.sellerId()));
         updateData.setSku(request.sku());
         updateData.setProductRecommendation(request.productRecommendation());
         updateData.setTitle(request.title());
