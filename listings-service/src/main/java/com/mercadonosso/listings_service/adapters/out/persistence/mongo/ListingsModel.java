@@ -1,7 +1,6 @@
 package com.mercadonosso.listings_service.adapters.out.persistence.mongo;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.bson.types.ObjectId;
