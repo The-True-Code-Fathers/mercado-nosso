@@ -65,7 +65,6 @@ public class ListingsController {
     public ListingResponse getListingById(@PathVariable String id) {
         logger.info("GET /{} - Recebida requisição para buscar listing com ID: {}", id, id);
 
-        // Validação do formato do ObjectId
         if (!ObjectId.isValid(id)) {
             logger.error(
                     "GET /{} - ID inválido fornecido. ObjectId deve ter 24 caracteres hexadecimais, mas recebeu: {}",
@@ -99,7 +98,6 @@ public class ListingsController {
     public ListingResponse updateListing(@PathVariable String id, @RequestBody UpdateListingsRequest request) {
         logger.info("PUT /{} - Recebida requisição para atualizar listing com ID: {}", id, id);
 
-        // Validação do formato do ObjectId
         if (!ObjectId.isValid(id)) {
             logger.error(
                     "PUT /{} - ID inválido fornecido. ObjectId deve ter 24 caracteres hexadecimais, mas recebeu: {}",
@@ -118,6 +116,7 @@ public class ListingsController {
         updateData.setDescription(request.description());
         updateData.setCategory(request.category());
         updateData.setPrice(request.price());
+        updateData.setCategory(request.category());
         updateData.setRating(request.rating());
         updateData.setReviewsId(request.reviewsId());
         updateData.setImagesUrl(request.imagesUrl());
