@@ -33,6 +33,7 @@ public class ListingsModel {
     private List<String> imagesUrl;
     private String category;
     private Integer stock;
+    private Integer salesCount;
     private boolean active;
     private ProductCondition productCondition;
 }

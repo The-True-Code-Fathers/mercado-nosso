@@ -26,5 +26,7 @@ public record UpdateListingsRequest(
 
                 @NotNull(message = "O estoque não pode ser nulo") Integer stock,
 
+                Integer salesCount,
+
                 @NotNull(message = "A condição do produto é obrigatória") ProductCondition productCondition) {
 }

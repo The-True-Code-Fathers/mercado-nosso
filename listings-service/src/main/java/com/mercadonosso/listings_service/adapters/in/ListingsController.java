@@ -122,6 +122,7 @@ public class ListingsController {
         updateData.setReviewsId(request.reviewsId());
         updateData.setImagesUrl(request.imagesUrl());
         updateData.setStock(request.stock());
+        updateData.setSalesCount(request.salesCount());
         updateData.setProductCondition(request.productCondition());
 
         ListingsEntity updatedListing = listingsServicePort.update(objectId, updateData);
@@ -214,6 +215,7 @@ public class ListingsController {
                 listingsEntity.getDescription(),
                 listingsEntity.getPrice(),
                 listingsEntity.getStock(),
+                listingsEntity.getSalesCount(),
                 listingsEntity.getRating(),
                 listingsEntity.getReviewsId(),
                 listingsEntity.getImagesUrl(),

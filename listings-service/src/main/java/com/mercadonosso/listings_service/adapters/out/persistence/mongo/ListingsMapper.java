@@ -29,6 +29,7 @@ public class ListingsMapper {
         model.setReviewsId(domain.getReviewsId());
         model.setImagesUrl(domain.getImagesUrl());
         model.setStock(domain.getStock());
+        model.setSalesCount(domain.getSalesCount());
         model.setActive(domain.isActive());
         model.setProductCondition(domain.getProductCondition());
 
@@ -54,6 +55,7 @@ public class ListingsMapper {
         domain.setReviewsId(model.getReviewsId());
         domain.setImagesUrl(model.getImagesUrl());
         domain.setStock(model.getStock());
+        domain.setSalesCount(model.getSalesCount());
         domain.setActive(model.isActive());
         domain.setProductCondition(model.getProductCondition());
 

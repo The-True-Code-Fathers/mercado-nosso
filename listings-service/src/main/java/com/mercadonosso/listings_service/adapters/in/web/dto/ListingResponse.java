@@ -18,6 +18,7 @@ public record ListingResponse(
                 String description,
                 @Field(targetType = FieldType.DECIMAL128) BigDecimal price,
                 Integer stock,
+                Integer salesCount,
                 Integer rating,
                 List<ObjectId> reviewsId,
                 List<String> imagesUrl,
