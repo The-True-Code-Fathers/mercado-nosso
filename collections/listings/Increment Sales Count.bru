@@ -1,0 +1,30 @@
+meta {
+  name: Increment Sales Count
+  type: http
+  seq: 9
+}
+
+put {
+  url: http://localhost:8080/api/listings/{{listingId}}
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "sku": "PC-GAMER-5800X-001",
+    "productRecommendation": ["GPU-RTX4060-001", "RAM-16GB-3200-001"],
+    "title": "PC Gamer AMD Ryzen 7 5800X com 16GB RAM",
+    "description": "PC Gamer completo com processador AMD Ryzen 7 5800X",
+    "category": "Computadores",
+    "price": 4000.00,
+    "rating": 5,
+    "reviewsId": [],
+    "imagesUrl": [
+      "https://example.com/pc-gamer-01.jpg"
+    ],
+    "stock": 49,
+    "salesCount": 1,
+    "productCondition": "NEW"
+  }
+}
