@@ -15,6 +15,9 @@ public class UserJPAEntity {
     @Id
     private UUID id;
 
+    @Column(name = "social_reason", length = 255)
+    private String socialReason;
+    
     @Column(name="full_name", length = 255, nullable = false)
     private String fullName;
 
