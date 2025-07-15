@@ -1,0 +1,11 @@
+meta {
+  name: Search Listings
+  type: http
+  seq: 6
+}
+
+get {
+  url: http://localhost:8080/api/listings/search?name=PC&condition=NEW&minPrice=1000&maxPrice=10000&ordering=PRICE_ASC
+  body: none
+  auth: inherit
+}

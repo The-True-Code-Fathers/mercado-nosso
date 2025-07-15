@@ -55,14 +55,6 @@ services:
       sh -c "cd products-recommendations-service &&
              mvn spring-boot:run"
 
-  products-service:
-    volumes:
-      - ./products-service:/app/products-service
-      - ~/.m2:/root/.m2
-    command: >
-      sh -c "cd products-service &&
-             mvn spring-boot:run"
-
   reviews-service:
     volumes:
       - ./reviews-service:/app/reviews-service

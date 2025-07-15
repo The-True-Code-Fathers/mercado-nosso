@@ -1,0 +1,36 @@
+meta {
+  name: Update Listing
+  type: http
+  seq: 6
+}
+
+put {
+  url: http://localhost:8080/api/listings/{{listingId}}
+  body: json
+  auth: inherit
+}
+
+vars:pre-request {
+  listingId: 67123456789abcdef1234567
+}
+
+body:json {
+  {
+    "sku": "PC-GAMER-5800X-001-UPDATED",
+    "productRecommendation": ["GPU-RTX4070-001", "RAM-32GB-3600-001", "SSD-NVME-1TB-001"],
+    "title": "PC Gamer AMD Ryzen 7 5800X com 32GB RAM - ATUALIZADO",
+    "description": "PC Gamer completo ATUALIZADO com processador AMD Ryzen 7 5800X, placa-mãe B550M, 32GB de RAM DDR4 3600MHz, placa de vídeo RTX 4070, SSD NVMe 1TB. Performance superior para jogos e aplicações profissionais.",
+    "category": "Computadores",
+    "price": 5500.00,
+    "rating": 5,
+    "reviewsId": ["507f1f77bcf86cd799439011", "507f1f77bcf86cd799439012"],
+    "imagesUrl": [
+      "https://example.com/images/pc-gamer-updated-01.jpg",
+      "https://example.com/images/pc-gamer-updated-02.jpg",
+      "https://example.com/images/pc-gamer-updated-03.jpg",
+      "https://example.com/images/pc-gamer-updated-04.jpg"
+    ],
+    "stock": 25,
+    "productCondition": "NEW"
+  }
+}

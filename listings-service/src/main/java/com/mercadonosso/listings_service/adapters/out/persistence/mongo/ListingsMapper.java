@@ -19,14 +19,17 @@ public class ListingsMapper {
             model.setId(domain.getListingId());
         }
 
-        model.setProductId(domain.getProductSku());
         model.setSellerId(domain.getSellerId());
+        model.setSku(domain.getSku());
+        model.setProductRecommendation(domain.getProductRecommendation());
         model.setTitle(domain.getTitle());
         model.setDescription(domain.getDescription());
         model.setPrice(domain.getPrice());
+        model.setRating(domain.getRating());
+        model.setReviewsId(domain.getReviewsId());
+        model.setImagesUrl(domain.getImagesUrl());
         model.setStock(domain.getStock());
         model.setActive(domain.isActive());
-        model.setCreatedAt(domain.getCreatedAt());
         model.setProductCondition(domain.getProductCondition());
 
         return model;
@@ -41,14 +44,17 @@ public class ListingsMapper {
         ListingsEntity domain = new ListingsEntity();
 
         domain.setListingId(model.getId());
-        domain.setProductSku(model.getProductId());
         domain.setSellerId(model.getSellerId());
+        domain.setSku(model.getSku());
+        domain.setProductRecommendation(model.getProductRecommendation());
         domain.setTitle(model.getTitle());
         domain.setDescription(model.getDescription());
         domain.setPrice(model.getPrice());
+        domain.setRating(model.getRating());
+        domain.setReviewsId(model.getReviewsId());
+        domain.setImagesUrl(model.getImagesUrl());
         domain.setStock(model.getStock());
         domain.setActive(model.isActive());
-        domain.setCreatedAt(model.getCreatedAt());
         domain.setProductCondition(model.getProductCondition());
 
         return domain;

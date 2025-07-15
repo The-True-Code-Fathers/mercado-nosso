@@ -1,5 +1,6 @@
 package com.mercadonosso.listings_service.core.usecases;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -8,6 +9,10 @@ import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import com.mercadonosso.listings_service.core.domain.ListingsEntity;
+import com.mercadonosso.listings_service.core.domain.PagedResult;
+import com.mercadonosso.listings_service.core.domain.Pagination;
+import com.mercadonosso.listings_service.core.domain.enums.ProductCondition;
+import com.mercadonosso.listings_service.core.domain.enums.SearchOrdering;
 import com.mercadonosso.listings_service.core.domain.exception.BusinessRuleException;
 import com.mercadonosso.listings_service.core.domain.exception.ListingsNotFoundException;
 import com.mercadonosso.listings_service.core.ports.in.ListingsServicePort;
@@ -29,7 +34,7 @@ public class ListingsServiceImpl implements ListingsServicePort {
     public ListingsEntity create(ListingsEntity listingsEntity) {
         validateListing(listingsEntity);
         listingsEntity.setListingId(new ObjectId());
-        listingsEntity.setCreatedAt(LocalDateTime.now());
+        listingsEntity.setUpdatedAt(LocalDateTime.now());
         listingsEntity.setActive(true);
         return listingsRepositoryPort.save(listingsEntity);
     }
@@ -43,6 +48,9 @@ public class ListingsServiceImpl implements ListingsServicePort {
         existingListing.setTitle(newListingData.getTitle());
         existingListing.setDescription(newListingData.getDescription());
         existingListing.setPrice(newListingData.getPrice());
+        existingListing.setRating(newListingData.getRating());
+        existingListing.setReviewsId(newListingData.getReviewsId());
+        existingListing.setImagesUrl(newListingData.getImagesUrl());
         existingListing.setStock(newListingData.getStock());
         existingListing.setProductCondition(newListingData.getProductCondition());
 
@@ -70,5 +78,20 @@ public class ListingsServiceImpl implements ListingsServicePort {
         if (!violations.isEmpty()) {
             throw new BusinessRuleException(violations.iterator().next().getMessage());
         }
+    }
+
+    @Override
+    public List<ListingsEntity> searchListings(String partialName, ProductCondition productCondition,
+            BigDecimal minPrice, BigDecimal maxPrice, SearchOrdering ordering) {
+
+        return listingsRepositoryPort.searchListings(partialName, productCondition, minPrice, maxPrice, ordering);
+    }
+
+    @Override
+    public PagedResult<ListingsEntity> searchListingsPaginated(String partialName, ProductCondition productCondition,
+            BigDecimal minPrice, BigDecimal maxPrice, SearchOrdering ordering, Pagination pagination) {
+
+        return listingsRepositoryPort.searchListingsPaginated(partialName, productCondition, minPrice, maxPrice,
+                ordering, pagination);
     }
 }

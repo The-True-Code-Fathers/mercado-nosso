@@ -2,6 +2,7 @@ package com.mercadonosso.listings_service.core.domain;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
@@ -25,12 +26,15 @@ public class ListingsEntity {
     @Id
     private ObjectId listingId;
 
-    @Field("product_id")
-    private String productSku;
-
     @NotNull(message = "O ID do vendedor é obrigatório.")
     @Field("seller_id")
     private String sellerId;
+
+    @Field(name = "sku")
+    private String sku;
+
+    @Field(name = "product_recommendation")
+    private List<String> productRecommendation;
 
     @NotBlank(message = "O título do anúncio é obrigatório!")
     @Size(min = 10, max = 80, message = "O titulo deve conter entre 10 e 80 caracteres.")
@@ -46,8 +50,20 @@ public class ListingsEntity {
     @Field(name = "active")
     private boolean active;
 
-    @Field("created_at")
-    private LocalDateTime createdAt;
+    @DecimalMin(value = "0.0", message = "O rating deve ser entre 0 e 5.")
+    private Integer rating;
+
+    @Field(name = "reviews_id")
+    private List<ObjectId> reviewsId;
+
+    @Field(name = "images_url")
+    @Size(max = 10, message = "Máximo de 10 imagens permitidas.")
+    private List<String> imagesUrl;
+
+    private String category;
+
+    @Field("updated_at")
+    private LocalDateTime updatedAt;
 
     @NotNull(message = "A condição do produto é obrigatória.")
     @Field("product_condition")
