@@ -25,9 +25,6 @@ public class ListingsEntity {
     @Id
     private ObjectId listingId;
 
-    @Field("product_id")
-    private String productSku;
-
     @NotNull(message = "O ID do vendedor é obrigatório.")
     @Field("seller_id")
     private String sellerId;
@@ -46,8 +43,15 @@ public class ListingsEntity {
     @Field(name = "active")
     private boolean active;
 
-    @Field("created_at")
-    private LocalDateTime createdAt;
+    private String brand;
+
+    @Field(name = "image_url")
+    private String imageUrl;
+
+    private String category;
+
+    @Field("updated_at")
+    private LocalDateTime updatedAt;
 
     @NotNull(message = "A condição do produto é obrigatória.")
     @Field("product_condition")
