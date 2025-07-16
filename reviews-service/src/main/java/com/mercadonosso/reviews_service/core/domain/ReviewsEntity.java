@@ -17,7 +17,7 @@ public class ReviewsEntity {
     private LocalDateTime createdAt;
     private boolean active;
     private UUID sellerId;
-    private UUID listingId;
+    private String listingId;
     private UUID buyerId;
     private Integer rating;
     private String message;

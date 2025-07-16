@@ -5,13 +5,12 @@ import java.util.List;
 import java.util.UUID;
 
 public record ReviewsResponse(
-        UUID id,
-        UUID listingId,
-        UUID buyerId,
-        Integer rating,
-        String message,
-        List<String> imagesUrls,
-        LocalDateTime createdAt,
-        UUID sellerId
-) {
+                UUID id,
+                String listingId, // Changed from UUID to String
+                UUID buyerId,
+                Integer rating,
+                String message,
+                List<String> imagesUrls,
+                LocalDateTime createdAt,
+                UUID sellerId) {
 }

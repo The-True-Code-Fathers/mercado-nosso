@@ -1,7 +1,6 @@
 package com.mercadonosso.listings_service.adapters.out.persistence.mongo;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.bson.types.ObjectId;
@@ -33,6 +32,7 @@ public class ListingsModel {
     private List<String> imagesUrl;
     private String category;
     private Integer stock;
+    private Integer salesCount;
     private boolean active;
     private ProductCondition productCondition;
 }

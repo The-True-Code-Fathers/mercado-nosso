@@ -71,6 +71,14 @@ public class ReviewsController {
                 .collect(Collectors.toList());
     }
 
+    @GetMapping("/listing/{listingId}")
+    public List<ReviewsResponse> findByListingId(@PathVariable String listingId) {
+        List<ReviewsEntity> reviewsEntities = reviewsServicePort.findByListingId(listingId);
+        return reviewsEntities.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         reviewsServicePort.delete(id);

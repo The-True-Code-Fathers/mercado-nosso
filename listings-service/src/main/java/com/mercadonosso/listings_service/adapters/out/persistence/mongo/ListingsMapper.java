@@ -25,10 +25,12 @@ public class ListingsMapper {
         model.setTitle(domain.getTitle());
         model.setDescription(domain.getDescription());
         model.setPrice(domain.getPrice());
+        model.setCategory(domain.getCategory());
         model.setRating(domain.getRating());
         model.setReviewsId(domain.getReviewsId());
         model.setImagesUrl(domain.getImagesUrl());
         model.setStock(domain.getStock());
+        model.setSalesCount(domain.getSalesCount());
         model.setActive(domain.isActive());
         model.setProductCondition(domain.getProductCondition());
 
@@ -50,10 +52,12 @@ public class ListingsMapper {
         domain.setTitle(model.getTitle());
         domain.setDescription(model.getDescription());
         domain.setPrice(model.getPrice());
+        domain.setCategory(model.getCategory());
         domain.setRating(model.getRating());
         domain.setReviewsId(model.getReviewsId());
         domain.setImagesUrl(model.getImagesUrl());
         domain.setStock(model.getStock());
+        domain.setSalesCount(model.getSalesCount());
         domain.setActive(model.isActive());
         domain.setProductCondition(model.getProductCondition());
 

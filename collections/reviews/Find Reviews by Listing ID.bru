@@ -1,0 +1,15 @@
+meta {
+  name: Find Reviews by Listing ID
+  type: http
+  seq: 6
+}
+
+get {
+  url: http://localhost:8080/api/reviews/listing/68766ef4f96bf742ce095332
+  body: none
+  auth: none
+}
+
+vars:pre-request {
+  listingId: 68766a2af96bf742ce095331
+}

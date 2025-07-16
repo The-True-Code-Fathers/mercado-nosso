@@ -52,6 +52,8 @@ public class ListingsServiceImpl implements ListingsServicePort {
         existingListing.setReviewsId(newListingData.getReviewsId());
         existingListing.setImagesUrl(newListingData.getImagesUrl());
         existingListing.setStock(newListingData.getStock());
+        existingListing.setSalesCount(newListingData.getSalesCount());
+        existingListing.setCategory(newListingData.getCategory());
         existingListing.setProductCondition(newListingData.getProductCondition());
 
         return listingsRepositoryPort.save(existingListing);
