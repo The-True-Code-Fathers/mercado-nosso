@@ -35,6 +35,10 @@ public class ReviewsServiceImpl implements ReviewsServicePort {
     public ReviewsEntity create(ReviewsEntity reviewData) {
         var listing = listingsServiceClient.findListingById(reviewData.getListingId());
 
+        if (listing == null) {
+            throw new IllegalArgumentException("Listing not found with ID: " + reviewData.getListingId());
+        }
+
         ReviewsEntity newReview = ReviewsEntity.builder()
                 .listingId(reviewData.getListingId())
                 .buyerId(reviewData.getBuyerId())
@@ -44,7 +48,7 @@ public class ReviewsServiceImpl implements ReviewsServicePort {
                 .id(UUID.randomUUID())
                 .createdAt(LocalDateTime.now())
                 .active(true)
-                .sellerId(listing.sellerId())
+                .sellerId(UUID.fromString(listing.sellerId())) // Convert String to UUID
                 .build();
 
         return reviewsRepositoryPort.save(newReview);
@@ -77,5 +81,11 @@ public class ReviewsServiceImpl implements ReviewsServicePort {
     public ReviewsEntity findById(UUID id) {
         return reviewsRepositoryPort.findById(id)
                 .orElseThrow(() -> new ReviewsNotFoundException("Review com o id " + id + " não encontrado."));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ReviewsEntity> findByListingId(String listingId) {
+        return reviewsRepositoryPort.findByListingId(listingId);
     }
 }

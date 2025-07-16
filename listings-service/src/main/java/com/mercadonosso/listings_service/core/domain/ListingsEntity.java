@@ -71,4 +71,7 @@ public class ListingsEntity {
 
     @Field(name = "stock")
     private Integer stock;
+
+    @Field(name = "sales_count")
+    private Integer salesCount = 0;
 }

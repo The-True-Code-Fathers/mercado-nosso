@@ -16,7 +16,7 @@ public class ReviewsModel {
     private UUID id;
 
     @Field("listing_id")
-    private UUID listingId;
+    private String listingId; // Changed from UUID to String
 
     @Field("buyer_id")
     private UUID buyerId;

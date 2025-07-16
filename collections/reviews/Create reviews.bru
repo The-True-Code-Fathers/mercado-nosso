@@ -5,19 +5,19 @@ meta {
 }
 
 post {
-  url: {{base_url}}/api/reviews
+  url: http://localhost:8080/api/reviews
   body: json
   auth: inherit
 }
 
 body:json {
   {
-    "listingId": "a1b2c3d4-e5f6-7890-1234-567890abcdef",
-    "buyerId": "fedcba09-8765-4321-fedc-ba0987654321",
-    "rating": 5,
+    "listingId": "6877af3aa4360519dcf7dc7d",
+    "buyerId": "550e8400-e29b-41d4-a716-446655440001",
+    "rating": 1,
     "message": "Este é um teste para o serviço",
     "imagesUrls": [
-      "https://example.com/image1.png"
+     "https://www.havan.com.br/media/catalog/product/cache/73a52df140c4d19dbec2b6c485ea6a50/g/a/garfo-de-mesa-leme-tramontina_29514_2.webp"
     ]
   }
 }

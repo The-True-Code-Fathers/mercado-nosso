@@ -45,4 +45,12 @@ public class ReviewsRepositoryAdapter implements ReviewsRepositoryPort {
         Optional<ReviewsModel> modelOptional = mongoRepository.findById(id);
         return modelOptional.map(mapper::toDomain);
     }
+
+    @Override
+    public List<ReviewsEntity> findByListingId(String listingId) {
+        List<ReviewsModel> reviewsModels = mongoRepository.findByListingId(listingId);
+        return reviewsModels.stream()
+                .map(mapper::toDomain)
+                .collect(Collectors.toList());
+    }
 }
