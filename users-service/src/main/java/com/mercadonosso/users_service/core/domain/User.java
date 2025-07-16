@@ -27,4 +27,5 @@ public class User {
     private Instant createdAt = Instant.now();
     private Instant updatedAt = Instant.now();
     private boolean active = true;
+    private String cep;
 }

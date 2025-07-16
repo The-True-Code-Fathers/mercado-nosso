@@ -7,6 +7,7 @@ public record UpdateUserRequest(
     String telephoneNumber,
     String cnpj,
     String socialReason,
+    String cep,
     boolean isSeller
 ) {
 }

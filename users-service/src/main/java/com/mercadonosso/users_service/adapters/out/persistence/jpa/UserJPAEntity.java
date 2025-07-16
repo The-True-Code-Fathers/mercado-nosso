@@ -60,4 +60,7 @@ public class UserJPAEntity {
 
     @Column(nullable = false)
     private boolean active = true;
+
+    @Column(name = "cep", length = 9)
+    private String cep;
 }

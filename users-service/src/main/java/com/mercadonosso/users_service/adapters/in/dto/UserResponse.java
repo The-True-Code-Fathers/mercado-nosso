@@ -14,5 +14,8 @@ public record UserResponse(
         List<UUID> listingBoughtId,
         Instant createdAt,
         Instant updatedAt,
-        boolean active
+        boolean active,
+        String cep,
+        String telephoneNumber,
+        String socialReason
 ) {}

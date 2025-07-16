@@ -89,8 +89,8 @@ public class UserController {
         userWithNewData.setFullName(request.fullName());
         userWithNewData.setEmail(request.email());
         userWithNewData.setTelephoneNumber(request.telephoneNumber());
-        userWithNewData.setProfilePictureUrl(request.profilePictureUrl());
-        userWithNewData.setSocialReason(request.socialReason()); // Isso aqui converte a entidade pra DTO
+        userWithNewData.setProfilePictureUrl(request.profilePictureUrl()); // Isso aqui converte a entidade pra DTO
+        userWithNewData.setCep(request.cep());
 
         if (request.cnpj() != null) {
             userWithNewData.setCnpj(request.cnpj());
@@ -135,7 +135,11 @@ public class UserController {
                 user.getListingBoughtId(),
                 user.getCreatedAt(),
                 user.getUpdatedAt(),
-                user.isActive());
+                user.isActive(),
+                user.getCep(),
+                user.getTelephoneNumber(),
+                user.getSocialReason());
+
     }
 
     private User toDomain(CreateUserRequest request) {
@@ -163,7 +167,10 @@ public class UserController {
                 authenticatedUser.getListingBoughtId(),
                 authenticatedUser.getCreatedAt(),
                 authenticatedUser.getUpdatedAt(),
-                authenticatedUser.isActive());
+                authenticatedUser.isActive(),
+                authenticatedUser.getCep(),
+                authenticatedUser.getTelephoneNumber(),
+                authenticatedUser.getSocialReason());
 
         return ResponseEntity.ok(response);
     }
