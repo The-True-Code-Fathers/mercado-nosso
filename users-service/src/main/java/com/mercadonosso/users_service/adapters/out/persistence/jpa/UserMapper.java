@@ -11,6 +11,9 @@ public class UserMapper {
         entity.setPasswordHash(user.getPasswordHash());
         entity.setCpf(user.getCpf());
         entity.setCnpj(user.getCnpj());
+        entity.setTelephoneNumber(user.getTelephoneNumber());
+        entity.setCep(user.getCep());
+        entity.setSocialReason(user.getSocialReason());
         entity.setSeller(user.isSeller());
         entity.setProfilePictureUrl(user.getProfilePictureUrl());
         entity.setListingSellingId(user.getListingSellingId());
@@ -29,6 +32,9 @@ public class UserMapper {
         domain.setPasswordHash(jpaEntity.getPasswordHash());
         domain.setCpf(jpaEntity.getCpf());
         domain.setCnpj(jpaEntity.getCnpj());
+        domain.setTelephoneNumber(jpaEntity.getTelephoneNumber());
+        domain.setCep(jpaEntity.getCep());
+        domain.setSocialReason(jpaEntity.getSocialReason());
         domain.setSeller(jpaEntity.isSeller());
         domain.setProfilePictureUrl(jpaEntity.getProfilePictureUrl());
         domain.setListingSellingId(jpaEntity.getListingSellingId());

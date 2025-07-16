@@ -77,13 +77,13 @@ public class UserController {
             @RequestHeader("X-User-Id") UUID userId,
             @Valid @RequestBody UpdateUserRequest request) {
 
-        System.out.println("=== BACKEND DEBUG ===");
+        System.out.println("=== BACKEND DEBUG CEP ===");
         System.out.println("User ID: " + userId);
-        System.out.println("Request: " + request);
-        System.out.println("isSeller: " + request.isSeller());
-        System.out.println("CNPJ: " + request.cnpj());
-        System.out.println("Social Reason: " + request.socialReason());
-        System.out.println("====================");
+        System.out.println("Request completo: " + request);
+        System.out.println("CEP recebido: " + request.cep());
+        System.out.println("CEP é null?: " + (request.cep() == null));
+        System.out.println("CEP está vazio?: " + (request.cep() != null && request.cep().isEmpty()));
+        System.out.println("========================");
 
         User userWithNewData = new User();
         userWithNewData.setFullName(request.fullName());
@@ -91,6 +91,10 @@ public class UserController {
         userWithNewData.setTelephoneNumber(request.telephoneNumber());
         userWithNewData.setProfilePictureUrl(request.profilePictureUrl()); // Isso aqui converte a entidade pra DTO
         userWithNewData.setCep(request.cep());
+
+        System.out.println("=== DOMAIN OBJECT DEBUG ===");
+        System.out.println("CEP no domain object: " + userWithNewData.getCep());
+        System.out.println("=============================");
 
         if (request.cnpj() != null) {
             userWithNewData.setCnpj(request.cnpj());
