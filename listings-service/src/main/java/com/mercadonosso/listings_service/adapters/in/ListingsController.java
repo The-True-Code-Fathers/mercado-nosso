@@ -97,35 +97,64 @@ public class ListingsController {
     @PutMapping("/{id}")
     public ListingResponse updateListing(@PathVariable String id, @RequestBody UpdateListingsRequest request) {
         logger.info("PUT /{} - Recebida requisição para atualizar listing com ID: {}", id, id);
+        logger.info("PUT /{} - Dados da requisição: sellerId={}, sku={}, title={}, category={}, price={}, stock={}",
+                id, request.sellerId(), request.sku(), request.title(), request.category(), request.price(),
+                request.stock());
 
-        if (!ObjectId.isValid(id)) {
-            logger.error(
-                    "PUT /{} - ID inválido fornecido. ObjectId deve ter 24 caracteres hexadecimais, mas recebeu: {}",
-                    id, id);
-            throw new IllegalArgumentException(
-                    "ID inválido: " + id + ". ObjectId deve ter 24 caracteres hexadecimais.");
+        try {
+            if (!ObjectId.isValid(id)) {
+                logger.error(
+                        "PUT /{} - ID inválido fornecido. ObjectId deve ter 24 caracteres hexadecimais, mas recebeu: {}",
+                        id, id);
+                throw new IllegalArgumentException(
+                        "ID inválido: " + id + ". ObjectId deve ter 24 caracteres hexadecimais.");
+            }
+
+            ObjectId objectId = new ObjectId(id);
+            logger.info("PUT /{} - ObjectId parseado com sucesso: {}", id, objectId.toHexString());
+
+            // Log detalhado dos dados antes de criar a entidade
+            logger.info("PUT /{} - Validando dados da requisição:", id);
+            logger.info("PUT /{} - sellerId type: {}, value: {}", id,
+                    request.sellerId() != null ? request.sellerId().getClass().getSimpleName() : "null",
+                    request.sellerId());
+            logger.info("PUT /{} - title: {}", id, request.title());
+            logger.info("PUT /{} - description length: {}", id,
+                    request.description() != null ? request.description().length() : "null");
+            logger.info("PUT /{} - category: {}", id, request.category());
+            logger.info("PUT /{} - price: {}", id, request.price());
+            logger.info("PUT /{} - stock: {}", id, request.stock());
+            logger.info("PUT /{} - productCondition: {}", id, request.productCondition());
+
+            ListingsEntity updateData = new ListingsEntity();
+            updateData.setSellerId(String.valueOf(request.sellerId()));
+            updateData.setSku(request.sku());
+            updateData.setProductRecommendation(request.productRecommendation());
+            updateData.setTitle(request.title());
+            updateData.setDescription(request.description());
+            updateData.setCategory(request.category());
+            updateData.setPrice(request.price());
+            updateData.setCategory(request.category());
+            updateData.setRating(request.rating());
+            updateData.setReviewsId(request.reviewsId());
+            updateData.setImagesUrl(request.imagesUrl());
+            updateData.setStock(request.stock());
+            updateData.setSalesCount(request.salesCount());
+            updateData.setProductCondition(request.productCondition());
+
+            logger.info("PUT /{} - Entidade criada com sucesso, chamando service para atualizar", id);
+            ListingsEntity updatedListing = listingsServicePort.update(objectId, updateData);
+
+            logger.info("PUT /{} - Listing atualizado com sucesso", id);
+            return toResponse(updatedListing);
+
+        } catch (IllegalArgumentException e) {
+            logger.error("PUT /{} - Erro de validação: {}", id, e.getMessage(), e);
+            throw e;
+        } catch (Exception e) {
+            logger.error("PUT /{} - Erro inesperado ao atualizar listing: {}", id, e.getMessage(), e);
+            throw e;
         }
-
-        ObjectId objectId = new ObjectId(id);
-
-        ListingsEntity updateData = new ListingsEntity();
-        updateData.setSellerId(String.valueOf(request.sellerId()));
-        updateData.setSku(request.sku());
-        updateData.setProductRecommendation(request.productRecommendation());
-        updateData.setTitle(request.title());
-        updateData.setDescription(request.description());
-        updateData.setCategory(request.category());
-        updateData.setPrice(request.price());
-        updateData.setCategory(request.category());
-        updateData.setRating(request.rating());
-        updateData.setReviewsId(request.reviewsId());
-        updateData.setImagesUrl(request.imagesUrl());
-        updateData.setStock(request.stock());
-        updateData.setSalesCount(request.salesCount());
-        updateData.setProductCondition(request.productCondition());
-
-        ListingsEntity updatedListing = listingsServicePort.update(objectId, updateData);
-        return toResponse(updatedListing);
     }
 
     @GetMapping("/search")
