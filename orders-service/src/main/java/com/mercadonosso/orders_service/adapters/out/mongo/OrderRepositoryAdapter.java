@@ -6,7 +6,6 @@ import com.mercadonosso.orders_service.core.ports.out.OrdersRepositoryPort;
 
 import org.springframework.stereotype.Component;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -16,7 +15,6 @@ import java.util.stream.Collectors;
 public class OrderRepositoryAdapter implements OrdersRepositoryPort {
 
     private final SpringOrderRepository orderRepository;
-
 
     public OrderRepositoryAdapter(SpringOrderRepository springOrderRepository) {
         this.orderRepository = springOrderRepository;
@@ -46,7 +44,7 @@ public class OrderRepositoryAdapter implements OrdersRepositoryPort {
 
     @Override
     public List<Order> findByBuyerId(UUID buyerId) {
-        List<OrderModel> models = orderRepository.findAllById(Collections.singleton(buyerId));
+        List<OrderModel> models = orderRepository.findByBuyerId(buyerId);
         return models.stream()
                 .map(OrderMapper::toDomain)
                 .collect(Collectors.toList());

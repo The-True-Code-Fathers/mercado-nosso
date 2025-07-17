@@ -3,7 +3,6 @@ package com.mercadonosso.orders_service.core.usecases;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -29,13 +28,10 @@ public class OrdersServiceImpl implements OrdersServicePort {
     public Order create(Order order) {
         validateOrders(order);
         order.setOrderId(UUID.randomUUID());
-        order.setBuyerId(order.getBuyerId());
-        order.setListingId(order.getListingId());
         order.setDate(LocalDateTime.now());
         order.setStatus(OrderStatus.OPEN);
         return ordersRepositoryPort.save(order);
     }
-
 
     @Override
     public Order updateOrder(UUID id, OrderStatus status) {
@@ -51,8 +47,8 @@ public class OrdersServiceImpl implements OrdersServicePort {
 
     @Override
     public Order findOrderById(UUID id) {
-        return ordersRepositoryPort.findById(id).orElseThrow(() ->
-                new OrderNotFoundException("Order " + id + " não encontrada"));
+        return ordersRepositoryPort.findById(id)
+                .orElseThrow(() -> new OrderNotFoundException("Order " + id + " não encontrada"));
     }
 
     @Override

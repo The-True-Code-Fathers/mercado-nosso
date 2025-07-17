@@ -80,8 +80,6 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
 
         List<ListingsModel> models = mongoTemplate.find(query, ListingsModel.class);
 
-        log.info("Search Listings - Criteria: {}, Ordering: {}, Found: {}", criteria, ordering, models.size());
-
         return models.stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
@@ -109,8 +107,7 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
 
         List<ListingsModel> models = mongoTemplate.find(query, ListingsModel.class);
 
-        log.info("Search Listings Paginated - Criteria: {}, Ordering: {}, Pagination: {}, Total: {}, Found: {}",
-                criteria, ordering, pagination, totalElements, models.size());
+        log.info("Search Listings Paginated - Total: {}, Found: {}", totalElements, models.size());
 
         List<ListingsEntity> entities = models.stream()
                 .map(mapper::toDomain)
@@ -135,11 +132,11 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
         }
 
         if (minPrice != null && maxPrice != null) {
-            criteria = criteria.and("price").gte(minPrice).lte(maxPrice);
+            criteria = criteria.and("price").gte(minPrice.doubleValue()).lte(maxPrice.doubleValue());
         } else if (minPrice != null) {
-            criteria = criteria.and("price").gte(minPrice);
+            criteria = criteria.and("price").gte(minPrice.doubleValue());
         } else if (maxPrice != null) {
-            criteria = criteria.and("price").lte(maxPrice);
+            criteria = criteria.and("price").lte(maxPrice.doubleValue());
         }
 
         return criteria;

@@ -6,8 +6,7 @@ import java.util.UUID;
 import com.mercadonosso.orders_service.core.domain.enums.OrderStatus;
 
 public record CreatingOrderRequest(UUID orderId,
-                                   UUID buyerId,
-                                   OrderStatus status,
-                                   List<UUID> listing
-                                   ){
+        UUID buyerId,
+        OrderStatus status,
+        List<String> listing) {
 }
