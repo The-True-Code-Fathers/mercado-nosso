@@ -32,6 +32,15 @@ public class OrderController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public OrderResponse createOrder(@RequestBody CreatingOrderRequest request) {
+        System.out.println("=== DEBUG CREATE ORDER ===");
+        System.out.println("Request listing: " + request.listing());
+        System.out.println("Request listing class: "
+                + (request.listing() != null ? request.listing().getClass().getName() : "null"));
+        if (request.listing() != null && !request.listing().isEmpty()) {
+            System.out.println("First listing: " + request.listing().get(0));
+            System.out.println("First listing class: " + request.listing().get(0).getClass().getName());
+        }
+
         Order order = new Order();
 
         order.setOrderId(request.orderId());
@@ -45,6 +54,15 @@ public class OrderController {
     }
 
     private OrderResponse toResponse(Order order) {
+        System.out.println("=== DEBUG TO RESPONSE ===");
+        System.out.println("Order listingId: " + order.getListingId());
+        System.out.println("Order listingId class: "
+                + (order.getListingId() != null ? order.getListingId().getClass().getName() : "null"));
+        if (order.getListingId() != null && !order.getListingId().isEmpty()) {
+            System.out.println("First order listingId: " + order.getListingId().get(0));
+            System.out.println("First order listingId class: " + order.getListingId().get(0).getClass().getName());
+        }
+
         return new OrderResponse(
                 order.getOrderId(),
                 order.getBuyerId(),
