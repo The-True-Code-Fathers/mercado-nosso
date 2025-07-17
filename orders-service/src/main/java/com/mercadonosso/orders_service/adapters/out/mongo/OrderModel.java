@@ -18,6 +18,7 @@ public class OrderModel {
     private UUID orderId;
 
     private UUID buyerId;
+    private UUID sellerId;
     private OrderStatus status;
     private LocalDateTime orderDate;
     private List<String> productIds;

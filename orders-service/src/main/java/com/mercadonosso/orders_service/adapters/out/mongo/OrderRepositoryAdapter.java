@@ -51,6 +51,14 @@ public class OrderRepositoryAdapter implements OrdersRepositoryPort {
     }
 
     @Override
+    public List<Order> findBySellerId(UUID sellerId) {
+        List<OrderModel> models = orderRepository.findBySellerId(sellerId);
+        return models.stream()
+                .map(OrderMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public void delete(Order order) {
         OrderModel model = OrderMapper.toModel(order);
         orderRepository.delete(model);

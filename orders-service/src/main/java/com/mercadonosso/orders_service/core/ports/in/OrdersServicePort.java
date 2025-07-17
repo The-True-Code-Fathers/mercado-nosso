@@ -14,4 +14,5 @@ public interface OrdersServicePort {
     Order findOrderById(UUID id);
     List<Order> findAllOrders();
     List<Order> findByBuyerId(UUID id);
+    List<Order> findBySellerId(UUID sellerId);
 }

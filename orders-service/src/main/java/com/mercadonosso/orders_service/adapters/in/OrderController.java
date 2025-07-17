@@ -98,6 +98,19 @@ public class OrderController {
                 .collect(Collectors.toList());
     }
 
+    @GetMapping("/seller/{sellerId}")
+    public List<OrderResponse> getBySellerId(@PathVariable UUID sellerId) {
+        System.out.println("=== DEBUG GET BY SELLER ID ===");
+        System.out.println("Seller ID: " + sellerId);
+
+        List<Order> orders = ordersServicePort.findBySellerId(sellerId);
+        System.out.println("Found seller orders count: " + orders.size());
+
+        return orders.stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteOrderById(@PathVariable UUID id) {
         Order ordersToDelete = ordersServicePort.findOrderById(id);

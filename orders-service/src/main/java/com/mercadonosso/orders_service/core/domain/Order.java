@@ -16,7 +16,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Order {
-
     @Id
     private UUID orderId;
 
@@ -34,4 +33,6 @@ public class Order {
     @Field("list_of_listings")
     private List<String> listingId;
 
+    @NotNull(message = "Seller id must not be null")
+    private UUID sellerId;
 }

@@ -18,6 +18,7 @@ public class OrderMapper {
 
         model.setOrderId(domain.getOrderId());
         model.setBuyerId(domain.getBuyerId());
+        model.setSellerId(domain.getSellerId());
         model.setStatus(domain.getStatus());
         model.setOrderDate(domain.getDate());
         model.setProductIds(domain.getListingId());
@@ -35,6 +36,7 @@ public class OrderMapper {
 
         order.setOrderId(model.getOrderId());
         order.setBuyerId(model.getBuyerId());
+        order.setSellerId(model.getSellerId());
         order.setStatus(model.getStatus());
         order.setDate(model.getOrderDate());
         order.setListingId(model.getProductIds());

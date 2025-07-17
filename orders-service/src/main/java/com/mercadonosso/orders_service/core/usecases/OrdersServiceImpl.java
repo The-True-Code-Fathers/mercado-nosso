@@ -61,6 +61,11 @@ public class OrdersServiceImpl implements OrdersServicePort {
         return ordersRepositoryPort.findByBuyerId(id);
     }
 
+    @Override
+    public List<Order> findBySellerId(UUID sellerId) {
+        return ordersRepositoryPort.findBySellerId(sellerId);
+    }
+
     private void validateOrders(Order order) {
         Set<ConstraintViolation<Order>> violations = validator.validate(order);
         if (!violations.isEmpty()) {

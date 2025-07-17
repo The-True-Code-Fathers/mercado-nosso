@@ -12,6 +12,7 @@ public interface OrdersRepositoryPort {
     Optional<Order> findById(UUID id);
     List<Order> findAll();
     List<Order> findByBuyerId(UUID id);
+    List<Order> findBySellerId(UUID sellerId);
     void delete(Order order);
 
 }
