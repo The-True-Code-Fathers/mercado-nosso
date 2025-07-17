@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableMongoRepositories(basePackages = "com.mercadonosso.orders_service.orderservice.adapters.out.persistence")
+@EnableMongoRepositories(basePackages = "com.mercadonosso.orders_service.adapters.out.persistence")
 public class OrdersServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(OrdersServiceApplication.class, args);

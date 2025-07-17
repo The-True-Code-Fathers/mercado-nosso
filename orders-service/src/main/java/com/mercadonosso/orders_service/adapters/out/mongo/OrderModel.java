@@ -20,6 +20,6 @@ public class OrderModel {
     private UUID buyerId;
     private OrderStatus status;
     private LocalDateTime orderDate;
-    private List<UUID> productIds;
+    private List<String> productIds;
 
 }

@@ -30,9 +30,8 @@ public class Order {
     @Field("order_status")
     private OrderStatus status;
 
-
     @NotNull(message = "Must have an item")
     @Field("list_of_listings")
-    private List<UUID> listingId;
+    private List<String> listingId;
 
 }
