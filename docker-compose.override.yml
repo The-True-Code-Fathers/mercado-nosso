@@ -23,14 +23,6 @@ services:
       sh -c "cd carts-service &&
              mvn spring-boot:run"
 
-  catalog-service:
-    volumes:
-      - ./catalog-service:/app/catalog-service
-      - ~/.m2:/root/.m2
-    command: >
-      sh -c "cd catalog-service &&
-             mvn spring-boot:run"
-
   listings-service:
     volumes:
       - ./listings-service:/app/listings-service
@@ -47,28 +39,12 @@ services:
       sh -c "cd orders-service &&
              mvn spring-boot:run"
 
-  products-recommendations-service:
-    volumes:
-      - ./products-recommendations-service:/app/products-recommendations-service
-      - ~/.m2:/root/.m2
-    command: >
-      sh -c "cd products-recommendations-service &&
-             mvn spring-boot:run"
-
   reviews-service:
     volumes:
       - ./reviews-service:/app/reviews-service
       - ~/.m2:/root/.m2
     command: >
       sh -c "cd reviews-service &&
-             mvn spring-boot:run"
-
-  seller-daily-analytics-service:
-    volumes:
-      - ./seller-daily-analytics-service:/app/seller-daily-analytics-service
-      - ~/.m2:/root/.m2
-    command: >
-      sh -c "cd seller-daily-analytics-service &&
              mvn spring-boot:run"
 
   users-service:
