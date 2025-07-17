@@ -8,6 +8,10 @@ spring:
     mongodb:
       uri: ${SPRING_DATA_MONGODB_URI}
       uuid-representation: java_legacy
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
 eureka:
   client:
     service-url:
@@ -15,16 +19,3 @@ eureka:
   instance:
     prefer-ip-address: true
     instance-id: ${spring.cloud.client.ip-address}:${server.port}
-
-logging:
-  level:
-    root: INFO # Or DEBUG if you want verbose logs for everything
-    org:
-      springframework:
-        data:
-          mongodb:
-            core: DEBUG # THIS MUST BE DEBUG
-      bson:
-        Document: DEBUG # Good to have
-      mongodb:
-        driver: DEBUG # Good to have
