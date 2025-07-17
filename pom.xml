@@ -19,7 +19,6 @@
   <modules>
     <module>api-gateway</module>
     <module>carts-service</module>
-    <module>catalog-service</module>
     <module>eureka-server</module>
     <module>listings-service</module>
     <module>orders-service</module>
