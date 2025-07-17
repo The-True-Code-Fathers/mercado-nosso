@@ -164,8 +164,8 @@ public class ListingsController {
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice) {
 
-        logger.info("GET /search - Recebida requisição para buscar listings com nome parcial: {}, condição: {}, "
-                + "preço mínimo: {}, preço máximo: {}, ordenação: {}", name, condition, minPrice, maxPrice, ordering);
+        logger.info("GET /search - Searching listings: name={}, condition={}, minPrice={}, maxPrice={}, ordering={}",
+                name, condition, minPrice, maxPrice, ordering);
 
         return listingsServicePort.searchListings(name, condition, minPrice, maxPrice, ordering).stream()
                 .map(this::toResponse)
@@ -210,8 +210,7 @@ public class ListingsController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        logger.info("GET /search/paginated - Recebida requisição para buscar listings paginados com nome: {}, " +
-                "condição: {}, preço mínimo: {}, preço máximo: {}, ordenação: {}, página: {}, tamanho: {}",
+        logger.info("GET /search/paginated - Searching listings: name={}, condition={}, minPrice={}, maxPrice={}, ordering={}, page={}, size={}",
                 name, condition, minPrice, maxPrice, ordering, page, size);
 
         Pagination pagination = Pagination.of(page, size);
