@@ -44,11 +44,11 @@ public class UserJPAEntity {
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "user_selling_listing_ids", joinColumns = @JoinColumn(name = "user_id"))
-    private List<UUID> listingSellingId;
+    private List<UUID> orderSellingId;
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "user_bought_id", joinColumns = @JoinColumn(name = "user_id"))
-    private List<UUID> listingBoughtId;
+    private List<UUID> orderBoughtId;
 
     @CreationTimestamp
     @Column(name = "created_at")

@@ -22,8 +22,8 @@ public class User {
     private String socialReason;
     private boolean isSeller;
     private String profilePictureUrl;
-    private List<UUID> listingSellingId;
-    private List<UUID> listingBoughtId;
+    private List<UUID> orderSellingId;
+    private List<UUID> orderBoughtId;
     private Instant createdAt = Instant.now();
     private Instant updatedAt = Instant.now();
     private boolean active = true;

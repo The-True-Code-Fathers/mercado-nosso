@@ -12,4 +12,5 @@ import java.util.UUID;
 public interface SpringOrderRepository extends MongoRepository<OrderModel, UUID> {
 
     List<OrderModel> findByBuyerId(UUID buyerId);
+    List<OrderModel> findBySellerId(UUID sellerId);
 }
