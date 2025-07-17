@@ -22,9 +22,7 @@
     <module>eureka-server</module>
     <module>listings-service</module>
     <module>orders-service</module>
-    <module>products-recommendations-service</module>
     <module>reviews-service</module>
-    <module>seller-daily-analytics-service</module>
     <module>users-service</module>
   </modules>
 
