@@ -84,6 +84,9 @@ public class UserService implements UserServicePort {
         if (userWithNewData.getProfilePictureUrl() != null) {
             existingUser.setProfilePictureUrl(userWithNewData.getProfilePictureUrl());
         }
+        if (userWithNewData.getCep() != null) {
+            existingUser.setCep(userWithNewData.getCep());
+        }
 
         existingUser.setSeller(userWithNewData.isSeller());
 
