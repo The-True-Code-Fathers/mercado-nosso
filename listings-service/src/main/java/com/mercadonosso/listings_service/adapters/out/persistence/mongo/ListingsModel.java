@@ -6,8 +6,6 @@ import java.util.List;
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.data.mongodb.core.mapping.FieldType;
 
 import com.mercadonosso.listings_service.core.domain.enums.ProductCondition;
 
@@ -25,7 +23,6 @@ public class ListingsModel {
     private String title;
     private String description;
 
-    @Field(targetType = FieldType.DECIMAL128)
     private BigDecimal price;
     private Integer rating;
     private List<ObjectId> reviewsId;
