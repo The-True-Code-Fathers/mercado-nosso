@@ -16,8 +16,8 @@ public class UserMapper {
         entity.setSocialReason(user.getSocialReason());
         entity.setSeller(user.isSeller());
         entity.setProfilePictureUrl(user.getProfilePictureUrl());
-        entity.setListingSellingId(user.getListingSellingId());
-        entity.setListingBoughtId(user.getListingBoughtId());
+        entity.setOrderSellingId(user.getOrderSellingId());
+        entity.setOrderBoughtId(user.getOrderBoughtId());
         entity.setCreatedAt(user.getCreatedAt());
         entity.setUpdatedAt(user.getUpdatedAt());
         entity.setActive(user.isActive());
@@ -37,8 +37,8 @@ public class UserMapper {
         domain.setSocialReason(jpaEntity.getSocialReason());
         domain.setSeller(jpaEntity.isSeller());
         domain.setProfilePictureUrl(jpaEntity.getProfilePictureUrl());
-        domain.setListingSellingId(jpaEntity.getListingSellingId());
-        domain.setListingBoughtId(jpaEntity.getListingBoughtId());
+        domain.setOrderSellingId(jpaEntity.getOrderSellingId());
+        domain.setOrderBoughtId(jpaEntity.getOrderBoughtId());
         domain.setCreatedAt(jpaEntity.getCreatedAt());
         domain.setUpdatedAt(jpaEntity.getUpdatedAt());
         domain.setActive(jpaEntity.isActive());
