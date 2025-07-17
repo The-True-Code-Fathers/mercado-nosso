@@ -1,0 +1,43 @@
+meta {
+  name: Debug ObjectId Conversion
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{base_url}}/api/orders
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+  "orderId": "8c44564e-59a7-45f9-ae19-b13507395fda",
+  "buyerId": "f2e3bf7c-d189-408f-904e-0991ebe80de2",
+  "status": "OPEN",
+  "listing": [
+    "507f1f77bcf86cd799439013"
+    ]
+  }
+}
+
+tests {
+  test("Should correctly handle ObjectId", function() {
+    console.log("Response status:", res.getStatus());
+    console.log("Response body:", JSON.stringify(res.getBody(), null, 2));
+    
+    expect(res.getStatus()).to.equal(201);
+    expect(res.getBody()).to.have.property('listingID');
+    expect(res.getBody().listingID).to.be.an('array');
+    
+    // Verificar se o ObjectId não foi convertido para timestamp
+    const listingId = res.getBody().listingID[0];
+    console.log("First listing ID:", listingId);
+    console.log("Type of listing ID:", typeof listingId);
+    
+    // Um ObjectId deve ser uma string de 24 caracteres hexadecimais
+    expect(listingId).to.be.a('string');
+    expect(listingId).to.have.lengthOf(24);
+    expect(listingId).to.match(/^[0-9a-fA-F]{24}$/);
+  });
+}

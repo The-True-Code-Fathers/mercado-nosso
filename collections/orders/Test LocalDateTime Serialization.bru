@@ -1,0 +1,41 @@
+meta {
+  name: Test LocalDateTime Serialization
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{base_url}}/api/orders
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+  "orderId": "9c44564e-59a7-45f9-ae19-b13507395fdb",
+  "buyerId": "f2e3bf7c-d189-408f-904e-0991ebe80de2",
+  "status": "OPEN",
+  "listing": [
+    "507f1f77bcf86cd799439014"
+    ]
+  }
+}
+
+tests {
+  test("Should correctly serialize LocalDateTime", function() {
+    console.log("Response status:", res.getStatus());
+    console.log("Response body:", JSON.stringify(res.getBody(), null, 2));
+    
+    expect(res.getStatus()).to.equal(201);
+    expect(res.getBody()).to.have.property('creationTime');
+    
+    // Verificar se creationTime é uma string (ISO format)
+    const creationTime = res.getBody().creationTime;
+    console.log("Creation time:", creationTime);
+    console.log("Type of creation time:", typeof creationTime);
+    
+    expect(creationTime).to.be.a('string');
+    // Verificar se está no formato ISO 8601
+    expect(creationTime).to.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+  });
+}

@@ -1,0 +1,33 @@
+meta {
+  name: Create Order with ObjectId Listings
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{base_url}}/api/orders
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+  "orderId": "7c44564e-59a7-45f9-ae19-b13507395fd9",
+  "buyerId": "f2e3bf7c-d189-408f-904e-0991ebe80de2",
+  "status": "OPEN",
+  "listing": [
+    "507f1f77bcf86cd799439011",
+    "507f1f77bcf86cd799439012"
+    ]
+  }
+}
+
+tests {
+  test("Should create order with ObjectId listings", function() {
+    expect(res.getStatus()).to.equal(201);
+    expect(res.getBody()).to.have.property('orderId');
+    expect(res.getBody()).to.have.property('listingID');
+    expect(res.getBody().listingID).to.be.an('array');
+    expect(res.getBody().listingID.length).to.equal(2);
+  });
+}
