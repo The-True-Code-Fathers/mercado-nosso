@@ -87,7 +87,12 @@ public class OrderController {
 
     @GetMapping("/all/{id}")
     public List<OrderResponse> getByBuyerId(@PathVariable UUID id) {
+        System.out.println("=== DEBUG GET BY BUYER ID ===");
+        System.out.println("Buyer ID: " + id);
+
         List<Order> orders = ordersServicePort.findByBuyerId(id);
+        System.out.println("Found orders count: " + orders.size());
+
         return orders.stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
