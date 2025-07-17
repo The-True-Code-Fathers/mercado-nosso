@@ -98,22 +98,6 @@ services:
     volumes:
       - carts_db_data:/data/db
 
-  catalog-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        SERVICE_NAME: catalog-service
-    container_name: catalog-service
-    environment:
-      - SERVER_PORT=8083
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - SPRING_APPLICATION_NAME=catalog-service
-    depends_on:
-      - eureka-server
-    networks:
-      - my-network
-
   listings-service:
     build:
       context: .
@@ -172,22 +156,6 @@ services:
     networks:
       - my-network
 
-  products-recommendations-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        SERVICE_NAME: products-recommendations-service
-    container_name: products-recommendations-service
-    environment:
-      - SERVER_PORT=8086
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - SPRING_APPLICATION_NAME=products-recommendations-service
-    depends_on:
-      - eureka-server
-    networks:
-      - my-network
-
   reviews-service:
     build:
       context: .
@@ -215,22 +183,6 @@ services:
       - "5436:27017"
     volumes:
       - reviews_db_data:/data/db
-    networks:
-      - my-network
-
-  seller-daily-analytics-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        SERVICE_NAME: seller-daily-analytics-service
-    container_name: seller-daily-analytics-service
-    environment:
-      - SERVER_PORT=8089
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - SPRING_APPLICATION_NAME=seller-daily-analytics-service
-    depends_on:
-      - eureka-server
     networks:
       - my-network
 
