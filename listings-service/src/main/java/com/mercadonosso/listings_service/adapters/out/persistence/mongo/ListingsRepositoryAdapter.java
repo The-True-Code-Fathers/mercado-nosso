@@ -134,10 +134,11 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
             criteria = criteria.and("productCondition").is(productCondition);
         }
 
-        if (minPrice != null) {
+        if (minPrice != null && maxPrice != null) {
+            criteria = criteria.and("price").gte(minPrice).lte(maxPrice);
+        } else if (minPrice != null) {
             criteria = criteria.and("price").gte(minPrice);
-        }
-        if (maxPrice != null) {
+        } else if (maxPrice != null) {
             criteria = criteria.and("price").lte(maxPrice);
         }
 
