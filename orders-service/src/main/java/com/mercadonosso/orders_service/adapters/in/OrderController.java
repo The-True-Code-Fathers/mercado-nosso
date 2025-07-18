@@ -1,9 +1,14 @@
 package com.mercadonosso.orders_service.adapters.in;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.mercadonosso.orders_service.adapters.in.dto.DashboardResponse;
+import jakarta.ws.rs.Path;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,19 +19,23 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import com.mercadonosso.orders_service.adapters.in.dto.CreatingOrderRequest;
 import com.mercadonosso.orders_service.adapters.in.dto.OrderResponse;
 import com.mercadonosso.orders_service.adapters.in.dto.UpdateOrderStatusRequest;
 import com.mercadonosso.orders_service.core.domain.Order;
 import com.mercadonosso.orders_service.core.ports.in.OrdersServicePort;
+import org.springframework.web.client.RestTemplate;
 
 @RestController
 public class OrderController {
+    private final RestTemplate restTemplate;
     private final OrdersServicePort ordersServicePort;
 
     public OrderController(OrdersServicePort ordersServicePort) {
         this.ordersServicePort = ordersServicePort;
+        this.restTemplate = new RestTemplate();
     }
 
     @PostMapping
@@ -47,6 +56,7 @@ public class OrderController {
         order.setListingId(request.listing());
         order.setBuyerId(request.buyerId());
         order.setStatus(request.status());
+        order.setSellerId(request.sellerId());
 
         Order createdOrder = ordersServicePort.create(order);
 
@@ -123,5 +133,70 @@ public class OrderController {
     public OrderResponse updateOrder(@PathVariable UUID id, @RequestBody UpdateOrderStatusRequest request) {
         Order orderToUpdate = ordersServicePort.updateOrder(id, request.getStatus());
         return toResponse(orderToUpdate);
+    }
+
+    @GetMapping("/seller/{sellerId}/dashboard")
+    public DashboardResponse getDashboard(@PathVariable UUID sellerId) {
+        List<Order> orders = ordersServicePort.findBySellerId(sellerId);
+
+        List<DashboardResponse.OrderWithListing> ordersWithListings = new ArrayList<>();
+
+        for (Order order : orders) {
+            List<DashboardResponse.ListingInfo> listingInfos = new ArrayList<>();
+
+            for (String listingId : order.getListingId()) {
+                try {
+                    String url = "http://listings-service:8084/" + listingId;
+
+                    Map<String, Object> listingResponse = restTemplate.getForObject(url, Map.class);
+                    System.out.println("URL chamada: " + url);
+                    System.out.println("Response: " + listingResponse);
+
+                    if (listingResponse != null) {
+                        String title = (String) listingResponse.get("title");
+                        BigDecimal price = new BigDecimal(listingResponse.get("price").toString());
+                        String category = (String) listingResponse.get("category");
+
+                        listingInfos.add(new DashboardResponse.ListingInfo(
+                                listingId,
+                                title,
+                                price,
+                                category
+                        ));
+                    }
+                } catch (Exception e) {
+                    System.err.println("Erro ao buscar listing " + listingId + ": " + e.getMessage());
+                }
+            }
+
+            ordersWithListings.add(new DashboardResponse.OrderWithListing(
+                    order.getOrderId(),
+                    order.getBuyerId(),
+                    order.getSellerId(),
+                    order.getStatus(),
+                    order.getDate(),
+                    listingInfos
+            ));
+
+        }
+
+        BigDecimal totalSales = BigDecimal.ZERO;
+        double totalRating = 0.0;
+        int ratingCount = 0;
+
+        for (DashboardResponse.OrderWithListing orderWithListing : ordersWithListings) {
+            for (DashboardResponse.ListingInfo listing : orderWithListing.listings()) {
+                totalSales = totalSales.add(listing.price());
+            }
+        }
+
+        double averageRating = ratingCount > 0 ? totalRating / ratingCount : 0.0;
+
+        return new DashboardResponse(
+                totalSales,
+                averageRating,
+                ordersWithListings,
+                new ArrayList<>()
+        );
     }
 }

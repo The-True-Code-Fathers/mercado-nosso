@@ -16,7 +16,6 @@ import com.mercadonosso.orders_service.core.ports.in.OrdersServicePort;
 import com.mercadonosso.orders_service.core.ports.out.OrdersRepositoryPort;
 
 public class OrdersServiceImpl implements OrdersServicePort {
-
     private final OrdersRepositoryPort ordersRepositoryPort;
     private final Validator validator;
 

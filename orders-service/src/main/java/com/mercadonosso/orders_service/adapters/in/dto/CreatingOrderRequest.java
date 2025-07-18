@@ -5,8 +5,10 @@ import java.util.UUID;
 
 import com.mercadonosso.orders_service.core.domain.enums.OrderStatus;
 
-public record CreatingOrderRequest(UUID orderId,
+public record CreatingOrderRequest(
+        UUID orderId,
         UUID buyerId,
+        UUID sellerId,
         OrderStatus status,
         List<String> listing) {
 }
