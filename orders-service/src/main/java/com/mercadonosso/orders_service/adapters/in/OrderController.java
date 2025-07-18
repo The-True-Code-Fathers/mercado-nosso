@@ -8,9 +8,12 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.mercadonosso.orders_service.adapters.in.dto.DashboardResponse;
+import com.mercadonosso.orders_service.adapters.out.rest.users.UpdateUserRequest;
+import com.mercadonosso.orders_service.adapters.out.rest.users.UsersServiceAdapter;
 import jakarta.ws.rs.Path;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -30,12 +33,16 @@ import org.springframework.web.client.RestTemplate;
 
 @RestController
 public class OrderController {
+    private final UsersServiceAdapter usersServiceAdapter;
+
+
     private final RestTemplate restTemplate;
     private final OrdersServicePort ordersServicePort;
 
-    public OrderController(OrdersServicePort ordersServicePort) {
+    public OrderController(OrdersServicePort ordersServicePort, UsersServiceAdapter usersServiceAdapter) {
         this.ordersServicePort = ordersServicePort;
         this.restTemplate = new RestTemplate();
+        this.usersServiceAdapter = usersServiceAdapter;
     }
 
     @PostMapping
@@ -59,6 +66,9 @@ public class OrderController {
         order.setSellerId(request.sellerId());
 
         Order createdOrder = ordersServicePort.create(order);
+
+        usersServiceAdapter.addOrderToBuyer(createdOrder.getBuyerId(), createdOrder.getOrderId());
+        usersServiceAdapter.addOrderToSeller(createdOrder.getSellerId(), createdOrder.getOrderId());
 
         return toResponse(createdOrder);
     }

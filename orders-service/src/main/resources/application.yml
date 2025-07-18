@@ -20,3 +20,4 @@ eureka:
 app:
   services:
     listings-url: http://listings-service
+    users-url: http://users-service
