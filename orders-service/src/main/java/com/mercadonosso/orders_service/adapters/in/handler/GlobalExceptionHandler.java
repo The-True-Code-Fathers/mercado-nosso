@@ -22,6 +22,7 @@ public class GlobalExceptionHandler {
                 "Bad request",
                 ex.getMessage()
         );
+        ex.printStackTrace();
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
@@ -34,6 +35,7 @@ public class GlobalExceptionHandler {
                 "Not found",
                 ex.getMessage()
         );
+        ex.printStackTrace();
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 }
