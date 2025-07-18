@@ -33,3 +33,9 @@ build/
 .tool-versions
 
 **/target
+
+### trained models ###
+*.pkl
+**.pyc
+
+*.jar
