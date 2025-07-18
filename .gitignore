@@ -37,3 +37,5 @@ build/
 ### trained models ###
 *.pkl
 **.pyc
+
+*.jar
