@@ -26,7 +26,9 @@ public record DashboardResponse(
             String listingId,
             String title,
             BigDecimal price,
-            String category
+            String category,
+            Integer rating,
+            Integer salesCount
     ) {}
 
     public record TopProduct(
