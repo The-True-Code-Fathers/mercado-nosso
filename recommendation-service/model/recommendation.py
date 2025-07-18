@@ -11,6 +11,7 @@ import os
 import glob
 import random
 import pickle
+import json
 
 def preprocess_features(df):
     """
@@ -189,62 +190,29 @@ def create_enhanced_recommendation_system(df, use_text_features=True, text_max_f
         }
     }
 
-def get_smart_recommendations(product_index, df, model_components, n_recommendations=3, filters=None, use_category_boost=True):
+def get_smart_recommendations(product_index, model_components, n_recommendations=5):
     """
-    Função de recomendação inteligente que retorna SKUs em vez de índices.
+    Gets recommendations using the pre-computed data inside model_components.
     """
-    knn_cosine = model_components['knn_cosine']
-    knn_euclidean = model_components['knn_euclidean']
+    # Use the correct key for the KNN model
+    knn = model_components.get('knn_cosine') or model_components.get('knn') 
+    
     X_reduced = model_components['X_reduced']
+    df_full = model_components['df_processed']
     
-    # ... (code for combining KNN results is unchanged) ...
-    original_product = df.iloc[product_index]
-    distances_cos, indices_cos = knn_cosine.kneighbors([X_reduced[product_index]], n_neighbors=50)
-    distances_euc, indices_euc = knn_euclidean.kneighbors([X_reduced[product_index]], n_neighbors=50)
-    combined_scores = {}
-    for i, idx in enumerate(indices_cos[0]):
-        if idx != product_index:
-            combined_scores[idx] = combined_scores.get(idx, 0) + (1 - distances_cos[0][i]) * 0.6
-    for i, idx in enumerate(indices_euc[0]):
-        if idx != product_index:
-            max_dist = np.max(distances_euc[0])
-            normalized_dist = distances_euc[0][i] / max_dist if max_dist > 0 else 0
-            combined_scores[idx] = combined_scores.get(idx, 0) + (1 - normalized_dist) * 0.4
-    if use_category_boost:
-        for idx in combined_scores:
-            candidate = df.iloc[idx]
-            if candidate['category'] == original_product['category']:
-                combined_scores[idx] *= 1.5
-    sorted_candidates = sorted(combined_scores.items(), key=lambda x: x[1], reverse=True)
+    # Get the embedding for the target product
+    product_embedding = X_reduced[product_index].reshape(1, -1)
     
-    # --- Start of Changed Section ---
-    recommendations = [] # This will now store SKUs
-    similarities = []
+    # Find the nearest neighbors
+    distances, indices = knn.kneighbors(product_embedding, n_neighbors=n_recommendations + 1)
     
-    for idx, score in sorted_candidates:
-        candidate = df.iloc[idx]
-        
-        # ... (all filter logic is unchanged) ...
-        if candidate['rating'] < 2.0 and candidate['reviews'] < 5:
-            continue
-        if filters:
-            if filters.get('same_category') and candidate['category'] != original_product['category']: continue
-            if filters.get('same_condition') and candidate['productCondition'] != original_product['productCondition']: continue
-            if filters.get('price_range_factor'):
-                price_diff = abs(candidate['price'] - original_product['price'])
-                if price_diff > original_product['price'] * filters['price_range_factor']: continue
-            if filters.get('min_rating') and candidate['rating'] < filters['min_rating']: continue
-            if filters.get('in_stock_only') and candidate['stock'] <= 0: continue
-            if filters.get('active_only') and not candidate['active']: continue
-        
-        recommendations.append(candidate['sku']) # ✅ APPEND SKU INSTEAD OF INDEX
-        similarities.append(min(score, 1.0))
-        
-        if len(recommendations) >= n_recommendations:
-            break
-            
-    # The function now returns a list of SKUs and an array of similarities
-    return recommendations, np.array(similarities)
+    # The first item is always the product itself, so we skip it (start from index 1)
+    rec_indices = indices[0][1:]
+    
+    # Get the SKUs of the recommended products from the full DataFrame
+    rec_skus = df_full.iloc[rec_indices]['sku'].tolist()
+    
+    return rec_skus
 
 def display_recommendations(product_index, df, recommendations, similarities):
     """
@@ -351,68 +319,65 @@ def load_model(model_path):
 
 def generate_recommendations_for_fragment(df_fragment, model_components, n_recommendations=3):
     """
-    Correctly generates recommendations for a fragment using the full trained model.
+    Correctly generates recommendations for a fragment.
     """
-    recommendations_map = {}
+    final_recommendations = []
+    df_full_processed = model_components['df_processed']
     
-    # ✅ CRITICAL STEP 1: Get the full, processed DataFrame that the model was trained on.
-    df_full_processed = model_components['df_processed'] 
-    
-    # Iterate through each product in the SMALL fragment
+    print("\nGenerating recommendations for fragment...")
     for _, row in df_fragment.iterrows():
         sku = row["sku"]
         try:
-            # Find the index of the product in the FULL dataset
-            product_index_in_full_df = df_full_processed[df_full_processed['sku'] == sku].index[0]
+            # Find the product's integer position in the FULL dataset
+            product_index = df_full_processed[df_full_processed['sku'] == sku].index[0]
             
-            # ✅ CRITICAL STEP 2: Call get_smart_recommendations using the FULL DataFrame.
-            rec_skus, similarities = get_smart_recommendations(
-                product_index_in_full_df, 
-                df_full_processed,  # Pass the correct, full DataFrame here
+            # This call now correctly matches the simplified function signature
+            rec_skus = get_smart_recommendations(
+                product_index, 
                 model_components, 
                 n_recommendations=n_recommendations
             )
             
-            # Look up the recommended items (by their SKUs) in the FULL DataFrame
-            if rec_skus:
-                recommended_items = df_full_processed.set_index('sku').loc[rec_skus].reset_index().to_dict(orient="records")
-                recommendations_map[sku] = recommended_items
-            else:
-                recommendations_map[sku] = []
+            final_recommendations.append({
+                "sku": sku,
+                "recommendations": rec_skus
+            })
 
         except (ValueError, IndexError):
-            print(f"❌ Could not find or process SKU '{sku}' in the trained model's dataset.")
-            recommendations_map[sku] = []
+            print(f"  - ❌ Could not find or process SKU '{sku}' in the trained model's dataset.")
+            final_recommendations.append({
+                "sku": sku,
+                "recommendations": []
+            })
             
-    return recommendations_map
+    print("✅ Recommendation generation complete.")
+    return final_recommendations
 
 
 def generate_recommendations_for_new_item(new_item_dict, model_components, n_recommendations=5):
     """
-    Generates recommendations for a single, new item not in the original dataset.
+    Generates recommendations for a single, new item and returns the
+    result in a JSON-friendly dictionary format.
     """
     print(f"🔧 Generating recommendations for new item: {new_item_dict.get('sku', 'N/A')}")
 
-    # --- 1. Load all necessary components ---
+    # --- (The first part of the function for preprocessing the new item is unchanged) ---
     df_full_processed = model_components['df_processed']
     scaler = model_components['scaler']
     label_encoders = model_components['label_encoders']
     tfidf = model_components['tfidf']
     encoder_model = model_components['encoder']
-    knn_cosine = model_components['knn_cosine']
+    knn = model_components.get('knn_cosine') or model_components.get('knn') # Handle different key names
     
     feature_info = model_components['feature_names']
     num_feat_names = feature_info['numerical']
     cat_feat_names = feature_info['categorical']
     
-    # --- 2. Preprocess the new item's features ---
     new_item_df = pd.DataFrame([new_item_dict])
     
-    # A. Handle numerical and derived features
+    # Preprocessing steps remain the same...
     new_item_df['popularity_score'] = (new_item_df['rating'] * np.log1p(new_item_df['reviews'])).fillna(0)
     numerical_data = scaler.transform(new_item_df[num_feat_names])
-
-    # B. Handle categorical features using the saved encoders
     new_item_df['category_encoded'] = label_encoders['category'].transform(new_item_df['category'])
     new_item_df['productCondition_encoded'] = label_encoders['productCondition'].transform(new_item_df['productCondition'])
     new_item_df['sellerId_encoded'] = label_encoders['sellerId'].transform(new_item_df['sellerId'])
@@ -422,24 +387,38 @@ def generate_recommendations_for_new_item(new_item_dict, model_components, n_rec
     new_item_df['price_range'] = pd.cut(new_item_df['price'], bins=[0, 50, 100, 200, 500, float('inf')], labels=[0, 1, 2, 3, 4]).cat.add_categories([5]).fillna(5).astype(int)
     new_item_df['rating_category'] = pd.cut(new_item_df['rating'], bins=[0, 3, 4, 4.5, 5], labels=[0, 1, 2, 3]).cat.add_categories([4]).fillna(4).astype(int)
     categorical_data = new_item_df[cat_feat_names].values
-
-    # C. Handle text features
     new_item_df['combined_text'] = new_item_df['title'].fillna('')
     text_data = tfidf.transform(new_item_df['combined_text']).toarray()
     
-    # --- 3. Combine features into a single vector ---
     X_new = np.concatenate([numerical_data, categorical_data, text_data], axis=1)
-    
-    # --- 4. Get the embedding for the new item ---
     X_new_reduced = encoder_model.predict(X_new)
     
-    # --- 5. Find neighbors in the original dataset ---
-    distances, indices = knn_cosine.kneighbors(X_new_reduced, n_neighbors=n_recommendations)
-    
-    # The indices are valid for df_full_processed
+    # --- (The last part of the function is changed to return only SKUs) ---
+    distances, indices = knn.kneighbors(X_new_reduced, n_neighbors=n_recommendations)
     rec_indices = indices[0]
     
-    # --- 6. Return the recommended items from the full dataset ---
-    recommended_items = df_full_processed.iloc[rec_indices].to_dict(orient="records")
+    # Get the list of recommended SKUs
+    recommended_skus = df_full_processed.iloc[rec_indices]['sku'].tolist()
     
-    return recommended_items
+    # Create the final result object
+    final_result = {
+        "sku": new_item_dict.get('sku'),
+        "recommendations": recommended_skus
+    }
+    
+    return final_result
+
+def save_recommendations_to_json(data, filepath):
+    """
+    Saves the recommendation data to a JSON file.
+
+    Args:
+        data (list or dict): The recommendation results to save.
+        filepath (str): The path to the output JSON file.
+    """
+    try:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        print(f"✅ Recommendations successfully saved to {filepath}")
+    except Exception as e:
+        print(f"❌ Error saving file: {e}")
