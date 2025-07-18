@@ -141,6 +141,7 @@ services:
       - SPRING_APPLICATION_NAME=orders-service
       - SPRING_DATA_MONGODB_URI=mongodb://orders-service-mongodb:27017/orders-service-mongodb
       - APP_SERVICES_LISTINGS-URL=http://listings-service:8084
+      - APP_SERVICES_USERS-URL=http://users-service:8081
     depends_on:
       - eureka-server
       - orders-service-mongodb

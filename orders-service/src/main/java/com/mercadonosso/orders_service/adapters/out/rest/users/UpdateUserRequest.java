@@ -1,4 +1,4 @@
-package com.mercadonosso.users_service.adapters.in.dto;
+package com.mercadonosso.orders_service.adapters.out.rest.users;
 
 import java.util.List;
 import java.util.UUID;
@@ -12,7 +12,7 @@ public record UpdateUserRequest(
         String socialReason,
         String cep,
         boolean isSeller,
-        List<UUID>orderSellingId,
-        List<UUID>orderBoughtId
+        List<UUID> orderSellingId,
+        List<UUID> orderBoughtId
 ) {
 }

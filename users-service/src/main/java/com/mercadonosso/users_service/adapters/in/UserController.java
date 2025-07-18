@@ -1,5 +1,6 @@
 package com.mercadonosso.users_service.adapters.in;
 
+import java.util.ArrayList;
 import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
@@ -84,6 +85,9 @@ public class UserController {
         System.out.println("CEP está vazio?: " + (request.cep() != null && request.cep().isEmpty()));
         System.out.println("========================");
 
+        User user = userService.findById(userId).
+                orElseThrow(() -> new RuntimeException("User not found"));
+
         User userWithNewData = new User();
         userWithNewData.setFullName(request.fullName());
         userWithNewData.setEmail(request.email());
@@ -108,6 +112,24 @@ public class UserController {
             userWithNewData.setSeller(true);
         } else {
             System.out.println("Nao atualizou, ficou como false mesmo");
+        }
+
+        if (request.orderSellingId() != null && !request.orderSellingId().isEmpty()) {
+            if (user.getOrderSellingId() == null) user.setOrderSellingId(new ArrayList<>());
+            for (UUID id : request.orderSellingId()) {
+                if (!user.getOrderSellingId().contains(id)) {
+                    user.getOrderSellingId().add(id);
+                }
+            }
+        }
+
+        if (request.orderBoughtId() != null && !request.orderBoughtId().isEmpty()) {
+            if (user.getOrderBoughtId() == null) user.setOrderBoughtId(new ArrayList<>());
+            for (UUID id : request.orderBoughtId()) {
+                if (!user.getOrderBoughtId().contains(id)) {
+                    user.getOrderBoughtId().add(id);
+                }
+            }
         }
 
         User updatedUser = userService.updateUser(userId, userWithNewData);
@@ -177,4 +199,8 @@ public class UserController {
 
         return ResponseEntity.ok(response);
     }
+
+
+
+
 }
