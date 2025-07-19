@@ -8,11 +8,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.mercadonosso.orders_service.adapters.in.dto.DashboardResponse;
-import com.mercadonosso.orders_service.adapters.out.rest.users.UpdateUserRequest;
 import com.mercadonosso.orders_service.adapters.out.rest.users.UsersServiceAdapter;
-import jakarta.ws.rs.Path;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +25,6 @@ import com.mercadonosso.orders_service.adapters.in.dto.OrderResponse;
 import com.mercadonosso.orders_service.adapters.in.dto.UpdateOrderStatusRequest;
 import com.mercadonosso.orders_service.core.domain.Order;
 import com.mercadonosso.orders_service.core.ports.in.OrdersServicePort;
-import org.springframework.web.client.RestTemplate;
 
 @RestController
 public class OrderController {
@@ -156,6 +151,7 @@ public class OrderController {
 
             for (String listingId : order.getListingId()) {
                 try {
+                    // TODO: replace this with an environment variable or configuration
                     String url = "http://listings-service:8084/" + listingId;
 
                     Map<String, Object> listingResponse = restTemplate.getForObject(url, Map.class);
