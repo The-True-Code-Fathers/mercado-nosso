@@ -39,3 +39,5 @@ build/
 **.pyc
 
 *.jar
+
+*/.venv/** 

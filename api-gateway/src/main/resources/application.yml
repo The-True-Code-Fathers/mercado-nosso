@@ -43,7 +43,6 @@ spring:
           filters:
             - StripPrefix=2
 
-
         - id: orders_service_route
           uri: lb://orders-service
           predicates:
@@ -52,7 +51,7 @@ spring:
             - StripPrefix=2
 
         - id: products_recommendations_service_route
-          uri: lb://products-recommendations-service
+          uri: lb://recommendations-service
           predicates:
             - Path=/api/recommendations/**
           filters:

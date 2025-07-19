@@ -223,6 +223,25 @@ services:
     networks:
       - my-network
 
+  recommendations-service:
+    build:
+      context: ./recommendations-service
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: recommendations-service
+    container_name: recommendations-service
+    environment:
+      - SERVER_PORT=8086
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_APPLICATION_NAME=recommendations-service
+    depends_on:
+      eureka-server:
+        condition: service_started
+    ports:
+      - "8086:8086"
+    networks:
+      - my-network
+
 volumes:
   users_db_data:
   carts_db_data:
