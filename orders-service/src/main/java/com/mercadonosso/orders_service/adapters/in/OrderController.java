@@ -166,12 +166,16 @@ public class OrderController {
                         String title = (String) listingResponse.get("title");
                         BigDecimal price = new BigDecimal(listingResponse.get("price").toString());
                         String category = (String) listingResponse.get("category");
+                        Integer rating = (Integer) listingResponse.get("rating");
+                        Integer salesCount = (Integer) listingResponse.get("salesCount");
 
                         listingInfos.add(new DashboardResponse.ListingInfo(
                                 listingId,
                                 title,
                                 price,
-                                category
+                                category,
+                                rating,
+                                salesCount
                         ));
                     }
                 } catch (Exception e) {
