@@ -12,6 +12,19 @@ import glob
 import random
 import pickle
 import json
+import io
+import pymongo
+from pymongo import MongoClient
+from bson.json_util import dumps
+from bson.objectid import ObjectId
+
+MONGO_HOST = 'listings-service-mongodb' # Nome do serviço do MongoDB no docker-compose.yml
+MONGO_PORT = 27017
+MONGO_DB_NAME = 'listings-service-mongodb'    
+INPUT_COLLECTION_NAME = 'listings' # Exemplo: Sua coleção de produtos/listings
+
+OUTPUT_COLLECTION_NAME = 'recommendations' # Nova coleção para salvar as recomendações
+RECOMMENDATION_ID_FIELD = 'sku' # Campo único no seu DataFrame de recomendações
 
 def preprocess_features(df):
     """
@@ -351,7 +364,7 @@ def generate_recommendations_for_fragment(df_fragment, model_components, n_recom
             })
             
     print("✅ Recommendation generation complete.")
-    return final_recommendations
+    return pd.DataFrame(final_recommendations)
 
 
 def generate_recommendations_for_new_item(new_item_dict, model_components, n_recommendations=5):
@@ -422,3 +435,114 @@ def save_recommendations_to_json(data, filepath):
         print(f"✅ Recommendations successfully saved to {filepath}")
     except Exception as e:
         print(f"❌ Error saving file: {e}")
+
+
+
+def get_data_from_mongodb(collection_name: str, query_filter: dict = None) -> str:
+    """
+    Conecta ao MongoDB, executa uma query em uma coleção específica e retorna os resultados em formato JSON.
+
+    Args:
+        collection_name (str): O nome da coleção a ser consultada.
+        query_filter (dict, optional): Um dicionário para filtrar a query. Ex: {"qty": {"$gt": 10}}.
+                                      Se None ou {}, retorna todos os documentos.
+                                      Padrão para {}.
+
+    Returns:
+        str: Uma string JSON contendo os documentos encontrados, ou um JSON de erro.
+    """
+    client = None
+    try:
+        conn_params = {
+            'host': MONGO_HOST,
+            'port': MONGO_PORT
+        }
+    
+        client = MongoClient(**conn_params)
+        db = client[MONGO_DB_NAME]
+        collection = db[collection_name]
+
+        final_filter = query_filter if query_filter is not None else {}
+        cursor = collection.find(final_filter)
+
+        json_output = dumps(list(cursor), indent=4)
+        return json_output
+
+    except pymongo.errors.ConnectionFailure as e:
+        return dumps({"error": f"Connection to MongoDB failed: {str(e)}"})
+    except Exception as e:
+        return dumps({"error": f"An unexpected error occurred during get_data: {str(e)}"})
+    finally:
+        if client:
+            client.close()
+
+def save_data_to_mongodb(data_list: list, collection_name: str, id_field: str = None) -> dict:
+    """
+    Salva uma lista de dicionários em uma coleção do MongoDB.
+    Se 'id_field' for fornecido, tenta atualizar documentos existentes (upsert),
+    caso contrário, insere todos os documentos como novos.
+
+    Args:
+        data_list (list): Uma lista de dicionários, onde cada dicionário é um documento a ser salvo.
+        collection_name (str): O nome da coleção onde os dados serão salvos.
+        id_field (str, optional): O nome do campo no documento que serve como ID único
+                                  para operações de upsert (atualização ou inserção).
+                                  Se None, todos os documentos serão inseridos como novos.
+
+    Returns:
+        dict: Um dicionário com o status da operação e mensagens de erro, se houver.
+    """
+    client = None
+    try:
+        conn_params = {
+            'host': MONGO_HOST,
+            'port': MONGO_PORT
+        }
+        
+        client = MongoClient(**conn_params)
+        db = client[MONGO_DB_NAME]
+        collection = db[collection_name]
+
+        results = []
+        for doc in data_list:
+            # Tenta converter _id para ObjectId se for string e válido
+            if '_id' in doc and isinstance(doc['_id'], str):
+                try:
+                    doc['_id'] = ObjectId(doc['_id'])
+                except:
+                    pass # Ignora se não for um ObjectId válido, mantém como string
+
+            if id_field and id_field in doc:
+                # Usa update_one com upsert para atualizar ou inserir
+                # Cria um filtro baseado no id_field
+                filter_query = {id_field: doc[id_field]}
+                
+                # Prepara o documento para atualização. Remove _id para evitar conflitos
+                # se o _id estiver presente no doc e id_field for diferente
+                doc_to_save = {k: v for k, v in doc.items() if k != '_id'}
+
+                update_result = collection.update_one(
+                    filter_query,
+                    {"$set": doc_to_save},
+                    upsert=True
+                )
+                if update_result.upserted_id:
+                    results.append(f"Inserido novo documento com _id: {update_result.upserted_id}")
+                elif update_result.modified_count > 0:
+                    results.append(f"Documento com {id_field}: {doc[id_field]} atualizado.")
+                else:
+                    results.append(f"Documento com {id_field}: {doc[id_field]} não modificado.")
+            else:
+                # Insere o documento como novo
+                insert_result = collection.insert_one(doc)
+                results.append(f"Inserido novo documento com _id: {insert_result.inserted_id}")
+
+        return {"status": "success", "message": "Dados salvos com sucesso.", "details": results}
+
+    except pymongo.errors.ConnectionFailure as e:
+        return {"status": "error", "message": f"Connection to MongoDB failed: {str(e)}"}
+    except Exception as e:
+        return {"status": "error", "message": f"An unexpected error occurred during save_data: {str(e)}"}
+    finally:
+        if client:
+            client.close()
