@@ -18,13 +18,15 @@ from pymongo import MongoClient
 from bson.json_util import dumps
 from bson.objectid import ObjectId
 
-MONGO_HOST = 'listings-service-mongodb' # Nome do serviço do MongoDB no docker-compose.yml
+MONGO_HOST_INPUT = 'listings-service-mongodb' # Nome do serviço do MongoDB no docker-compose.yml
 MONGO_PORT = 27017
-MONGO_DB_NAME = 'listings-service-mongodb'    
+MONGO_DB_NAME_INPUT = 'listings-service-mongodb'    
 INPUT_COLLECTION_NAME = 'listings' # Exemplo: Sua coleção de produtos/listings
 
-OUTPUT_COLLECTION_NAME = 'recommendations' # Nova coleção para salvar as recomendações
-RECOMMENDATION_ID_FIELD = 'sku' # Campo único no seu DataFrame de recomendações
+MONGO_HOST_OUTPUT = 'recommendations-service-mongodb' # Service name for recommendations MongoDB
+MONGO_DB_NAME_OUTPUT = 'recommendations-service-mongodb' # <--- Choose a logical database name for recommendations (e.g., 'recommendations-db' or 'mercado_nosso_recommendations')
+OUTPUT_COLLECTION_NAME = 'recommendations' # Collection name for recommendations data
+RECOMMENDATION_ID_FIELD = 'sku' # Field used as ID for recommendations único no seu DataFrame de recomendações
 
 def preprocess_features(df):
     """
@@ -454,12 +456,12 @@ def get_data_from_mongodb(collection_name: str, query_filter: dict = None) -> st
     client = None
     try:
         conn_params = {
-            'host': MONGO_HOST,
+            'host': MONGO_HOST_INPUT,
             'port': MONGO_PORT
         }
     
         client = MongoClient(**conn_params)
-        db = client[MONGO_DB_NAME]
+        db = client[MONGO_DB_NAME_INPUT]
         collection = db[collection_name]
 
         final_filter = query_filter if query_filter is not None else {}
@@ -476,7 +478,9 @@ def get_data_from_mongodb(collection_name: str, query_filter: dict = None) -> st
         if client:
             client.close()
 
-def save_data_to_mongodb(data_list: list, collection_name: str, id_field: str = None) -> dict:
+def save_data_to_mongodb(data_list: list, collection_name: str, id_field: str = None,
+                         mongo_host: str = MONGO_HOST_OUTPUT, # Use OUTPUT host as default
+                         mongo_db_name: str = MONGO_DB_NAME_OUTPUT) -> dict:
     """
     Salva uma lista de dicionários em uma coleção do MongoDB.
     Se 'id_field' for fornecido, tenta atualizar documentos existentes (upsert),
@@ -495,12 +499,12 @@ def save_data_to_mongodb(data_list: list, collection_name: str, id_field: str = 
     client = None
     try:
         conn_params = {
-            'host': MONGO_HOST,
+            'host': mongo_host,
             'port': MONGO_PORT
         }
         
         client = MongoClient(**conn_params)
-        db = client[MONGO_DB_NAME]
+        db = client[mongo_db_name]
         collection = db[collection_name]
 
         results = []

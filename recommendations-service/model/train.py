@@ -121,7 +121,10 @@ def execute_recommendation_pipeline():
     save_result = save_data_to_mongodb(
         data_list=recommendations_list,
         collection_name=OUTPUT_COLLECTION_NAME,
-        id_field=RECOMMENDATION_ID_FIELD # Use um campo que identifique unicamente a recomendação, ex: 'product_id'
+        id_field=RECOMMENDATION_ID_FIELD,
+        # --- CRITICAL: Explicitly pass output MongoDB config ---
+        mongo_host=MONGO_HOST_OUTPUT,
+        mongo_db_name=MONGO_DB_NAME_OUTPUT
     )
 
     if save_result["status"] == "success":
