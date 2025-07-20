@@ -75,7 +75,7 @@ app = FastAPI(lifespan=lifespan)
 
 print("DEBUG: FastAPI app definida com lifespan.", flush=True)
 
-@app.get("/recommendations/{sku}")
+@app.get("/{sku}")
 async def get_recommendations_for_existing_sku(sku: str):
     """
     Retorna recomendações para um SKU existente.
@@ -93,7 +93,7 @@ async def get_recommendations_for_existing_sku(sku: str):
         # Para outros erros inesperados
         raise HTTPException(status_code=500, detail=f"Ocorreu um erro interno: {e}")
 
-@app.post("/recommendations/new-product")
+@app.post("/new-product")
 async def get_recommendations_for_new_product(product: NewProduct):
     """
     Gera e retorna recomendações para um novo produto enviado no corpo da requisição.
