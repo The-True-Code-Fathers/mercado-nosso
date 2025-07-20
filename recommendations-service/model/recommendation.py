@@ -377,44 +377,75 @@ def generate_recommendations_for_fragment(df_fragment, model_components, n_recom
     """
     Generates recommendations for a fragment with progress logging.
     """
-    final_recommendations = []
+    print(f"\n🧠 Iniciando geração de recomendações filtradas para {len(df_fragment)} itens...", flush=True)
+
+    # --- PASSO 1: Obter os embeddings apenas para os SKUs do fragmento ---
     df_full_processed = model_components['df_processed']
-    sku_to_index = df_full_processed['sku'].reset_index().set_index('sku')['index'].to_dict()
+    X_reduced = model_components['X_reduced']
     
-    total_items = len(df_fragment)
-    print(f"\nGenerating recommendations for {total_items} items...", flush=True)
+    # Criar um mapa de SKU para índice do dataset completo para busca rápida
+    sku_to_full_index = pd.Series(df_full_processed.index, index=df_full_processed.sku)
     
-    # Usamos enumerate para obter o índice (i) de cada item
-    for i, (_, row) in enumerate(df_fragment.iterrows()):
-        sku = row["sku"]
-        
-        # --- LÓGICA DO CHECKPOINT ---
-        # A cada 100 itens (e também para o primeiro item), imprime o status.
-        # (i + 1) porque o índice 'i' começa em 0.
-        if (i + 1) % 100 == 0 or i == 0:
-            percent = ((i + 1) / total_items) * 100
-            print(f"CHECKPOINT: Processing item {i + 1}/{total_items} ({percent:.2f}%)...", flush=True)
-            
-        try:
-            product_index = sku_to_index[sku]
-            rec_skus = get_smart_recommendations(
-                product_index, 
-                model_components, 
-                n_recommendations=n_recommendations
-            )
-            final_recommendations.append({
-                "sku": sku,
-                "recommendations": rec_skus
-            })
-        except (ValueError, IndexError):
-            print(f"  - ❌ Could not find or process SKU '{sku}' in the trained model's dataset.")
-            final_recommendations.append({
-                "sku": sku,
-                "recommendations": []
-            })
-            
-    print(f"✅ Recommendation generation complete for all {total_items} items.", flush=True)
-    return pd.DataFrame(final_recommendations)
+    # Mapear os SKUs do fragmento para seus índices no dataset completo
+    # SKUs não encontrados no modelo original se tornarão NaN
+    fragment_indices_in_full_model = df_fragment['sku'].map(sku_to_full_index)
+    
+    # Criar um DataFrame temporário com os SKUs e seus índices correspondentes
+    available_items = pd.DataFrame({
+        'sku': df_fragment['sku'],
+        'full_index': fragment_indices_in_full_model
+    }).dropna().set_index(pd.RangeIndex(len(df_fragment))).dropna() # Limpa e reindexa
+
+    if len(available_items) != len(df_fragment):
+        print(f"   ⚠️  Aviso: {len(df_fragment) - len(available_items)} SKUs do fragmento não foram encontrados no modelo e serão ignorados.", flush=True)
+
+    if available_items.empty:
+        print("   ❌ Nenhum SKU do fragmento foi encontrado no modelo. Retornando resultados vazios.", flush=True)
+        return pd.DataFrame({'sku': df_fragment['sku'], 'recommendations': [[] for _ in df_fragment['sku']]})
+
+    # Obter os vetores (embeddings) apenas dos itens disponíveis
+    available_indices = available_items['full_index'].astype(int).tolist()
+    available_embeddings = X_reduced[available_indices]
+    
+    # Armazenar os SKUs dos itens disponíveis para mapeamento posterior
+    available_skus = available_items['sku'].values
+
+    # --- PASSO 2: Treinar um modelo KNN temporário APENAS com os itens disponíveis ---
+    # O número de vizinhos deve ser o mínimo entre n_recommendations e o total de itens disponíveis
+    k = min(n_recommendations + 1, len(available_embeddings))
+
+    temp_knn = NearestNeighbors(n_neighbors=k, metric='cosine')
+    temp_knn.fit(available_embeddings)
+    
+    print(f"   ✅ Modelo KNN temporário treinado com {len(available_embeddings)} itens.", flush=True)
+
+    # --- PASSO 3: Encontrar os vizinhos mais próximos DENTRO do modelo temporário ---
+    # A busca é feita nos próprios embeddings disponíveis
+    _, neighbor_indices_in_temp_model = temp_knn.kneighbors(available_embeddings)
+
+    # --- PASSO 4: Mapear os índices do modelo temporário de volta para SKUs ---
+    # Descartamos a primeira coluna (o próprio item)
+    rec_indices = neighbor_indices_in_temp_model[:, 1:]
+
+    # Usamos os 'rec_indices' para buscar os SKUs no nosso array 'available_skus'
+    recommended_skus_matrix = available_skus[rec_indices]
+    
+    # Criar o DataFrame de resultados para os SKUs processados
+    results_df = pd.DataFrame({
+        'sku': available_skus,
+        'recommendations': list(recommended_skus_matrix)
+    })
+
+    # --- PASSO 5: Juntar os resultados com o DataFrame original para manter a ordem e os SKUs faltantes ---
+    final_df = df_fragment[['sku']].merge(results_df, on='sku', how='left')
+    
+    # Preencher SKUs que não tiveram recomendações (seja por falta no modelo ou por serem únicos) com listas vazias
+    final_df['recommendations'] = final_df['recommendations'].apply(
+        lambda x: [] if isinstance(x, float) and np.isnan(x) else list(x)
+    )
+    
+    print(f"✅ Geração de recomendações filtradas concluída.", flush=True)
+    return final_df
 
 
 def generate_recommendations_for_new_item(new_item_dict, model_components, n_recommendations=3):
