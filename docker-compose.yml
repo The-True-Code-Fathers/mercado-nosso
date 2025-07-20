@@ -239,12 +239,24 @@ services:
         condition: service_started
       listings-service-mongodb:
         condition: service_started
+      zookeeper: # <--- ADD THIS
+        condition: service_started # <--- ADD THIS
+      kafka: # <--- ADD THIS
+        condition: service_healthy
     ports:
       - "8086:8086"
     networks:
       - my-network
     working_dir: /app
     command: ["python", "main.py"]
+    deploy:
+      resources:
+        limits:
+          memory: 6G # Allocate 4 GB RAM. Start here, increase if it still crashes.
+          cpus: '2.0' # Allocate 2 CPU cores. Adjust as needed.
+        reservations:
+          memory: 2G # Reserve 2 GB RAM. Ensures this minimum is available.
+          cpus: '1.0' # Reserve 1 CPU core.
 
 
   recommendations-service-mongodb:

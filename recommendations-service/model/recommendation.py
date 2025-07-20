@@ -24,8 +24,8 @@ MONGO_DB_NAME_INPUT = 'listings-service-mongodb'
 INPUT_COLLECTION_NAME = 'listings' # Exemplo: Sua coleção de produtos/listings
 
 MONGO_HOST_OUTPUT = 'recommendations-service-mongodb' # Service name for recommendations MongoDB
-MONGO_DB_NAME_OUTPUT = 'recommendations-service-mongodb' # <--- Choose a logical database name for recommendations (e.g., 'recommendations-db' or 'mercado_nosso_recommendations')
-OUTPUT_COLLECTION_NAME = 'recommendations' # Collection name for recommendations data
+MONGO_DB_NAME_OUTPUT = 'my_recommendation_database' # <--- LET'S MAKE THIS A CLEAR NEW NAME!
+OUTPUT_COLLECTION_NAME = 'generated_recommendations' # <--- And let's make this explicit too!
 RECOMMENDATION_ID_FIELD = 'sku' # Field used as ID for recommendations único no seu DataFrame de recomendações
 
 def preprocess_features(df):
@@ -39,7 +39,7 @@ def preprocess_features(df):
     numerical_features = ['price', 'rating', 'reviews', 'boughtInLastMonth', 
                          'stock']
     
-    print("✅ Features numéricas incluídas:", numerical_features)
+    # print("✅ Features numéricas incluídas:", numerical_features)
     
     # ==================== FEATURES CATEGÓRICAS ====================
     # 1. Category - já estava sendo usada
@@ -81,11 +81,11 @@ def preprocess_features(df):
                           'sellerId_encoded', 'isBestSeller_encoded', 'active_encoded',
                           'in_stock', 'price_range', 'rating_category']
     
-    print("✅ Features categóricas incluídas:", categorical_features)
+    # print("✅ Features categóricas incluídas:", categorical_features)
     
     # ==================== FEATURES DERIVADAS AVANÇADAS ====================
     derived_features = ['popularity_score']
-    print("✅ Features derivadas incluídas:", derived_features)
+    # print("✅ Features derivadas incluídas:", derived_features)
     
     encoders = {
     'category': label_encoder_cat,
@@ -98,7 +98,7 @@ def process_text_features(df, max_features=100):
     """
     Processa features de texto (title e description) usando TF-IDF
     """
-    print("🔤 Processando features de texto...")
+    # print("🔤 Processando features de texto...")
     
     # Limpar e combinar título e descrição
     df['combined_text'] = df['title'].fillna('').fillna('')
@@ -122,7 +122,7 @@ def process_text_features(df, max_features=100):
     text_feature_names = [f'text_feature_{i}' for i in range(text_features.shape[1])]
     text_df = pd.DataFrame(text_features, columns=text_feature_names)
     
-    print(f"✅ {text_features.shape[1]} features de texto extraídas")
+    # print(f"✅ {text_features.shape[1]} features de texto extraídas")
     
     return text_df, tfidf
 
@@ -172,7 +172,9 @@ def create_enhanced_recommendation_system(df, use_text_features=True, text_max_f
     from keras.optimizers import Adam
     autoencoder.compile(optimizer=Adam(learning_rate=0.001), loss='mse')
     print("🏋️ Treinando autoencoder...")
-    autoencoder.fit(X, X, epochs=100, batch_size=64, shuffle=True, verbose=1, validation_split=0.2)
+    epochs = min(20, max(5, 1000 // len(df)))  # Adaptativo baseado no tamanho
+    batch_size = min(128, len(df) // 4)
+    autoencoder.fit(X, X, epochs=epochs, batch_size=batch_size, shuffle=True, verbose=1, validation_split=0.2)
     
     # Obter representação compacta
     X_reduced = encoder.predict(X)
@@ -235,30 +237,30 @@ def display_recommendations(product_index, df, recommendations, similarities):
     """
     original = df.iloc[product_index]
     
-    print("=" * 80)
-    print("🎯 PRODUTO ORIGINAL")
-    print("=" * 80)
-    print(f"Título: {original['title']}")
-    print(f"Categoria: {original['category']}")
-    print(f"Preço: R$ {original['price']:.2f}")
-    print(f"Rating: {original['rating']}/5.0 ({original['reviews']} reviews)")
-    print(f"Vendido por: {original['sellerId']}")
-    print(f"Best Seller: {'Sim' if original['isBestSeller'] else 'Não'}")
-    print(f"Compras último mês: {original['boughtInLastMonth']}")
+    # print("=" * 80)
+    # print("🎯 PRODUTO ORIGINAL")
+    # print("=" * 80)
+    # print(f"Título: {original['title']}")
+    # print(f"Categoria: {original['category']}")
+    # print(f"Preço: R$ {original['price']:.2f}")
+    # print(f"Rating: {original['rating']}/5.0 ({original['reviews']} reviews)")
+    # print(f"Vendido por: {original['sellerId']}")
+    # print(f"Best Seller: {'Sim' if original['isBestSeller'] else 'Não'}")
+    # print(f"Compras último mês: {original['boughtInLastMonth']}")
     
-    print("\n" + "=" * 80)
-    print("🔥 PRODUTOS RECOMENDADOS")
-    print("=" * 80)
+    # print("\n" + "=" * 80)
+    # print("🔥 PRODUTOS RECOMENDADOS")
+    # print("=" * 80)
     
     for i, (idx, similarity) in enumerate(zip(recommendations, similarities)):
         product = df.iloc[idx]
-        print(f"\n{i+1}. {product['title']}")
-        print(f"   📂 Categoria: {product['category']}")
-        print(f"   💰 Preço: R$ {product['price']:.2f}")
-        print(f"   ⭐ Rating: {product['rating']}/5.0 ({product['reviews']} reviews)")
-        print(f"   🏪 Vendedor: {product['sellerId']}")
-        print(f"   🔥 Best Seller: {'Sim' if product['isBestSeller'] else 'Não'}")
-        print(f"   🎯 Similaridade: {similarity:.3f}")
+        # print(f"\n{i+1}. {product['title']}")
+        # print(f"   📂 Categoria: {product['category']}")
+        # print(f"   💰 Preço: R$ {product['price']:.2f}")
+        # print(f"   ⭐ Rating: {product['rating']}/5.0 ({product['reviews']} reviews)")
+        # print(f"   🏪 Vendedor: {product['sellerId']}")
+        # print(f"   🔥 Best Seller: {'Sim' if product['isBestSeller'] else 'Não'}")
+        # print(f"   🎯 Similaridade: {similarity:.3f}")
 
 def get_product_index_by_sku(df, sku):
     """
@@ -325,39 +327,85 @@ def load_model(model_path):
     Returns:
         dict: The loaded model components.
     """
-    print("🔧 Loading the recommendation model...")
+    print(f"DEBUG: Carregando modelo de: {model_path}", flush=True)
+    print("🔧 Loading the recommendation model...", flush=True)
     with open(model_path, "rb") as f:
         model_components = pickle.load(f)
-    print("✅ Model loaded successfully")
+    print("✅ Model loaded successfully", flush=True)
     return model_components
 
+def get_recommendations_for_sku(sku: str, model_components: dict, n_recommendations: int = 3) -> dict:
+    """
+    Busca recomendações para um único SKU existente no modelo treinado.
+
+    Args:
+        sku (str): O SKU do produto para o qual queremos recomendações.
+        model_components (dict): O dicionário com os componentes do modelo carregado.
+        n_recommendations (int): O número de recomendações a serem retornadas.
+
+    Returns:
+        dict: Um dicionário com o SKU original e a lista de SKUs recomendados.
+    
+    Raises:
+        ValueError: Se o SKU não for encontrado no dataset do modelo.
+    """
+    print(f"Buscando recomendações para o SKU existente: {sku}", flush=True)
+    df_full_processed = model_components['df_processed']
+    
+    # Cria um mapa de SKU para índice para busca rápida
+    sku_to_index = {s: i for i, s in enumerate(df_full_processed['sku'])}
+    
+    product_index = sku_to_index.get(sku)
+
+    # Verifica se o SKU foi encontrado
+    if product_index is None:
+        raise ValueError(f"SKU '{sku}' não encontrado no dataset do modelo treinado.")
+
+    # Usa a função que já tínhamos para buscar os vizinhos mais próximos
+    rec_skus = get_smart_recommendations(
+        product_index,
+        model_components,
+        n_recommendations=n_recommendations
+    )
+
+    return {
+        "sku": sku,
+        "recommendations": rec_skus
+    }
 
 def generate_recommendations_for_fragment(df_fragment, model_components, n_recommendations=3):
     """
-    Correctly generates recommendations for a fragment.
+    Generates recommendations for a fragment with progress logging.
     """
     final_recommendations = []
     df_full_processed = model_components['df_processed']
+    sku_to_index = df_full_processed['sku'].reset_index().set_index('sku')['index'].to_dict()
     
-    print("\nGenerating recommendations for fragment...")
-    for _, row in df_fragment.iterrows():
+    total_items = len(df_fragment)
+    print(f"\nGenerating recommendations for {total_items} items...", flush=True)
+    
+    # Usamos enumerate para obter o índice (i) de cada item
+    for i, (_, row) in enumerate(df_fragment.iterrows()):
         sku = row["sku"]
-        try:
-            # Find the product's integer position in the FULL dataset
-            product_index = df_full_processed[df_full_processed['sku'] == sku].index[0]
+        
+        # --- LÓGICA DO CHECKPOINT ---
+        # A cada 100 itens (e também para o primeiro item), imprime o status.
+        # (i + 1) porque o índice 'i' começa em 0.
+        if (i + 1) % 100 == 0 or i == 0:
+            percent = ((i + 1) / total_items) * 100
+            print(f"CHECKPOINT: Processing item {i + 1}/{total_items} ({percent:.2f}%)...", flush=True)
             
-            # This call now correctly matches the simplified function signature
+        try:
+            product_index = sku_to_index[sku]
             rec_skus = get_smart_recommendations(
                 product_index, 
                 model_components, 
                 n_recommendations=n_recommendations
             )
-            
             final_recommendations.append({
                 "sku": sku,
                 "recommendations": rec_skus
             })
-
         except (ValueError, IndexError):
             print(f"  - ❌ Could not find or process SKU '{sku}' in the trained model's dataset.")
             final_recommendations.append({
@@ -365,11 +413,11 @@ def generate_recommendations_for_fragment(df_fragment, model_components, n_recom
                 "recommendations": []
             })
             
-    print("✅ Recommendation generation complete.")
+    print(f"✅ Recommendation generation complete for all {total_items} items.", flush=True)
     return pd.DataFrame(final_recommendations)
 
 
-def generate_recommendations_for_new_item(new_item_dict, model_components, n_recommendations=5):
+def generate_recommendations_for_new_item(new_item_dict, model_components, n_recommendations=3):
     """
     Generates recommendations for a single, new item and returns the
     result in a JSON-friendly dictionary format.
@@ -440,113 +488,92 @@ def save_recommendations_to_json(data, filepath):
 
 
 
-def get_data_from_mongodb(collection_name: str, query_filter: dict = None) -> str:
+def get_data_from_mongodb(collection_name: str, query_filter: dict = None) -> list:
     """
-    Conecta ao MongoDB, executa uma query em uma coleção específica e retorna os resultados em formato JSON.
-
-    Args:
-        collection_name (str): O nome da coleção a ser consultada.
-        query_filter (dict, optional): Um dicionário para filtrar a query. Ex: {"qty": {"$gt": 10}}.
-                                      Se None ou {}, retorna todos os documentos.
-                                      Padrão para {}.
-
-    Returns:
-        str: Uma string JSON contendo os documentos encontrados, ou um JSON de erro.
+    Busca dados do MongoDB e retorna uma lista de dicionários.
     """
     client = None
     try:
         conn_params = {
             'host': MONGO_HOST_INPUT,
-            'port': MONGO_PORT
+            'port': MONGO_PORT,
+            'serverSelectionTimeoutMS': 5000 # Timeout de conexão mais rápido
         }
-    
         client = MongoClient(**conn_params)
         db = client[MONGO_DB_NAME_INPUT]
         collection = db[collection_name]
 
         final_filter = query_filter if query_filter is not None else {}
-        cursor = collection.find(final_filter)
-
-        json_output = dumps(list(cursor), indent=4)
-        return json_output
+        # Aumentar o timeout da query no lado do servidor
+        cursor = collection.find(final_filter).max_time_ms(120000)
+        
+        # Retorna a lista de documentos diretamente
+        return list(cursor)
 
     except pymongo.errors.ConnectionFailure as e:
-        return dumps({"error": f"Connection to MongoDB failed: {str(e)}"})
+        print(f"ERROR: Connection to MongoDB (input) failed: {str(e)}", flush=True)
+        raise  # Lança a exceção para ser tratada pela função que chamou
     except Exception as e:
-        return dumps({"error": f"An unexpected error occurred during get_data: {str(e)}"})
+        print(f"ERROR: An unexpected error occurred during get_data: {str(e)}", flush=True)
+        raise # Lança a exceção
     finally:
         if client:
             client.close()
 
 def save_data_to_mongodb(data_list: list, collection_name: str, id_field: str = None,
-                         mongo_host: str = MONGO_HOST_OUTPUT, # Use OUTPUT host as default
+                         mongo_host: str = MONGO_HOST_OUTPUT,
                          mongo_db_name: str = MONGO_DB_NAME_OUTPUT) -> dict:
-    """
-    Salva uma lista de dicionários em uma coleção do MongoDB.
-    Se 'id_field' for fornecido, tenta atualizar documentos existentes (upsert),
-    caso contrário, insere todos os documentos como novos.
-
-    Args:
-        data_list (list): Uma lista de dicionários, onde cada dicionário é um documento a ser salvo.
-        collection_name (str): O nome da coleção onde os dados serão salvos.
-        id_field (str, optional): O nome do campo no documento que serve como ID único
-                                  para operações de upsert (atualização ou inserção).
-                                  Se None, todos os documentos serão inseridos como novos.
-
-    Returns:
-        dict: Um dicionário com o status da operação e mensagens de erro, se houver.
-    """
     client = None
     try:
+        # Keep this initial save attempt message
+        print(f"DEBUG SAVE: Attempting to save {len(data_list)} docs to host={mongo_host}, db={mongo_db_name}, collection={collection_name}", flush=True)
+        
         conn_params = {
             'host': mongo_host,
             'port': MONGO_PORT
         }
-        
         client = MongoClient(**conn_params)
         db = client[mongo_db_name]
         collection = db[collection_name]
 
         results = []
-        for doc in data_list:
-            # Tenta converter _id para ObjectId se for string e válido
-            if '_id' in doc and isinstance(doc['_id'], str):
+        for doc_original in data_list:
+            doc_to_save = dict(doc_original)
+
+            if '_id' in doc_to_save and isinstance(doc_to_save['_id'], str):
                 try:
-                    doc['_id'] = ObjectId(doc['_id'])
+                    doc_to_save['_id'] = ObjectId(doc_to_save['_id'])
                 except:
-                    pass # Ignora se não for um ObjectId válido, mantém como string
+                    pass
 
-            if id_field and id_field in doc:
-                # Usa update_one com upsert para atualizar ou inserir
-                # Cria um filtro baseado no id_field
-                filter_query = {id_field: doc[id_field]}
+            if id_field and id_field in doc_to_save:
+                filter_query = {id_field: doc_to_save[id_field]}
                 
-                # Prepara o documento para atualização. Remove _id para evitar conflitos
-                # se o _id estiver presente no doc e id_field for diferente
-                doc_to_save = {k: v for k, v in doc.items() if k != '_id'}
-
                 update_result = collection.update_one(
                     filter_query,
                     {"$set": doc_to_save},
                     upsert=True
                 )
                 if update_result.upserted_id:
-                    results.append(f"Inserido novo documento com _id: {update_result.upserted_id}")
+                    results.append(f"Inserido novo documento para SKU {doc_to_save[id_field]}") # Simplified print
                 elif update_result.modified_count > 0:
-                    results.append(f"Documento com {id_field}: {doc[id_field]} atualizado.")
+                    results.append(f"Documento para SKU {doc_to_save[id_field]} atualizado.") # Simplified print
                 else:
-                    results.append(f"Documento com {id_field}: {doc[id_field]} não modificado.")
+                    results.append(f"Documento para SKU {doc_to_save[id_field]} não modificado.") # Simplified print
             else:
-                # Insere o documento como novo
-                insert_result = collection.insert_one(doc)
-                results.append(f"Inserido novo documento com _id: {insert_result.inserted_id}")
-
+                insert_result = collection.insert_one(doc_to_save)
+                results.append(f"Inserido novo documento com _id: {insert_result.inserted_id} (no id_field).")
+            
+        # Keep this final print of the save operation, without dumping results list.
+        print(f"DEBUG SAVE: Completed saving process. Total results: {len(results)}.", flush=True)
         return {"status": "success", "message": "Dados salvos com sucesso.", "details": results}
 
     except pymongo.errors.ConnectionFailure as e:
-        return {"status": "error", "message": f"Connection to MongoDB failed: {str(e)}"}
+        print(f"ERROR SAVE: Connection to output MongoDB failed at {mongo_host}:{MONGO_PORT}/{mongo_db_name}: {str(e)}", flush=True)
+        return {"status": "error", "message": f"Connection to output MongoDB failed: {str(e)}"}
     except Exception as e:
-        return {"status": "error", "message": f"An unexpected error occurred during save_data: {str(e)}"}
+        print(f"ERROR SAVE: An unexpected error occurred during save_data: {str(e)}", flush=True)
+        return {"status": "error", "message": f"An unexpected error occurred: {str(e)}"}
     finally:
         if client:
             client.close()

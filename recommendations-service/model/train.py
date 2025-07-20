@@ -81,57 +81,54 @@ def load_model(model_path: str):
 def execute_recommendation_pipeline():
     """
     Executa o pipeline completo:
-    1. Lê dados brutos do MongoDB.
-    2. Gera recomendações.
-    3. Salva as recomendações de volta no MongoDB.
     """
-    print("Iniciando pipeline de recomendações...")
-
-    # --- 1. Ler os dados de entrada do MongoDB ---
-    print(f"Lendo dados da coleção '{INPUT_COLLECTION_NAME}' no MongoDB...")
-    mongo_data_json = get_data_from_mongodb(collection_name=INPUT_COLLECTION_NAME)
-
-    if mongo_data_json and "error" in mongo_data_json.lower():
-        print(f"Erro ao carregar dados do MongoDB: {mongo_data_json}")
-        return # Ou levante uma exceção, dependendo da sua estratégia de erro
+    print("DEBUG: Pipeline function ENTERED.", flush=True)
+    print("Iniciando pipeline de recomendações...", flush=True)
 
     try:
-        df_fragment = pd.read_json(io.StringIO(mongo_data_json))
-        print(f"DataFrame carregado com {len(df_fragment)} itens da coleção '{INPUT_COLLECTION_NAME}'.")
-    except Exception as e:
-        print(f"Erro ao converter JSON para DataFrame: {e}")
-        return
+        # --- 1. Ler os dados de entrada do MongoDB ---
+        print(f"DEBUG: Step 1: Attempting to read data from '{INPUT_COLLECTION_NAME}'.", flush=True)
+        mongo_data_list = get_data_from_mongodb(collection_name=INPUT_COLLECTION_NAME)
 
-    # --- 2. Gerar as recomendações ---
-    # As funções load_model e generate_recommendations_for_fragment devem existir no seu ambiente.
-    print("Carregando modelo e gerando recomendações...")
-    try:
+        print("DEBUG: Step 1: Data fetched from MongoDB. Attempting to convert to DataFrame.", flush=True)
+        df_fragment = pd.DataFrame(mongo_data_list) # <--- MUITO MAIS EFICIENTE!
+        
+        if df_fragment.empty:
+            print("WARNING: Step 1: No data returned from MongoDB. Exiting pipeline.", flush=True)
+            return
+
+        print(f"DEBUG: Step 1: DataFrame loaded with {len(df_fragment)} items.", flush=True)
+        print(f"DataFrame carregado com {len(df_fragment)} itens da coleção '{INPUT_COLLECTION_NAME}'.", flush=True)
+
+        # --- 2. Gerar as recomendações ---
+        print("DEBUG: Step 2: Attempting to load model and generate recommendations.", flush=True)
         model_components = load_model("trained_model.pkl")
+        print("DEBUG: Step 2: Model loaded. Generating recommendations.", flush=True)
         recommendations_df = generate_recommendations_for_fragment(df_fragment, model_components)
-        print(f"Recomendações geradas para {len(recommendations_df)} itens.")
+        print(f"DEBUG: Step 2: Recommendations generated for {len(recommendations_df)} items.", flush=True)
+        print(f"Recomendações geradas para {len(recommendations_df)} itens.", flush=True)
+
+        # --- 3. Salvar as recomendações de volta no MongoDB ---
+        print("DEBUG: Step 3: Attempting to save recommendations to MongoDB.", flush=True)
+        recommendations_list = recommendations_df.to_dict(orient='records')
+        save_result = save_data_to_mongodb(
+            data_list=recommendations_list,
+            collection_name=OUTPUT_COLLECTION_NAME,
+            id_field=RECOMMENDATION_ID_FIELD,
+            mongo_host=MONGO_HOST_OUTPUT,
+            mongo_db_name=MONGO_DB_NAME_OUTPUT
+        )
+
+        if save_result["status"] == "success":
+            print("Pipeline concluído com sucesso!", flush=True)
+            print(save_result["message"], flush=True)
+        else:
+            print(f"ERROR: Step 3 failed - Error saving recommendations: {save_result['message']}", flush=True)
+
     except Exception as e:
-        print(f"Erro ao gerar recomendações: {e}")
-        return
+        # Captura qualquer erro do pipeline (incluindo da leitura do DB)
+        print(f"ERROR: Pipeline failed critically. Error: {e}", flush=True)
+        # Opcional: re-lançar a exceção se necessário
+        # raise
 
-    # --- 3. Salvar as recomendações de volta no MongoDB ---
-    # Converte o DataFrame de recomendações para uma lista de dicionários
-    recommendations_list = recommendations_df.to_dict(orient='records')
-
-    print(f"Salvando recomendações na coleção '{OUTPUT_COLLECTION_NAME}' no MongoDB...")
-    save_result = save_data_to_mongodb(
-        data_list=recommendations_list,
-        collection_name=OUTPUT_COLLECTION_NAME,
-        id_field=RECOMMENDATION_ID_FIELD,
-        # --- CRITICAL: Explicitly pass output MongoDB config ---
-        mongo_host=MONGO_HOST_OUTPUT,
-        mongo_db_name=MONGO_DB_NAME_OUTPUT
-    )
-
-    if save_result["status"] == "success":
-        print("Pipeline concluído com sucesso!")
-        print(save_result["message"])
-        # Opcional: imprimir detalhes da gravação
-        # for detail in save_result["details"]:
-        #     print(f"  - {detail}")
-    else:
-        print(f"Erro ao salvar recomendações: {save_result['message']}")
+    print("DEBUG: Pipeline function EXITED.", flush=True)
