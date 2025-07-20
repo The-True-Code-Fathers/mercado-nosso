@@ -28,7 +28,7 @@ async def get_recommendations():
 async def startup_event():
     """Run the Eureka client when the application starts."""
     print("DEBUG: FastAPI startup event triggered.", flush=True)
-    asyncio.create_task(start_eureka_client())
+    # asyncio.create_task(start_eureka_client())
     print("DEBUG: Eureka client task created.", flush=True)
 
 async def start_eureka_client():
@@ -72,6 +72,12 @@ async def generate_recommendations():
         raise HTTPException(status_code=500, detail=f"Failed to trigger recommendation pipeline: {e}")
 
 if __name__ == '__main__':
-    print("DEBUG: __name__ is __main__, starting Uvicorn...", flush=True) # NEW DEBUG PRINT
-    uvicorn.run(app, host="0.0.0.0", port=SERVER_PORT, reload=True)
-    print("DEBUG: Uvicorn run call finished (should not see this if server is running).", flush=True) # NEW DEBUG PRINT
+    print("DEBUG: __name__ is __main__, starting Uvicorn...", flush=True)
+    try:
+        uvicorn.run(app, host="0.0.0.0", port=SERVER_PORT)
+        print("DEBUG: Uvicorn server started (should stay running).", flush=True) # This line usually won't be seen if server is running
+    except Exception as e:
+        print(f"ERROR: Uvicorn failed to start or crashed immediately: {e}", flush=True) # NEW ERROR CATCH
+        # It's good to re-raise or exit with an error code if this happens
+        import sys
+        sys.exit(1)
