@@ -9,33 +9,39 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import java.time.LocalDate;
+
 @Data
 @Entity(name = "users")
 public class UserJPAEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private UUID id;
 
     @Column(name = "social_reason", length = 255)
     private String socialReason;
 
-    @Column(name="full_name", length = 255, nullable = false)
+    @Column(name = "full_name", length = 255, nullable = false)
     private String fullName;
+
+    @Column(name = "birth_date")
+    private LocalDate birthDate;
 
     @Column(length = 255, nullable = false, unique = true)
     private String email;
 
-    @Column(name="password_hash", length = 255, nullable = false)
+    @Column(name = "password_hash", length = 255, nullable = false)
     private String passwordHash;
 
-    @Column(length = 11, unique = true, nullable = false)
+    @Column(unique = true)
     private String cpf;
 
     @Column(length = 14)
     private String cnpj;
 
-    @Column(name = "telephone_number", length = 15)
+    @Column(name = "telephone_number", length = 25)
     private String telephoneNumber;
-    
+
     @Column(name = "is_seller", nullable = false)
     private boolean isSeller;
 

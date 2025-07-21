@@ -9,6 +9,7 @@ public class UserMapper {
         entity.setFullName(user.getFullName());
         entity.setEmail(user.getEmail());
         entity.setPasswordHash(user.getPasswordHash());
+        entity.setBirthDate(user.getBirthDate());
         entity.setCpf(user.getCpf());
         entity.setCnpj(user.getCnpj());
         entity.setTelephoneNumber(user.getTelephoneNumber());
@@ -30,6 +31,7 @@ public class UserMapper {
         domain.setFullName(jpaEntity.getFullName());
         domain.setEmail(jpaEntity.getEmail());
         domain.setPasswordHash(jpaEntity.getPasswordHash());
+        domain.setBirthDate(jpaEntity.getBirthDate());
         domain.setCpf(jpaEntity.getCpf());
         domain.setCnpj(jpaEntity.getCnpj());
         domain.setTelephoneNumber(jpaEntity.getTelephoneNumber());
