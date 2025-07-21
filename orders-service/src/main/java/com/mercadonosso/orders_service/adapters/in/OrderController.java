@@ -20,9 +20,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import com.mercadonosso.orders_service.adapters.in.dto.CreatingOrderRequest;
 import com.mercadonosso.orders_service.adapters.in.dto.OrderResponse;
 import com.mercadonosso.orders_service.adapters.in.dto.UpdateOrderStatusRequest;
+import com.mercadonosso.orders_service.adapters.in.dto.create_order.CreatingOrderRequest;
 import com.mercadonosso.orders_service.core.domain.Order;
 import com.mercadonosso.orders_service.core.ports.in.OrdersServicePort;
 
@@ -45,20 +45,21 @@ public class OrderController {
     public OrderResponse createOrder(@RequestBody CreatingOrderRequest request) {
         System.out.println("=== DEBUG CREATE ORDER ===");
         System.out.println("Request listing: " + request.listing());
-        System.out.println("Request listing class: "
-                + (request.listing() != null ? request.listing().getClass().getName() : "null"));
-        if (request.listing() != null && !request.listing().isEmpty()) {
-            System.out.println("First listing: " + request.listing().get(0));
-            System.out.println("First listing class: " + request.listing().get(0).getClass().getName());
-        }
-
+        System.out.println("Request shipping address: " + request.shippingAddress());
+        System.out.println("Request payment method: " + request.paymentMethod());
+        System.out.println("Request order summary: " + request.orderSummary());
+        
         Order order = new Order();
-
         order.setOrderId(request.orderId());
         order.setListingId(request.listing());
         order.setBuyerId(request.buyerId());
         order.setStatus(request.status());
         order.setSellerId(request.sellerId());
+        
+        // === NOVAS INFORMAÇÕES DO CHECKOUT ===
+        order.setShippingAddress(request.shippingAddress());
+        order.setPaymentMethod(request.paymentMethod());
+        order.setOrderSummary(request.orderSummary());
 
         Order createdOrder = ordersServicePort.create(order);
 

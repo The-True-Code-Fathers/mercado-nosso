@@ -3,6 +3,7 @@ package com.mercadonosso.orders_service.core.domain;
 import lombok.*;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.Valid;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -35,4 +36,18 @@ public class Order {
 
     @NotNull(message = "Seller id must not be null")
     private UUID sellerId;
+
+    // === NOVAS INFORMAÇÕES DO CHECKOUT ===
+    
+    @Valid
+    @NotNull(message = "Shipping address is required")
+    private ShippingAddress shippingAddress;
+    
+    @Valid
+    @NotNull(message = "Payment method is required")
+    private PaymentMethod paymentMethod;
+    
+    @Valid
+    @NotNull(message = "Order summary is required")
+    private OrderSummary orderSummary;
 }
