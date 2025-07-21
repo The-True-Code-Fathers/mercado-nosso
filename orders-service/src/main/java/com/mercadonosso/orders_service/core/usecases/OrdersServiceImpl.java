@@ -2,26 +2,26 @@ package com.mercadonosso.orders_service.core.usecases;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.mercadonosso.orders_service.adapters.in.dto.CreatingOrderRequest;
 import com.mercadonosso.orders_service.adapters.out.rest.users.UsersServiceAdapter;
 import com.mercadonosso.orders_service.core.domain.Order;
+import com.mercadonosso.orders_service.core.domain.OrderItem;
 import com.mercadonosso.orders_service.core.domain.enums.OrderStatus;
 import com.mercadonosso.orders_service.core.domain.exceptions.BusinessRuleException;
 import com.mercadonosso.orders_service.core.domain.exceptions.OrderNotFoundException;
 import com.mercadonosso.orders_service.core.ports.in.OrdersServicePort;
 import com.mercadonosso.orders_service.core.ports.out.OrdersRepositoryPort;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+@Slf4j
 public class OrdersServiceImpl implements OrdersServicePort {
-    private static final Logger logger = LoggerFactory.getLogger(OrdersServiceImpl.class);
 
     private final OrdersRepositoryPort ordersRepositoryPort;
     private final Validator validator;
@@ -44,7 +44,7 @@ public class OrdersServiceImpl implements OrdersServicePort {
 
     @Override
     public Order createOrderWithUserUpdates(CreatingOrderRequest request) {
-        logger.info("Creating order with user updates for buyer: {} and seller: {}",
+        log.info("Creating order with user updates for buyer: {} and seller: {}",
                 request.buyerId(), request.sellerId());
 
         // Map DTO to domain object
@@ -58,12 +58,9 @@ public class OrdersServiceImpl implements OrdersServicePort {
             usersServiceAdapter.addOrderToBuyer(createdOrder.getBuyerId(), createdOrder.getOrderId());
             usersServiceAdapter.addOrderToSeller(createdOrder.getSellerId(), createdOrder.getOrderId());
 
-            logger.info("Successfully created order {} and updated user records", createdOrder.getOrderId());
+            log.info("Successfully created order {} and updated user records", createdOrder.getOrderId());
         } catch (Exception e) {
-            logger.error("Failed to update user records for order {}: {}", createdOrder.getOrderId(), e.getMessage());
-            // Aqui você pode decidir se quer reverter a criação da order ou não
-            // Por agora, vamos deixar a order criada mesmo se falhar a atualização dos
-            // usuários
+            log.error("Failed to update user records for order {}: {}", createdOrder.getOrderId(), e.getMessage());
             throw new BusinessRuleException("Order created but failed to update user records: " + e.getMessage());
         }
 
@@ -72,10 +69,16 @@ public class OrdersServiceImpl implements OrdersServicePort {
 
     private Order mapRequestToOrder(CreatingOrderRequest request) {
         Order order = new Order();
-        order.setOrderId(request.orderId());
-        order.setListingId(request.listingsId());
+        order.setOrderId(UUID.randomUUID()); // Gera UUID automaticamente
+        
+        // Converter lista de OrderItemDTO para lista de OrderItem
+        List<OrderItem> orderItems = request.orderItems().stream()
+                .map(itemRequest -> new OrderItem(itemRequest.listingId(), itemRequest.quantity()))
+                .collect(Collectors.toList());
+        order.setOrderItems(orderItems);
+        
         order.setBuyerId(request.buyerId());
-        order.setStatus(request.status());
+        order.setStatus(OrderStatus.OPEN); // Status padrão sempre OPEN
         order.setSellerId(request.sellerId());
         order.setShippingAddress(request.shippingAddress());
         order.setPaymentMethod(request.paymentMethod());
@@ -92,13 +95,13 @@ public class OrdersServiceImpl implements OrdersServicePort {
 
     @Override
     public void delete(UUID orderId) {
-        logger.info("Inactivating (soft delete) order with ID: {}", orderId);
+        log.info("Inactivating (soft delete) order with ID: {}", orderId);
 
         Order order = findOrderById(orderId);
         order.setStatus(OrderStatus.CANCELLED);
         ordersRepositoryPort.save(order);
 
-        logger.info("Order {} successfully inactivated", orderId);
+        log.info("Order {} successfully inactivated", orderId);
     }
 
     @Override

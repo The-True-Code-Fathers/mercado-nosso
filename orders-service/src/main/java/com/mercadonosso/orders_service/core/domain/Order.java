@@ -30,15 +30,12 @@ public class Order {
     @Field("order_status")
     private OrderStatus status;
 
-    @NotNull(message = "Must have an item")
-    @Field("list_of_listings")
-    private List<String> listingId;
+    @NotNull(message = "Must have at least one item")
+    @Field("order_items")
+    private List<OrderItem> orderItems;
 
     @NotNull(message = "Seller id must not be null")
     private UUID sellerId;
-
-    // === NOVAS INFORMAÇÕES DO CHECKOUT ===
-
     @Valid
     @NotNull(message = "Shipping address is required")
     private ShippingAddress shippingAddress;
@@ -50,4 +47,45 @@ public class Order {
     @Valid
     @NotNull(message = "Order summary is required")
     private OrderSummary orderSummary;
+
+    /**
+     * Retorna uma lista com todos os listing IDs do pedido
+     * @return Lista de listing IDs
+     */
+    public List<String> getListingIds() {
+        if (orderItems == null) {
+            return List.of();
+        }
+        return orderItems.stream()
+                .map(OrderItem::getListingId)
+                .toList();
+    }
+    
+    /**
+     * Retorna a quantidade total de items no pedido
+     * @return Quantidade total de items
+     */
+    public Integer getTotalQuantity() {
+        if (orderItems == null) {
+            return 0;
+        }
+        return orderItems.stream()
+                .mapToInt(OrderItem::getQuantity)
+                .sum();
+    }
+    
+    /**
+     * Busca um item específico por listing ID
+     * @param listingId ID do listing
+     * @return OrderItem encontrado ou null
+     */
+    public OrderItem getItemByListingId(String listingId) {
+        if (orderItems == null || listingId == null) {
+            return null;
+        }
+        return orderItems.stream()
+                .filter(item -> listingId.equals(item.getListingId()))
+                .findFirst()
+                .orElse(null);
+    }
 }

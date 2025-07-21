@@ -1,6 +1,10 @@
 package com.mercadonosso.orders_service.adapters.out.mongo;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.mercadonosso.orders_service.core.domain.Order;
+import com.mercadonosso.orders_service.core.domain.OrderItem;
 import com.mercadonosso.orders_service.core.domain.ShippingAddress;
 import com.mercadonosso.orders_service.core.domain.PaymentMethod;
 import com.mercadonosso.orders_service.core.domain.OrderSummary;
@@ -28,7 +32,7 @@ public class OrderMapper {
         model.setSellerId(domain.getSellerId());
         model.setStatus(domain.getStatus());
         model.setOrderDate(domain.getDate());
-        model.setProductIds(domain.getListingId());
+        model.setProductIds(domain.getListingIds());
 
         // === CONVERSÃO DAS NOVAS INFORMAÇÕES ===
         if (domain.getShippingAddress() != null) {
@@ -60,7 +64,14 @@ public class OrderMapper {
         order.setSellerId(model.getSellerId());
         order.setStatus(model.getStatus());
         order.setDate(model.getOrderDate());
-        order.setListingId(model.getProductIds());
+        
+        // Converter lista de String para lista de OrderItem (cada item com quantidade 1 por padrão)
+        if (model.getProductIds() != null) {
+            List<OrderItem> orderItems = model.getProductIds().stream()
+                    .map(listingId -> new OrderItem(listingId, 1))
+                    .collect(Collectors.toList());
+            order.setOrderItems(orderItems);
+        }
 
         // === CONVERSÃO DAS NOVAS INFORMAÇÕES ===
         if (model.getShippingAddress() != null) {

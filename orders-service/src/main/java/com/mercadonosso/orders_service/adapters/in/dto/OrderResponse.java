@@ -9,7 +9,7 @@ import com.mercadonosso.orders_service.core.domain.enums.OrderStatus;
 public record OrderResponse(
                 UUID orderId,
                 UUID buyerId,
-                List<String> listingID,
+                List<OrderItemResponse> orderItems,
                 OrderStatus status,
                 LocalDateTime creationTime) {
 }
