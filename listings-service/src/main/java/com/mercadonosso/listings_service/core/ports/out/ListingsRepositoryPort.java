@@ -23,6 +23,8 @@ public interface ListingsRepositoryPort {
 
         Optional<ListingsEntity> findById(ObjectId id);
 
+        Optional<ListingsEntity> findBySku(String sku);
+
         List<ListingsEntity> searchListings(String partialName, ProductCondition productCondition,
                         BigDecimal minPrice, BigDecimal maxPrice, SearchOrdering ordering);
 

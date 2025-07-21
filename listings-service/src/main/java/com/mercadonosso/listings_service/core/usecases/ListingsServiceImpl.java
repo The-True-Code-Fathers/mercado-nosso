@@ -71,6 +71,12 @@ public class ListingsServiceImpl implements ListingsServicePort {
     }
 
     @Override
+    public ListingsEntity findBySku(String sku) {
+        return listingsRepositoryPort.findBySku(sku)
+                .orElseThrow(() -> new ListingsNotFoundException("Sku: " + sku + " não encontrado."));
+    }
+
+    @Override
     public List<ListingsEntity> listAll() {
         return listingsRepositoryPort.listAll();
     }
