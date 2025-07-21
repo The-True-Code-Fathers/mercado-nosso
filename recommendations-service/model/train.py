@@ -91,24 +91,33 @@ def execute_recommendation_pipeline():
         mongo_data_list = get_data_from_mongodb(collection_name=INPUT_COLLECTION_NAME)
 
         print("DEBUG: Step 1: Data fetched from MongoDB. Attempting to convert to DataFrame.", flush=True)
-        df_fragment = pd.DataFrame(mongo_data_list) # <--- MUITO MAIS EFICIENTE!
-        
-        if df_fragment.empty:
-            print("WARNING: Step 1: No data returned from MongoDB. Exiting pipeline.", flush=True)
+        df_raw = pd.DataFrame(mongo_data_list) # Renomeado para df_raw para clareza
+
+        # ==========================================================
+        # ---> PONTO DE INTEGRAÇÃO AQUI <---
+        # 2. Validar e limpar os dados antes de prosseguir
+        print("DEBUG: Step 1.5: Validating and cleaning data.", flush=True)
+        df_cleaned = validate_and_clean_dataframe(df_raw) # Chama a função de limpeza
+        # ==========================================================
+
+        if df_cleaned.empty:
+            print("WARNING: No data left after cleaning process. Exiting pipeline.", flush=True)
             return
 
-        print(f"DEBUG: Step 1: DataFrame loaded with {len(df_fragment)} items.", flush=True)
-        print(f"DataFrame carregado com {len(df_fragment)} itens da coleção '{INPUT_COLLECTION_NAME}'.", flush=True)
+        print(f"DEBUG: Step 1: DataFrame loaded and cleaned with {len(df_cleaned)} items.", flush=True)
+        print(f"DataFrame carregado com {len(df_cleaned)} itens da coleção '{INPUT_COLLECTION_NAME}'.", flush=True)
 
-        # --- 2. Gerar as recomendações ---
+        # --- 3. Gerar as recomendações ---
         print("DEBUG: Step 2: Attempting to load model and generate recommendations.", flush=True)
-        model_components = load_model("trained_model.pkl")
+        model_components = load_model("trained_model.pkl") # Use o load_model do seu arquivo
         print("DEBUG: Step 2: Model loaded. Generating recommendations.", flush=True)
-        recommendations_df = generate_recommendations_for_fragment(df_fragment, model_components)
+
+        # PASSE O DATAFRAME LIMPO (df_cleaned) PARA A FUNÇÃO
+        recommendations_df = generate_recommendations_for_fragment(df_cleaned, model_components)
         print(f"DEBUG: Step 2: Recommendations generated for {len(recommendations_df)} items.", flush=True)
         print(f"Recomendações geradas para {len(recommendations_df)} itens.", flush=True)
 
-        # --- 3. Salvar as recomendações de volta no MongoDB ---
+        # --- 4. Salvar as recomendações de volta no MongoDB ---
         print("DEBUG: Step 3: Attempting to save recommendations to MongoDB.", flush=True)
         recommendations_list = recommendations_df.to_dict(orient='records')
         save_result = save_data_to_mongodb(
@@ -126,9 +135,7 @@ def execute_recommendation_pipeline():
             print(f"ERROR: Step 3 failed - Error saving recommendations: {save_result['message']}", flush=True)
 
     except Exception as e:
-        # Captura qualquer erro do pipeline (incluindo da leitura do DB)
         print(f"ERROR: Pipeline failed critically. Error: {e}", flush=True)
-        # Opcional: re-lançar a exceção se necessário
-        # raise
+        raise
 
     print("DEBUG: Pipeline function EXITED.", flush=True)

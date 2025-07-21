@@ -17,6 +17,7 @@ import pymongo
 from pymongo import MongoClient
 from bson.json_util import dumps
 from bson.objectid import ObjectId
+from bson.decimal128 import Decimal128
 
 MONGO_HOST_INPUT = 'listings-service-mongodb' # Nome do serviço do MongoDB no docker-compose.yml
 MONGO_PORT = 27017
@@ -334,9 +335,85 @@ def load_model(model_path):
     print("✅ Model loaded successfully", flush=True)
     return model_components
 
+def validate_and_clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Garante que o DataFrame tenha as colunas e os tipos de dados corretos
+    antes de ser passado para o modelo de recomendação.
+    Agora inclui a conversão de Decimal128.
+    """
+    # Define o "contrato" de dados: quais colunas são necessárias e seus tipos
+    required_schema = {
+        'sku': str,
+        'title': str,
+        'price': float,
+        'rating': float,
+        'reviews': int,
+        'stock': int,
+        'boughtInLastMonth': int,
+        'category': str,
+        'productCondition': str,
+        'sellerId': str,
+        'isBestSeller': bool,
+        'active': bool
+    }
+
+    # Define valores padrão para preencher dados ausentes
+    default_values = {
+        'title': '',
+        'price': 0.0,
+        'rating': 0.0,
+        'reviews': 0,
+        'stock': 0,
+        'boughtInLastMonth': 0,
+        'category': 'Unknown',
+        'productCondition': 'Unknown',
+        'sellerId': 'Unknown',
+        'isBestSeller': False,
+        'active': False
+    }
+
+    df_cleaned = df.copy()
+
+    # PASSO 1: Garantir que todas as colunas necessárias existam
+    for col, default_val in default_values.items():
+        if col not in df_cleaned.columns:
+            print(f"   ⚠️  AVISO: Coluna '{col}' ausente. Adicionando com valor padrão.")
+            df_cleaned[col] = default_val
+
+    # PASSO 2: Forçar os tipos de dados corretos e tratar erros
+    numerical_cols = ['price', 'rating', 'reviews', 'stock', 'boughtInLastMonth']
+
+    # --- INÍCIO DA CORREÇÃO ---
+    # PASSO 2.1: Converter Decimal128 para float ANTES de outras operações
+    for col in numerical_cols:
+        if col in df_cleaned.columns:
+            # Aplica uma função a cada célula da coluna
+            df_cleaned[col] = df_cleaned[col].apply(
+                lambda x: float(x.to_decimal()) if isinstance(x, Decimal128) else x
+            )
+    # --- FIM DA CORREÇÃO ---
+
+    # PASSO 2.2: Converter para tipo numérico, transformando erros em NaN
+    for col in numerical_cols:
+        # 'coerce' transforma valores não numéricos (que não são Decimal128) em NaN
+        df_cleaned[col] = pd.to_numeric(df_cleaned[col], errors='coerce')
+
+    # PASSO 3: Preencher quaisquer valores nulos (NaN) que possam ter surgido
+    df_cleaned.fillna(default_values, inplace=True)
+
+    # PASSO 4: Garantir que as colunas restantes tenham o tipo correto
+    for col, dtype in required_schema.items():
+        # As colunas numéricas já foram tratadas, então as pulamos
+        if col not in numerical_cols:
+            df_cleaned[col] = df_cleaned[col].astype(dtype)
+
+    print("   ✅ Dados validados e limpos com sucesso (incluindo Decimal128).")
+    return df_cleaned
+
 def get_recommendations_for_sku(sku: str, model_components: dict, n_recommendations: int = 3) -> dict:
     """
-    Busca recomendações para um único SKU existente no modelo treinado.
+    Busca recomendações para um único SKU, garantindo que os itens recomendados
+    sejam escolhidos apenas dentre os produtos atualmente disponíveis no banco de dados.
 
     Args:
         sku (str): O SKU do produto para o qual queremos recomendações.
@@ -347,104 +424,189 @@ def get_recommendations_for_sku(sku: str, model_components: dict, n_recommendati
         dict: Um dicionário com o SKU original e a lista de SKUs recomendados.
     
     Raises:
-        ValueError: Se o SKU não for encontrado no dataset do modelo.
+        ValueError: Se o SKU alvo não for encontrado no banco de dados.
     """
-    print(f"Buscando recomendações para o SKU existente: {sku}", flush=True)
-    df_full_processed = model_components['df_processed']
-    
-    # Cria um mapa de SKU para índice para busca rápida
-    sku_to_index = {s: i for i, s in enumerate(df_full_processed['sku'])}
-    
-    product_index = sku_to_index.get(sku)
+    print(f"Buscando recomendações filtradas para o SKU: {sku}", flush=True)
 
-    # Verifica se o SKU foi encontrado
-    if product_index is None:
-        raise ValueError(f"SKU '{sku}' não encontrado no dataset do modelo treinado.")
+    # --- PASSO 1: Buscar o item alvo e os candidatos no MongoDB ---
+    # Busca o documento completo do item alvo
+    target_item_doc = get_data_from_mongodb(INPUT_COLLECTION_NAME, query_filter={'sku': sku})
+    if not target_item_doc:
+        raise ValueError(f"SKU alvo '{sku}' não encontrado no banco de dados '{INPUT_COLLECTION_NAME}'.")
 
-    # Usa a função que já tínhamos para buscar os vizinhos mais próximos
-    rec_skus = get_smart_recommendations(
-        product_index,
-        model_components,
-        n_recommendations=n_recommendations
+    # Busca todos os OUTROS itens disponíveis para serem os candidatos da recomendação
+    # O filtro {'active': True} é uma boa prática para recomendar apenas itens ativos
+    candidate_docs = get_data_from_mongodb(
+        INPUT_COLLECTION_NAME, 
+        query_filter={'sku': {'$ne': sku}, 'active': True}
     )
+    if not candidate_docs:
+        print(f"Nenhum outro item disponível encontrado para servir como recomendação para o SKU {sku}.")
+        return {"sku": sku, "recommendations": []}
 
+    # --- PASSO 2: Validar e limpar os dados de ambos ---
+    print("   - Validando e limpando dados do item alvo e dos candidatos...")
+    df_target_clean = validate_and_clean_dataframe(pd.DataFrame(target_item_doc))
+    df_candidates_clean = validate_and_clean_dataframe(pd.DataFrame(candidate_docs))
+
+    # --- PASSO 3: Gerar os embeddings para o alvo e para os candidatos ---
+    # Usamos a função auxiliar que já criamos para processar novos itens
+    print("   - Gerando embeddings...")
+    target_embedding = _preprocess_and_encode_new_items(df_target_clean, model_components)
+    candidate_embeddings = _preprocess_and_encode_new_items(df_candidates_clean, model_components)
+
+    # --- PASSO 4: Criar e treinar o KNN temporário apenas com os candidatos ---
+    k = min(n_recommendations, len(candidate_embeddings))
+    if k == 0:
+        return {"sku": sku, "recommendations": []}
+
+    temp_knn = NearestNeighbors(n_neighbors=k, metric='cosine')
+    temp_knn.fit(candidate_embeddings)
+    print(f"   - Modelo KNN temporário treinado com {len(candidate_embeddings)} candidatos.")
+
+    # --- PASSO 5: Encontrar os vizinhos mais próximos do item alvo ---
+    distances, indices = temp_knn.kneighbors(target_embedding)
+    
+    # Os índices retornados correspondem às posições no df_candidates_clean
+    rec_indices = indices[0]
+    
+    # Mapear os índices de volta para os SKUs dos candidatos
+    recommended_skus = df_candidates_clean.iloc[rec_indices]['sku'].tolist()
+
+    print(f"   - Recomendações encontradas: {recommended_skus}")
+    
     return {
         "sku": sku,
-        "recommendations": rec_skus
+        "recommendations": recommended_skus
     }
+
+def _preprocess_and_encode_new_items(df_new_items, model_components):
+    """
+    Recebe um DataFrame de itens novos e retorna seus embeddings calculados em tempo real.
+    (Esta é uma versão em lote da sua função 'generate_recommendations_for_new_item')
+    """
+    scaler = model_components['scaler']
+    label_encoders = model_components['label_encoders']
+    tfidf = model_components['tfidf']
+    encoder_model = model_components['encoder']
+    feature_info = model_components['feature_names']
+    
+    df_processed = df_new_items.copy()
+    
+    # --- Reaplica todo o pré-processamento ---
+    # Features Derivadas
+    df_processed['popularity_score'] = (df_processed['rating'] * np.log1p(df_processed['reviews'])).fillna(0)
+    df_processed['in_stock'] = (df_processed['stock'] > 0).astype(int)
+    df_processed['price_range'] = pd.cut(df_processed['price'], bins=[0, 50, 100, 200, 500, float('inf')], labels=[0, 1, 2, 3, 4]).cat.add_categories([5]).fillna(5).astype(int)
+    df_processed['rating_category'] = pd.cut(df_processed['rating'], bins=[0, 3, 4, 4.5, 5], labels=[0, 1, 2, 3]).cat.add_categories([4]).fillna(4).astype(int)
+    
+    # Features Categóricas
+    for col, encoder in label_encoders.items():
+        # Lida com categorias que podem não ter sido vistas no treino
+        df_processed[f'{col}_encoded'] = df_processed[col].apply(lambda x: encoder.transform([x])[0] if x in encoder.classes_ else -1) # -1 para desconhecido
+    
+    # Features Booleanas
+    df_processed['isBestSeller_encoded'] = df_processed['isBestSeller'].astype(int)
+    df_processed['active_encoded'] = df_processed['active'].astype(int)
+
+    # Features Numéricas
+    numerical_data = scaler.transform(df_processed[feature_info['numerical']])
+    
+    # Features Categóricas (garante a ordem correta das colunas)
+    categorical_data = df_processed[feature_info['categorical']].values
+    
+    # Features de Texto
+    df_processed['combined_text'] = df_processed['title'].fillna('')
+    text_data = tfidf.transform(df_processed['combined_text']).toarray()
+    
+    # Combina tudo no vetor de features final
+    X_new = np.concatenate([numerical_data, categorical_data, text_data], axis=1)
+    
+    # Gera os embeddings
+    new_embeddings = encoder_model.predict(X_new)
+    
+    return new_embeddings
 
 def generate_recommendations_for_fragment(df_fragment, model_components, n_recommendations=3):
     """
     Generates recommendations for a fragment with progress logging.
     """
-    print(f"\n🧠 Iniciando geração de recomendações filtradas para {len(df_fragment)} itens...", flush=True)
+    print(f"\n🚀 Iniciando geração dinâmica para {len(df_fragment)} itens...", flush=True)
 
-    # --- PASSO 1: Obter os embeddings apenas para os SKUs do fragmento ---
+    # --- PASSO 1: Separar itens conhecidos de itens novos ---
     df_full_processed = model_components['df_processed']
     X_reduced = model_components['X_reduced']
-    
-    # Criar um mapa de SKU para índice do dataset completo para busca rápida
     sku_to_full_index = pd.Series(df_full_processed.index, index=df_full_processed.sku)
     
-    # Mapear os SKUs do fragmento para seus índices no dataset completo
-    # SKUs não encontrados no modelo original se tornarão NaN
-    fragment_indices_in_full_model = df_fragment['sku'].map(sku_to_full_index)
+    # Adiciona uma coluna com o índice original; novos itens terão NaN
+    df_fragment['full_index'] = df_fragment['sku'].map(sku_to_full_index)
     
-    # Criar um DataFrame temporário com os SKUs e seus índices correspondentes
-    available_items = pd.DataFrame({
-        'sku': df_fragment['sku'],
-        'full_index': fragment_indices_in_full_model
-    }).dropna().set_index(pd.RangeIndex(len(df_fragment))).dropna() # Limpa e reindexa
+    df_known = df_fragment[df_fragment['full_index'].notna()].copy()
+    df_new = df_fragment[df_fragment['full_index'].isna()].copy()
 
-    if len(available_items) != len(df_fragment):
-        print(f"   ⚠️  Aviso: {len(df_fragment) - len(available_items)} SKUs do fragmento não foram encontrados no modelo e serão ignorados.", flush=True)
+    print(f"   - Itens conhecidos no modelo: {len(df_known)}")
+    print(f"   - Itens novos (não estão no modelo): {len(df_new)}")
 
-    if available_items.empty:
-        print("   ❌ Nenhum SKU do fragmento foi encontrado no modelo. Retornando resultados vazios.", flush=True)
+    # --- PASSO 2: Obter/Calcular os embeddings para todos os itens ---
+    # Para itens conhecidos, apenas buscamos os embeddings pré-calculados
+    known_indices = df_known['full_index'].astype(int).tolist()
+    known_embeddings = X_reduced[known_indices]
+    known_skus = df_known['sku'].values
+    
+    all_available_embeddings = list(known_embeddings)
+    all_available_skus = list(known_skus)
+
+    # Para itens novos, calculamos os embeddings em tempo real
+    if not df_new.empty:
+        print("   - Calculando embeddings para itens novos...", flush=True)
+        # Precisamos dos dados completos dos itens novos para o pré-processamento
+        # Supondo que df_fragment já contém todos os campos necessários (preço, título, etc)
+        new_embeddings = _preprocess_and_encode_new_items(df_new, model_components)
+        new_skus = df_new['sku'].values
+        
+        all_available_embeddings.extend(new_embeddings)
+        all_available_skus.extend(new_skus)
+        print(f"   - Embeddings para {len(new_skus)} itens novos calculados.", flush=True)
+
+    if not all_available_embeddings:
+        print("   ❌ Nenhum item (conhecido ou novo) pôde ser processado.", flush=True)
         return pd.DataFrame({'sku': df_fragment['sku'], 'recommendations': [[] for _ in df_fragment['sku']]})
 
-    # Obter os vetores (embeddings) apenas dos itens disponíveis
-    available_indices = available_items['full_index'].astype(int).tolist()
-    available_embeddings = X_reduced[available_indices]
+    # Converte para array NumPy para o KNN
+    final_embeddings_array = np.array(all_available_embeddings)
+    final_skus_array = np.array(all_available_skus)
     
-    # Armazenar os SKUs dos itens disponíveis para mapeamento posterior
-    available_skus = available_items['sku'].values
-
-    # --- PASSO 2: Treinar um modelo KNN temporário APENAS com os itens disponíveis ---
-    # O número de vizinhos deve ser o mínimo entre n_recommendations e o total de itens disponíveis
-    k = min(n_recommendations + 1, len(available_embeddings))
-
+    # --- PASSO 3: Treinar o KNN temporário com TODOS os itens disponíveis ---
+    k = min(n_recommendations + 1, len(final_embeddings_array))
     temp_knn = NearestNeighbors(n_neighbors=k, metric='cosine')
-    temp_knn.fit(available_embeddings)
+    temp_knn.fit(final_embeddings_array)
+    print(f"   ✅ Modelo KNN temporário treinado com {len(final_embeddings_array)} itens (conhecidos + novos).", flush=True)
+
+    # --- PASSO 4: Gerar Recomendações ---
+    _, neighbor_indices = temp_knn.kneighbors(final_embeddings_array)
+    rec_indices = neighbor_indices[:, 1:]
     
-    print(f"   ✅ Modelo KNN temporário treinado com {len(available_embeddings)} itens.", flush=True)
-
-    # --- PASSO 3: Encontrar os vizinhos mais próximos DENTRO do modelo temporário ---
-    # A busca é feita nos próprios embeddings disponíveis
-    _, neighbor_indices_in_temp_model = temp_knn.kneighbors(available_embeddings)
-
-    # --- PASSO 4: Mapear os índices do modelo temporário de volta para SKUs ---
-    # Descartamos a primeira coluna (o próprio item)
-    rec_indices = neighbor_indices_in_temp_model[:, 1:]
-
-    # Usamos os 'rec_indices' para buscar os SKUs no nosso array 'available_skus'
-    recommended_skus_matrix = available_skus[rec_indices]
+    # Mapeia os índices de volta para SKUs
+    recommended_skus_matrix = final_skus_array[rec_indices]
     
-    # Criar o DataFrame de resultados para os SKUs processados
     results_df = pd.DataFrame({
-        'sku': available_skus,
+        'sku': final_skus_array,
         'recommendations': list(recommended_skus_matrix)
     })
 
-    # --- PASSO 5: Juntar os resultados com o DataFrame original para manter a ordem e os SKUs faltantes ---
+    # --- PASSO 5: Juntar e formatar o resultado final ---
+    # <-- INÍCIO DA CORREÇÃO ---
+    # Primeiro, fazemos o merge. A coluna 'recommendations' terá 'NaN' para SKUs que não tiveram resultado.
     final_df = df_fragment[['sku']].merge(results_df, on='sku', how='left')
     
-    # Preencher SKUs que não tiveram recomendações (seja por falta no modelo ou por serem únicos) com listas vazias
+    # <-- INÍCIO DA CORREÇÃO ---
+    # Verifica se o elemento 'x' é um array numpy. Se for, converte para lista.
+    # Se não for (ou seja, é NaN), retorna uma lista vazia.
     final_df['recommendations'] = final_df['recommendations'].apply(
-        lambda x: [] if isinstance(x, float) and np.isnan(x) else list(x)
+        lambda x: list(x) if isinstance(x, np.ndarray) else []
     )
-    
-    print(f"✅ Geração de recomendações filtradas concluída.", flush=True)
+    # <-- FIM DA CORREÇÃO ---
+    print("✅ Geração de recomendações dinâmica concluída.", flush=True)
     return final_df
 
 
