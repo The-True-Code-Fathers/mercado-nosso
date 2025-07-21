@@ -115,6 +115,7 @@ public class OrderMapper {
                 domain.getCardNumber(),
                 domain.getCardholderName(),
                 domain.getExpiryDate(),
+                domain.getCvv(),
                 domain.getInstallments(),
                 domain.getPixKey());
     }
@@ -126,6 +127,7 @@ public class OrderMapper {
                 model.getCardNumber(),
                 model.getCardholderName(),
                 model.getExpiryDate(),
+                model.getCvv(),
                 model.getInstallments(),
                 model.getPixKey());
     }

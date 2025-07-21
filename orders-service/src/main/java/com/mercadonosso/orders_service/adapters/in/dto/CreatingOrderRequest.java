@@ -1,4 +1,4 @@
-package com.mercadonosso.orders_service.adapters.in.dto.create_order;
+package com.mercadonosso.orders_service.adapters.in.dto;
 
 import java.util.List;
 import java.util.UUID;
@@ -13,7 +13,7 @@ public record CreatingOrderRequest(
                 UUID buyerId,
                 UUID sellerId,
                 OrderStatus status,
-                List<String> listing,
+                List<String> listingsId,
                 ShippingAddress shippingAddress,
                 PaymentMethod paymentMethod,
                 OrderSummary orderSummary) {

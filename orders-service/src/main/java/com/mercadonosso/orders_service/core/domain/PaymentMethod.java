@@ -17,11 +17,13 @@ public class PaymentMethod {
     @NotNull(message = "Payment type is required")
     private PaymentType type;
 
-    private String cardNumber; // Sempre mascarado para segurança
+    private String cardNumber;
 
     private String cardholderName;
 
     private String expiryDate;
+
+    private String cvv; // Código de segurança do cartão
 
     @Min(value = 1, message = "Installments must be at least 1")
     private Integer installments;

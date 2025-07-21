@@ -9,7 +9,8 @@ import java.util.stream.Collectors;
 
 import com.mercadonosso.orders_service.adapters.in.dto.CreatingOrderRequest;
 import com.mercadonosso.orders_service.adapters.in.dto.DashboardResponse;
-import com.mercadonosso.orders_service.adapters.out.rest.users.UsersServiceAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,56 +29,27 @@ import com.mercadonosso.orders_service.core.ports.in.OrdersServicePort;
 
 @RestController
 public class OrderController {
-    private final UsersServiceAdapter usersServiceAdapter;
+    private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
 
     private final RestTemplate restTemplate;
     private final OrdersServicePort ordersServicePort;
 
-    public OrderController(OrdersServicePort ordersServicePort, UsersServiceAdapter usersServiceAdapter) {
+    public OrderController(OrdersServicePort ordersServicePort, RestTemplate restTemplate) {
         this.ordersServicePort = ordersServicePort;
-        this.restTemplate = new RestTemplate();
-        this.usersServiceAdapter = usersServiceAdapter;
+        this.restTemplate = restTemplate;
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public OrderResponse createOrder(@RequestBody CreatingOrderRequest request) {
-        System.out.println("=== DEBUG CREATE ORDER ===");
-        System.out.println("Request listing: " + request.listing());
-        System.out.println("Request shipping address: " + request.shippingAddress());
-        System.out.println("Request payment method: " + request.paymentMethod());
-        System.out.println("Request order summary: " + request.orderSummary());
+        logger.info("Creating order for buyer: {} and seller: {}", request.buyerId(), request.sellerId());
 
-        Order order = new Order();
-        order.setOrderId(request.orderId());
-        order.setListingId(request.listing());
-        order.setBuyerId(request.buyerId());
-        order.setStatus(request.status());
-        order.setSellerId(request.sellerId());
-
-        // === NOVAS INFORMAÇÕES DO CHECKOUT ===
-        order.setShippingAddress(request.shippingAddress());
-        order.setPaymentMethod(request.paymentMethod());
-        order.setOrderSummary(request.orderSummary());
-
-        Order createdOrder = ordersServicePort.create(order);
-
-        usersServiceAdapter.addOrderToBuyer(createdOrder.getBuyerId(), createdOrder.getOrderId());
-        usersServiceAdapter.addOrderToSeller(createdOrder.getSellerId(), createdOrder.getOrderId());
+        Order createdOrder = ordersServicePort.createOrderWithUserUpdates(request);
 
         return toResponse(createdOrder);
     }
 
     private OrderResponse toResponse(Order order) {
-        System.out.println("=== DEBUG TO RESPONSE ===");
-        System.out.println("Order listingId: " + order.getListingId());
-        System.out.println("Order listingId class: "
-                + (order.getListingId() != null ? order.getListingId().getClass().getName() : "null"));
-        if (order.getListingId() != null && !order.getListingId().isEmpty()) {
-            System.out.println("First order listingId: " + order.getListingId().get(0));
-            System.out.println("First order listingId class: " + order.getListingId().get(0).getClass().getName());
-        }
-
         return new OrderResponse(
                 order.getOrderId(),
                 order.getBuyerId(),
@@ -102,11 +74,10 @@ public class OrderController {
 
     @GetMapping("/all/{id}")
     public List<OrderResponse> getByBuyerId(@PathVariable UUID id) {
-        System.out.println("=== DEBUG GET BY BUYER ID ===");
-        System.out.println("Buyer ID: " + id);
+        logger.debug("Fetching orders for buyer ID: {}", id);
 
         List<Order> orders = ordersServicePort.findByBuyerId(id);
-        System.out.println("Found orders count: " + orders.size());
+        logger.debug("Found {} orders for buyer {}", orders.size(), id);
 
         return orders.stream()
                 .map(this::toResponse)
@@ -115,11 +86,10 @@ public class OrderController {
 
     @GetMapping("/seller/{sellerId}")
     public List<OrderResponse> getBySellerId(@PathVariable UUID sellerId) {
-        System.out.println("=== DEBUG GET BY SELLER ID ===");
-        System.out.println("Seller ID: " + sellerId);
+        logger.debug("Fetching orders for seller ID: {}", sellerId);
 
         List<Order> orders = ordersServicePort.findBySellerId(sellerId);
-        System.out.println("Found seller orders count: " + orders.size());
+        logger.debug("Found {} orders for seller {}", orders.size(), sellerId);
 
         return orders.stream()
                 .map(this::toResponse)
@@ -128,9 +98,8 @@ public class OrderController {
 
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteOrderById(@PathVariable UUID id) {
-        Order ordersToDelete = ordersServicePort.findOrderById(id);
-        ordersServicePort.delete(ordersToDelete);
-
+        logger.info("Inactivating order with ID: {}", id);
+        ordersServicePort.delete(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -154,9 +123,10 @@ public class OrderController {
                     // TODO: replace this with an environment variable or configuration
                     String url = "http://listings-service:8084/" + listingId;
 
+                    @SuppressWarnings("unchecked")
                     Map<String, Object> listingResponse = restTemplate.getForObject(url, Map.class);
-                    System.out.println("URL chamada: " + url);
-                    System.out.println("Response: " + listingResponse);
+                    logger.debug("URL called: {}", url);
+                    logger.debug("Response: {}", listingResponse);
 
                     if (listingResponse != null) {
                         String title = (String) listingResponse.get("title");
@@ -174,7 +144,7 @@ public class OrderController {
                                 salesCount));
                     }
                 } catch (Exception e) {
-                    System.err.println("Erro ao buscar listing " + listingId + ": " + e.getMessage());
+                    logger.error("Error fetching listing {}: {}", listingId, e.getMessage());
                 }
             }
 

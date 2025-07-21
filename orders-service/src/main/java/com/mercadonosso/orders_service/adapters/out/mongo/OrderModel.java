@@ -28,15 +28,13 @@ public class OrderModel {
     private UUID sellerId;
 
     @Field("order_status")
-    private OrderStatus status;
+    private OrderStatus status = OrderStatus.OPEN;
 
     @Field("order_date")
     private LocalDateTime orderDate;
 
     @Field("product_ids")
     private List<String> productIds;
-
-    // === NOVAS INFORMAÇÕES DO CHECKOUT ===
 
     @Field("shipping_address")
     private ShippingAddressModel shippingAddress;

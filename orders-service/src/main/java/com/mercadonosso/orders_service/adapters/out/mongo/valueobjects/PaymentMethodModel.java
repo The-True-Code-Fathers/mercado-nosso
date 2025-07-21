@@ -18,6 +18,7 @@ public class PaymentMethodModel {
     private String cardNumber; // Sempre mascarado
     private String cardholderName;
     private String expiryDate;
+    private String cvv; // Código de segurança do cartão
     private Integer installments;
     private String pixKey; // Para pagamentos PIX
 }
