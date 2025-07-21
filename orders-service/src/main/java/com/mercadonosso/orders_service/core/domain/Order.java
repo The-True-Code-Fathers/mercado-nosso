@@ -38,15 +38,15 @@ public class Order {
     private UUID sellerId;
 
     // === NOVAS INFORMAÇÕES DO CHECKOUT ===
-    
+
     @Valid
     @NotNull(message = "Shipping address is required")
     private ShippingAddress shippingAddress;
-    
+
     @Valid
     @NotNull(message = "Payment method is required")
     private PaymentMethod paymentMethod;
-    
+
     @Valid
     @NotNull(message = "Order summary is required")
     private OrderSummary orderSummary;

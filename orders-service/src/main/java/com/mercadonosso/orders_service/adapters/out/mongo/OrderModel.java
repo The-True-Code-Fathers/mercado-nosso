@@ -23,27 +23,27 @@ public class OrderModel {
 
     @Field("buyer_id")
     private UUID buyerId;
-    
+
     @Field("seller_id")
     private UUID sellerId;
-    
+
     @Field("order_status")
     private OrderStatus status;
-    
+
     @Field("order_date")
     private LocalDateTime orderDate;
-    
+
     @Field("product_ids")
     private List<String> productIds;
 
     // === NOVAS INFORMAÇÕES DO CHECKOUT ===
-    
+
     @Field("shipping_address")
     private ShippingAddressModel shippingAddress;
-    
+
     @Field("payment_method")
     private PaymentMethodModel paymentMethod;
-    
+
     @Field("order_summary")
     private OrderSummaryModel orderSummary;
 }

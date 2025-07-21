@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ShippingAddressModel {
-    
+
     private String street;
     private String number;
     private String complement;

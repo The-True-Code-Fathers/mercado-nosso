@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderSummaryModel {
-    
+
     private BigDecimal subtotal;
     private BigDecimal shippingTotal;
     private BigDecimal discountTotal;

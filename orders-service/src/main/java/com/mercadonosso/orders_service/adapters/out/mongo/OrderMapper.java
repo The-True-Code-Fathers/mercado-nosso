@@ -12,6 +12,7 @@ public class OrderMapper {
 
     /**
      * Converte Order (Domain) para OrderModel (MongoDB)
+     * 
      * @param domain - Entidade de domínio
      * @return OrderModel para persistência no MongoDB
      */
@@ -33,11 +34,11 @@ public class OrderMapper {
         if (domain.getShippingAddress() != null) {
             model.setShippingAddress(toShippingAddressModel(domain.getShippingAddress()));
         }
-        
+
         if (domain.getPaymentMethod() != null) {
             model.setPaymentMethod(toPaymentMethodModel(domain.getPaymentMethod()));
         }
-        
+
         if (domain.getOrderSummary() != null) {
             model.setOrderSummary(toOrderSummaryModel(domain.getOrderSummary()));
         }
@@ -47,6 +48,7 @@ public class OrderMapper {
 
     /**
      * Converte OrderModel (MongoDB) para Order (Domain)
+     * 
      * @param model - Model do MongoDB
      * @return Order (entidade de domínio)
      */
@@ -64,11 +66,11 @@ public class OrderMapper {
         if (model.getShippingAddress() != null) {
             order.setShippingAddress(toShippingAddressDomain(model.getShippingAddress()));
         }
-        
+
         if (model.getPaymentMethod() != null) {
             order.setPaymentMethod(toPaymentMethodDomain(model.getPaymentMethod()));
         }
-        
+
         if (model.getOrderSummary() != null) {
             order.setOrderSummary(toOrderSummaryDomain(model.getOrderSummary()));
         }
@@ -89,8 +91,7 @@ public class OrderMapper {
                 domain.getZipCode(),
                 domain.getFullName(),
                 domain.getId(),
-                domain.isDefault()
-        );
+                domain.isDefault());
     }
 
     private static ShippingAddress toShippingAddressDomain(ShippingAddressModel model) {
@@ -104,8 +105,7 @@ public class OrderMapper {
                 model.getZipCode(),
                 model.getFullName(),
                 model.getId(),
-                model.isDefault()
-        );
+                model.isDefault());
     }
 
     private static PaymentMethodModel toPaymentMethodModel(PaymentMethod domain) {
@@ -116,8 +116,7 @@ public class OrderMapper {
                 domain.getCardholderName(),
                 domain.getExpiryDate(),
                 domain.getInstallments(),
-                domain.getPixKey()
-        );
+                domain.getPixKey());
     }
 
     private static PaymentMethod toPaymentMethodDomain(PaymentMethodModel model) {
@@ -128,8 +127,7 @@ public class OrderMapper {
                 model.getCardholderName(),
                 model.getExpiryDate(),
                 model.getInstallments(),
-                model.getPixKey()
-        );
+                model.getPixKey());
     }
 
     private static OrderSummaryModel toOrderSummaryModel(OrderSummary domain) {
@@ -138,8 +136,7 @@ public class OrderMapper {
                 domain.getShippingTotal(),
                 domain.getDiscountTotal(),
                 domain.getTotal(),
-                domain.getItemsCount()
-        );
+                domain.getItemsCount());
     }
 
     private static OrderSummary toOrderSummaryDomain(OrderSummaryModel model) {
@@ -148,7 +145,6 @@ public class OrderMapper {
                 model.getShippingTotal(),
                 model.getDiscountTotal(),
                 model.getTotal(),
-                model.getItemsCount()
-        );
+                model.getItemsCount());
     }
 }

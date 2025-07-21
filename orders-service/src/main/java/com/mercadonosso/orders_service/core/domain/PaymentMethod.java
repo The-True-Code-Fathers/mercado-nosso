@@ -4,8 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Min;
+import com.mercadonosso.orders_service.core.domain.enums.PaymentType;
 
 @Data
 @AllArgsConstructor
@@ -13,15 +14,31 @@ import jakarta.validation.constraints.Min;
 public class PaymentMethod {
     private String id;
 
-    @NotBlank(message = "Payment type is required")
-    private PaymentMethod type; // CREDIT_CARD, DEBIT_CARD, PIX, etc.
+    @NotNull(message = "Payment type is required")
+    private PaymentType type;
 
-    private String cardNumber;
+    private String cardNumber; // Sempre mascarado para segurança
 
     private String cardholderName;
 
     private String expiryDate;
 
     @Min(value = 1, message = "Installments must be at least 1")
-    private Integer installments = 1;
+    private Integer installments;
+
+    // Para PIX ou outros métodos
+    private String pixKey;
+
+    // Método de conveniência para verificar se é cartão
+    public boolean isCreditCard() {
+        return PaymentType.CREDIT_CARD.equals(type);
+    }
+
+    public boolean isDebitCard() {
+        return PaymentType.DEBIT_CARD.equals(type);
+    }
+
+    public boolean isPix() {
+        return PaymentType.PIX.equals(type);
+    }
 }

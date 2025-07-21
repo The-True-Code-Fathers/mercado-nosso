@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import com.mercadonosso.orders_service.adapters.in.dto.CreatingOrderRequest;
 import com.mercadonosso.orders_service.adapters.in.dto.DashboardResponse;
 import com.mercadonosso.orders_service.adapters.out.rest.users.UsersServiceAdapter;
 import org.springframework.http.*;
@@ -22,14 +23,12 @@ import org.springframework.web.client.RestTemplate;
 
 import com.mercadonosso.orders_service.adapters.in.dto.OrderResponse;
 import com.mercadonosso.orders_service.adapters.in.dto.UpdateOrderStatusRequest;
-import com.mercadonosso.orders_service.adapters.in.dto.create_order.CreatingOrderRequest;
 import com.mercadonosso.orders_service.core.domain.Order;
 import com.mercadonosso.orders_service.core.ports.in.OrdersServicePort;
 
 @RestController
 public class OrderController {
     private final UsersServiceAdapter usersServiceAdapter;
-
 
     private final RestTemplate restTemplate;
     private final OrdersServicePort ordersServicePort;
@@ -48,14 +47,14 @@ public class OrderController {
         System.out.println("Request shipping address: " + request.shippingAddress());
         System.out.println("Request payment method: " + request.paymentMethod());
         System.out.println("Request order summary: " + request.orderSummary());
-        
+
         Order order = new Order();
         order.setOrderId(request.orderId());
         order.setListingId(request.listing());
         order.setBuyerId(request.buyerId());
         order.setStatus(request.status());
         order.setSellerId(request.sellerId());
-        
+
         // === NOVAS INFORMAÇÕES DO CHECKOUT ===
         order.setShippingAddress(request.shippingAddress());
         order.setPaymentMethod(request.paymentMethod());
@@ -172,8 +171,7 @@ public class OrderController {
                                 price,
                                 category,
                                 rating,
-                                salesCount
-                        ));
+                                salesCount));
                     }
                 } catch (Exception e) {
                     System.err.println("Erro ao buscar listing " + listingId + ": " + e.getMessage());
@@ -186,8 +184,7 @@ public class OrderController {
                     order.getSellerId(),
                     order.getStatus(),
                     order.getDate(),
-                    listingInfos
-            ));
+                    listingInfos));
 
         }
 
@@ -207,7 +204,6 @@ public class OrderController {
                 totalSales,
                 averageRating,
                 ordersWithListings,
-                new ArrayList<>()
-        );
+                new ArrayList<>());
     }
 }
