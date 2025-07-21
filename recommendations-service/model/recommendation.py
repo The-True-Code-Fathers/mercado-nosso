@@ -1,0 +1,706 @@
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import LabelEncoder, StandardScaler, MinMaxScaler
+from sklearn.neighbors import NearestNeighbors
+from sklearn.feature_extraction.text import TfidfVectorizer
+from keras.models import Model
+from keras.layers import Input, Dense, Dropout
+import re
+from textblob import TextBlob  # Para análise de sentimento (opcional)
+import os
+import glob
+import random
+import pickle
+import json
+import io
+import pymongo
+from pymongo import MongoClient
+from bson.json_util import dumps
+from bson.objectid import ObjectId
+from bson.decimal128 import Decimal128
+
+MONGO_HOST_INPUT = 'listings-service-mongodb'
+MONGO_PORT = 27017
+MONGO_DB_NAME_INPUT = 'listings-service-mongodb'    
+INPUT_COLLECTION_NAME = 'listings'
+
+MONGO_HOST_OUTPUT = 'recommendations-service-mongodb'
+MONGO_DB_NAME_OUTPUT = 'my_recommendation_database'
+OUTPUT_COLLECTION_NAME = 'generated_recommendations' 
+RECOMMENDATION_ID_FIELD = 'sku'
+
+def preprocess_features(df):
+    """
+    Preprocessa todas as features disponíveis para o sistema de recomendação
+    """
+    df_processed = df.copy()
+    
+    # ==================== FEATURES NUMÉRICAS ====================
+    # Features numéricas diretas - muito importantes!
+    numerical_features = ['price', 'rating', 'reviews', 'boughtInLastMonth', 
+                         'stock']
+    
+    # ==================== FEATURES CATEGÓRICAS ====================
+    # 1. Category - já estava sendo usada
+    label_encoder_cat = LabelEncoder()
+    df_processed['category_encoded'] = label_encoder_cat.fit_transform(df['category'])
+    
+    # 2. ProductCondition - muito importante para recomendações
+    label_encoder_condition = LabelEncoder()
+    df_processed['productCondition_encoded'] = label_encoder_condition.fit_transform(df['productCondition'])
+    
+    # 3. SellerId - pode ajudar a recomendar produtos do mesmo vendedor
+    label_encoder_seller = LabelEncoder()
+    df_processed['sellerId_encoded'] = label_encoder_seller.fit_transform(df['sellerId'])
+    
+    # ==================== FEATURES BOOLEANAS ====================
+    # Converter para 0 e 1
+    df_processed['isBestSeller_encoded'] = df['isBestSeller'].astype(int)
+    df_processed['active_encoded'] = df['active'].astype(int)
+    
+    # ==================== FEATURES DERIVADAS ====================
+    # 1. Popularidade geral (combinação de reviews e rating)
+    df_processed['popularity_score'] = (df['rating'] * np.log1p(df['reviews'])).fillna(0)
+    
+    
+    # 4. Disponibilidade (stock > 0)
+    df_processed['in_stock'] = (df['stock'] > 0).astype(int)
+    
+    # 5. Faixa de preço (categorização)
+    df_processed['price_range'] = pd.cut(df['price'], 
+                                       bins=[0, 50, 100, 200, 500, float('inf')], 
+                                       labels=[0, 1, 2, 3, 4]).cat.add_categories([5]).fillna(5).astype(int)
+    
+    # 6. Categoria de rating
+    df_processed['rating_category'] = pd.cut(df['rating'], 
+                                           bins=[0, 3, 4, 4.5, 5], 
+                                           labels=[0, 1, 2, 3]).cat.add_categories([4]).fillna(4).astype(int)
+    
+    categorical_features = ['category_encoded', 'productCondition_encoded', 
+                          'sellerId_encoded', 'isBestSeller_encoded', 'active_encoded',
+                          'in_stock', 'price_range', 'rating_category']
+    
+    
+    # ==================== FEATURES DERIVADAS AVANÇADAS ====================
+    derived_features = ['popularity_score']
+    
+    encoders = {
+    'category': label_encoder_cat,
+    'productCondition': label_encoder_condition,
+    'sellerId': label_encoder_seller
+}
+    return df_processed, numerical_features, categorical_features, derived_features, encoders
+
+def process_text_features(df, max_features=100):
+    """
+    Processa features de texto (title e description) usando TF-IDF
+    """
+    
+    # Limpar e combinar título e descrição
+    df['combined_text'] = df['title'].fillna('').fillna('')
+    
+    # Preprocessing básico de texto
+    def clean_text(text):
+        text = str(text).lower()
+        text = re.sub(r'[^a-zA-Z\s]', '', text)
+        return text
+    
+    df['combined_text_clean'] = df['combined_text'].apply(clean_text)
+    
+    # TF-IDF para extrair features importantes do texto
+    tfidf = TfidfVectorizer(max_features=max_features, 
+                           stop_words='english',
+                           ngram_range=(1, 2))
+    
+    text_features = tfidf.fit_transform(df['combined_text_clean']).toarray()
+    
+    # Criar DataFrame com features de texto
+    text_feature_names = [f'text_feature_{i}' for i in range(text_features.shape[1])]
+    text_df = pd.DataFrame(text_features, columns=text_feature_names)
+    
+    
+    return text_df, tfidf
+
+def create_enhanced_recommendation_system(df, use_text_features=True, text_max_features=50):
+    """
+    Cria um sistema de recomendação avançado usando todas as features disponíveis
+    """
+    print("🚀 Criando sistema de recomendação melhorado...")
+    
+    # Preprocessar features
+    df_processed, numerical_features, categorical_features, derived_features, label_encoders = preprocess_features(df)
+    
+    # Escalar features numéricas
+    scaler = StandardScaler()
+    numerical_data = scaler.fit_transform(df_processed[numerical_features + derived_features])
+    
+    # Combinar features numéricas e categóricas
+    categorical_data = df_processed[categorical_features].values
+    
+    # Combinar todas as features
+    if use_text_features:
+        text_df, tfidf = process_text_features(df, max_features=text_max_features)
+        X = np.concatenate([numerical_data, categorical_data, text_df.values], axis=1)
+        print(f"✅ Features totais: {X.shape[1]} (numéricas: {len(numerical_features + derived_features)}, categóricas: {len(categorical_features)}, texto: {text_df.shape[1]})")
+    else:
+        X = np.concatenate([numerical_data, categorical_data], axis=1)
+        tfidf = None
+        print(f"✅ Features totais: {X.shape[1]} (numéricas: {len(numerical_features + derived_features)}, categóricas: {len(categorical_features)})")
+    
+    # Autoencoder melhorado com normalização
+    input_layer = Input(shape=(X.shape[1],))
+    encoded = Dense(256, activation='relu')(input_layer)
+    encoded = Dropout(0.3)(encoded)
+    encoded = Dense(128, activation='relu')(encoded)
+    encoded = Dropout(0.3)(encoded)
+    encoded = Dense(64, activation='relu')(encoded)  # Camada de codificação
+    
+    decoded = Dense(128, activation='relu')(encoded)
+    decoded = Dropout(0.3)(decoded)
+    decoded = Dense(256, activation='relu')(decoded)
+    decoded = Dense(X.shape[1], activation='linear')(decoded)  # Mudança para linear
+    
+    autoencoder = Model(input_layer, decoded)
+    encoder = Model(input_layer, encoded)
+    
+    # Compilar e treinar com learning rate menor
+    from keras.optimizers import Adam
+    autoencoder.compile(optimizer=Adam(learning_rate=0.001), loss='mse')
+    print("🏋️ Treinando autoencoder...")
+    epochs = min(20, max(5, 1000 // len(df)))  # Adaptativo baseado no tamanho
+    batch_size = min(128, len(df) // 4)
+    autoencoder.fit(X, X, epochs=epochs, batch_size=batch_size, shuffle=True, verbose=1, validation_split=0.2)
+    
+    # Obter representação compacta
+    X_reduced = encoder.predict(X)
+    
+    # Sistema KNN com métricas diferentes
+    knn_cosine = NearestNeighbors(n_neighbors=20, metric='cosine')
+    knn_cosine.fit(X_reduced)
+    
+    # Adicionar KNN euclidiano como alternativa
+    knn_euclidean = NearestNeighbors(n_neighbors=20, metric='euclidean')
+    knn_euclidean.fit(X_reduced)
+    
+    return {
+        'knn_cosine': knn_cosine,
+        'knn_euclidean': knn_euclidean,
+        'encoder': encoder,
+        'scaler': scaler,
+        'X_reduced': X_reduced,
+        'X_original': X,
+        'df_processed': df_processed,
+        'numerical_features': numerical_features,
+        'categorical_features': categorical_features,
+        'derived_features': derived_features,
+        'tfidf': tfidf,
+        'label_encoders': label_encoders,
+        'feature_names': {
+            'numerical': numerical_features + derived_features,
+            'categorical': categorical_features,
+            'text_features': text_max_features if use_text_features else 0
+        }
+    }
+
+def get_smart_recommendations(product_index, model_components, n_recommendations=5):
+    """
+    Gets recommendations using the pre-computed data inside model_components.
+    """
+    # Use the correct key for the KNN model
+    knn = model_components.get('knn_cosine') or model_components.get('knn') 
+    
+    X_reduced = model_components['X_reduced']
+    df_full = model_components['df_processed']
+    
+    # Get the embedding for the target product
+    product_embedding = X_reduced[product_index].reshape(1, -1)
+    
+    # Find the nearest neighbors
+    distances, indices = knn.kneighbors(product_embedding, n_neighbors=n_recommendations + 1)
+    
+    # The first item is always the product itself, so we skip it (start from index 1)
+    rec_indices = indices[0][1:]
+    
+    # Get the SKUs of the recommended products from the full DataFrame
+    rec_skus = df_full.iloc[rec_indices]['sku'].tolist()
+    
+    return rec_skus
+
+
+def get_product_index_by_sku(df, sku):
+    """
+    Maps an SKU to the corresponding product index in the DataFrame.
+    """
+    try:
+        return df[df['sku'] == sku].index[0]
+    except IndexError:
+        raise ValueError(f"SKU '{sku}' not found in the dataset.")
+
+
+def train_and_save_model(df, model_path):
+    """
+    Trains the recommendation model and saves it to disk.
+    
+    Args:
+        df (pd.DataFrame): The DataFrame containing the full dataset (1.08 million items).
+        model_path (str): Path to save the trained model components.
+    """
+    print("🔧 Training the recommendation model...")
+    model_components = create_enhanced_recommendation_system(df, use_text_features=True)
+    
+    # Save the trained model components to disk
+    with open(model_path, "wb") as f:
+        pickle.dump(model_components, f)
+    print(f"✅ Model saved to {model_path}")
+
+
+def load_model(model_path):
+    """
+    Loads the trained recommendation model from disk.
+    
+    Args:
+        model_path (str): Path to the saved model components.
+    
+    Returns:
+        dict: The loaded model components.
+    """
+    print(f"DEBUG: Carregando modelo de: {model_path}", flush=True)
+    print("🔧 Loading the recommendation model...", flush=True)
+    with open(model_path, "rb") as f:
+        model_components = pickle.load(f)
+    print("✅ Model loaded successfully", flush=True)
+    return model_components
+
+def validate_and_clean_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Garante que o DataFrame tenha as colunas e os tipos de dados corretos
+    antes de ser passado para o modelo de recomendação.
+    Agora inclui a conversão de Decimal128.
+    """
+    # Define o "contrato" de dados: quais colunas são necessárias e seus tipos
+    required_schema = {
+        'sku': str,
+        'title': str,
+        'price': float,
+        'rating': float,
+        'reviews': int,
+        'stock': int,
+        'boughtInLastMonth': int,
+        'category': str,
+        'productCondition': str,
+        'sellerId': str,
+        'isBestSeller': bool,
+        'active': bool
+    }
+
+    # Define valores padrão para preencher dados ausentes
+    default_values = {
+        'title': '',
+        'price': 0.0,
+        'rating': 0.0,
+        'reviews': 0,
+        'stock': 0,
+        'boughtInLastMonth': 0,
+        'category': 'Unknown',
+        'productCondition': 'Unknown',
+        'sellerId': 'Unknown',
+        'isBestSeller': False,
+        'active': False
+    }
+
+    df_cleaned = df.copy()
+
+    # PASSO 1: Garantir que todas as colunas necessárias existam
+    for col, default_val in default_values.items():
+        if col not in df_cleaned.columns:
+            print(f"   ⚠️  AVISO: Coluna '{col}' ausente. Adicionando com valor padrão.")
+            df_cleaned[col] = default_val
+
+    # PASSO 2: Forçar os tipos de dados corretos e tratar erros
+    numerical_cols = ['price', 'rating', 'reviews', 'stock', 'boughtInLastMonth']
+
+    # PASSO 2.1: Converter Decimal128 para float ANTES de outras operações
+    for col in numerical_cols:
+        if col in df_cleaned.columns:
+            # Aplica uma função a cada célula da coluna
+            df_cleaned[col] = df_cleaned[col].apply(
+                lambda x: float(x.to_decimal()) if isinstance(x, Decimal128) else x
+            )
+
+    # PASSO 2.2: Converter para tipo numérico, transformando erros em NaN
+    for col in numerical_cols:
+        # 'coerce' transforma valores não numéricos (que não são Decimal128) em NaN
+        df_cleaned[col] = pd.to_numeric(df_cleaned[col], errors='coerce')
+
+    # PASSO 3: Preencher quaisquer valores nulos (NaN) que possam ter surgido
+    df_cleaned.fillna(default_values, inplace=True)
+
+    # PASSO 4: Garantir que as colunas restantes tenham o tipo correto
+    for col, dtype in required_schema.items():
+        # As colunas numéricas já foram tratadas, então as pulamos
+        if col not in numerical_cols:
+            df_cleaned[col] = df_cleaned[col].astype(dtype)
+
+    print("   ✅ Dados validados e limpos com sucesso (incluindo Decimal128).")
+    return df_cleaned
+
+def get_recommendations_for_sku(sku: str, model_components: dict, n_recommendations: int = 3) -> dict:
+    """
+    Busca recomendações para um único SKU, garantindo que os itens recomendados
+    sejam escolhidos apenas dentre os produtos atualmente disponíveis no banco de dados.
+
+    Args:
+        sku (str): O SKU do produto para o qual queremos recomendações.
+        model_components (dict): O dicionário com os componentes do modelo carregado.
+        n_recommendations (int): O número de recomendações a serem retornadas.
+
+    Returns:
+        dict: Um dicionário com o SKU original e a lista de SKUs recomendados.
+    
+    Raises:
+        ValueError: Se o SKU alvo não for encontrado no banco de dados.
+    """
+    print(f"Buscando recomendações filtradas para o SKU: {sku}", flush=True)
+
+    # --- PASSO 1: Buscar o item alvo e os candidatos no MongoDB ---
+    # Busca o documento completo do item alvo
+    target_item_doc = get_data_from_mongodb(INPUT_COLLECTION_NAME, query_filter={'sku': sku})
+    if not target_item_doc:
+        raise ValueError(f"SKU alvo '{sku}' não encontrado no banco de dados '{INPUT_COLLECTION_NAME}'.")
+
+    # Busca todos os OUTROS itens disponíveis para serem os candidatos da recomendação
+    # O filtro {'active': True} é uma boa prática para recomendar apenas itens ativos
+    candidate_docs = get_data_from_mongodb(
+        INPUT_COLLECTION_NAME, 
+        query_filter={'sku': {'$ne': sku}, 'active': True}
+    )
+    if not candidate_docs:
+        print(f"Nenhum outro item disponível encontrado para servir como recomendação para o SKU {sku}.")
+        return {"sku": sku, "recommendations": []}
+
+    # --- PASSO 2: Validar e limpar os dados de ambos ---
+    print("   - Validando e limpando dados do item alvo e dos candidatos...")
+    df_target_clean = validate_and_clean_dataframe(pd.DataFrame(target_item_doc))
+    df_candidates_clean = validate_and_clean_dataframe(pd.DataFrame(candidate_docs))
+
+    # --- PASSO 3: Gerar os embeddings para o alvo e para os candidatos ---
+    # Usamos a função auxiliar que já criamos para processar novos itens
+    print("   - Gerando embeddings...")
+    target_embedding = _preprocess_and_encode_new_items(df_target_clean, model_components)
+    candidate_embeddings = _preprocess_and_encode_new_items(df_candidates_clean, model_components)
+
+    # --- PASSO 4: Criar e treinar o KNN temporário apenas com os candidatos ---
+    k = min(n_recommendations, len(candidate_embeddings))
+    if k == 0:
+        return {"sku": sku, "recommendations": []}
+
+    temp_knn = NearestNeighbors(n_neighbors=k, metric='cosine')
+    temp_knn.fit(candidate_embeddings)
+    print(f"   - Modelo KNN temporário treinado com {len(candidate_embeddings)} candidatos.")
+
+    # --- PASSO 5: Encontrar os vizinhos mais próximos do item alvo ---
+    distances, indices = temp_knn.kneighbors(target_embedding)
+    
+    # Os índices retornados correspondem às posições no df_candidates_clean
+    rec_indices = indices[0]
+    
+    # Mapear os índices de volta para os SKUs dos candidatos
+    recommended_skus = df_candidates_clean.iloc[rec_indices]['sku'].tolist()
+
+    print(f"   - Recomendações encontradas: {recommended_skus}")
+    
+    return {
+        "sku": sku,
+        "recommendations": recommended_skus
+    }
+
+def _preprocess_and_encode_new_items(df_new_items, model_components):
+    """
+    Recebe um DataFrame de itens novos e retorna seus embeddings calculados em tempo real.
+    (Esta é uma versão em lote da sua função 'generate_recommendations_for_new_item')
+    """
+    scaler = model_components['scaler']
+    label_encoders = model_components['label_encoders']
+    tfidf = model_components['tfidf']
+    encoder_model = model_components['encoder']
+    feature_info = model_components['feature_names']
+    
+    df_processed = df_new_items.copy()
+    
+    # --- Reaplica todo o pré-processamento ---
+    # Features Derivadas
+    df_processed['popularity_score'] = (df_processed['rating'] * np.log1p(df_processed['reviews'])).fillna(0)
+    df_processed['in_stock'] = (df_processed['stock'] > 0).astype(int)
+    df_processed['price_range'] = pd.cut(df_processed['price'], bins=[0, 50, 100, 200, 500, float('inf')], labels=[0, 1, 2, 3, 4]).cat.add_categories([5]).fillna(5).astype(int)
+    df_processed['rating_category'] = pd.cut(df_processed['rating'], bins=[0, 3, 4, 4.5, 5], labels=[0, 1, 2, 3]).cat.add_categories([4]).fillna(4).astype(int)
+    
+    # Features Categóricas
+    for col, encoder in label_encoders.items():
+        # Lida com categorias que podem não ter sido vistas no treino
+        df_processed[f'{col}_encoded'] = df_processed[col].apply(lambda x: encoder.transform([x])[0] if x in encoder.classes_ else -1) # -1 para desconhecido
+    
+    # Features Booleanas
+    df_processed['isBestSeller_encoded'] = df_processed['isBestSeller'].astype(int)
+    df_processed['active_encoded'] = df_processed['active'].astype(int)
+
+    # Features Numéricas
+    numerical_data = scaler.transform(df_processed[feature_info['numerical']])
+    
+    # Features Categóricas (garante a ordem correta das colunas)
+    categorical_data = df_processed[feature_info['categorical']].values
+    
+    # Features de Texto
+    df_processed['combined_text'] = df_processed['title'].fillna('')
+    text_data = tfidf.transform(df_processed['combined_text']).toarray()
+    
+    # Combina tudo no vetor de features final
+    X_new = np.concatenate([numerical_data, categorical_data, text_data], axis=1)
+    
+    # Gera os embeddings
+    new_embeddings = encoder_model.predict(X_new)
+    
+    return new_embeddings
+
+def generate_recommendations_for_fragment(df_fragment, model_components, n_recommendations=3):
+    """
+    Generates recommendations for a fragment with progress logging.
+    """
+    print(f"\n🚀 Iniciando geração dinâmica para {len(df_fragment)} itens...", flush=True)
+
+    # --- PASSO 1: Separar itens conhecidos de itens novos ---
+    df_full_processed = model_components['df_processed']
+    X_reduced = model_components['X_reduced']
+    sku_to_full_index = pd.Series(df_full_processed.index, index=df_full_processed.sku)
+    
+    # Adiciona uma coluna com o índice original; novos itens terão NaN
+    df_fragment['full_index'] = df_fragment['sku'].map(sku_to_full_index)
+    
+    df_known = df_fragment[df_fragment['full_index'].notna()].copy()
+    df_new = df_fragment[df_fragment['full_index'].isna()].copy()
+
+    print(f"   - Itens conhecidos no modelo: {len(df_known)}")
+    print(f"   - Itens novos (não estão no modelo): {len(df_new)}")
+
+    # --- PASSO 2: Obter/Calcular os embeddings para todos os itens ---
+    # Para itens conhecidos, apenas buscamos os embeddings pré-calculados
+    known_indices = df_known['full_index'].astype(int).tolist()
+    known_embeddings = X_reduced[known_indices]
+    known_skus = df_known['sku'].values
+    
+    all_available_embeddings = list(known_embeddings)
+    all_available_skus = list(known_skus)
+
+    # Para itens novos, calculamos os embeddings em tempo real
+    if not df_new.empty:
+        print("   - Calculando embeddings para itens novos...", flush=True)
+        # Precisamos dos dados completos dos itens novos para o pré-processamento
+        # Supondo que df_fragment já contém todos os campos necessários (preço, título, etc)
+        new_embeddings = _preprocess_and_encode_new_items(df_new, model_components)
+        new_skus = df_new['sku'].values
+        
+        all_available_embeddings.extend(new_embeddings)
+        all_available_skus.extend(new_skus)
+        print(f"   - Embeddings para {len(new_skus)} itens novos calculados.", flush=True)
+
+    if not all_available_embeddings:
+        print("   ❌ Nenhum item (conhecido ou novo) pôde ser processado.", flush=True)
+        return pd.DataFrame({'sku': df_fragment['sku'], 'recommendations': [[] for _ in df_fragment['sku']]})
+
+    # Converte para array NumPy para o KNN
+    final_embeddings_array = np.array(all_available_embeddings)
+    final_skus_array = np.array(all_available_skus)
+    
+    # --- PASSO 3: Treinar o KNN temporário com TODOS os itens disponíveis ---
+    k = min(n_recommendations + 1, len(final_embeddings_array))
+    temp_knn = NearestNeighbors(n_neighbors=k, metric='cosine')
+    temp_knn.fit(final_embeddings_array)
+    print(f"   ✅ Modelo KNN temporário treinado com {len(final_embeddings_array)} itens (conhecidos + novos).", flush=True)
+
+    # --- PASSO 4: Gerar Recomendações ---
+    _, neighbor_indices = temp_knn.kneighbors(final_embeddings_array)
+    rec_indices = neighbor_indices[:, 1:]
+    
+    # Mapeia os índices de volta para SKUs
+    recommended_skus_matrix = final_skus_array[rec_indices]
+    
+    results_df = pd.DataFrame({
+        'sku': final_skus_array,
+        'recommendations': list(recommended_skus_matrix)
+    })
+
+    # --- PASSO 5: Juntar e formatar o resultado final ---
+    # <-- INÍCIO DA CORREÇÃO ---
+    # Primeiro, fazemos o merge. A coluna 'recommendations' terá 'NaN' para SKUs que não tiveram resultado.
+    final_df = df_fragment[['sku']].merge(results_df, on='sku', how='left')
+    
+    # <-- INÍCIO DA CORREÇÃO ---
+    # Verifica se o elemento 'x' é um array numpy. Se for, converte para lista.
+    # Se não for (ou seja, é NaN), retorna uma lista vazia.
+    final_df['recommendations'] = final_df['recommendations'].apply(
+        lambda x: list(x) if isinstance(x, np.ndarray) else []
+    )
+    # <-- FIM DA CORREÇÃO ---
+    print("✅ Geração de recomendações dinâmica concluída.", flush=True)
+    return final_df
+
+
+def generate_recommendations_for_new_item(new_item_dict, model_components, n_recommendations=3):
+    """
+    Generates recommendations for a single, new item and returns the
+    result in a JSON-friendly dictionary format.
+    """
+    print(f"🔧 Generating recommendations for new item: {new_item_dict.get('sku', 'N/A')}")
+
+    # --- (The first part of the function for preprocessing the new item is unchanged) ---
+    df_full_processed = model_components['df_processed']
+    scaler = model_components['scaler']
+    label_encoders = model_components['label_encoders']
+    tfidf = model_components['tfidf']
+    encoder_model = model_components['encoder']
+    knn = model_components.get('knn_cosine') or model_components.get('knn') # Handle different key names
+    
+    feature_info = model_components['feature_names']
+    num_feat_names = feature_info['numerical']
+    cat_feat_names = feature_info['categorical']
+    
+    new_item_df = pd.DataFrame([new_item_dict])
+    
+    # Preprocessing steps remain the same...
+    new_item_df['popularity_score'] = (new_item_df['rating'] * np.log1p(new_item_df['reviews'])).fillna(0)
+    numerical_data = scaler.transform(new_item_df[num_feat_names])
+    new_item_df['category_encoded'] = label_encoders['category'].transform(new_item_df['category'])
+    new_item_df['productCondition_encoded'] = label_encoders['productCondition'].transform(new_item_df['productCondition'])
+    new_item_df['sellerId_encoded'] = label_encoders['sellerId'].transform(new_item_df['sellerId'])
+    new_item_df['isBestSeller_encoded'] = new_item_df['isBestSeller'].astype(int)
+    new_item_df['active_encoded'] = new_item_df['active'].astype(int)
+    new_item_df['in_stock'] = (new_item_df['stock'] > 0).astype(int)
+    new_item_df['price_range'] = pd.cut(new_item_df['price'], bins=[0, 50, 100, 200, 500, float('inf')], labels=[0, 1, 2, 3, 4]).cat.add_categories([5]).fillna(5).astype(int)
+    new_item_df['rating_category'] = pd.cut(new_item_df['rating'], bins=[0, 3, 4, 4.5, 5], labels=[0, 1, 2, 3]).cat.add_categories([4]).fillna(4).astype(int)
+    categorical_data = new_item_df[cat_feat_names].values
+    new_item_df['combined_text'] = new_item_df['title'].fillna('')
+    text_data = tfidf.transform(new_item_df['combined_text']).toarray()
+    
+    X_new = np.concatenate([numerical_data, categorical_data, text_data], axis=1)
+    X_new_reduced = encoder_model.predict(X_new)
+    
+    # --- (The last part of the function is changed to return only SKUs) ---
+    distances, indices = knn.kneighbors(X_new_reduced, n_neighbors=n_recommendations)
+    rec_indices = indices[0]
+    
+    # Get the list of recommended SKUs
+    recommended_skus = df_full_processed.iloc[rec_indices]['sku'].tolist()
+    
+    # Create the final result object
+    final_result = {
+        "sku": new_item_dict.get('sku'),
+        "recommendations": recommended_skus
+    }
+    
+    return final_result
+
+def save_recommendations_to_json(data, filepath):
+    """
+    Saves the recommendation data to a JSON file.
+
+    Args:
+        data (list or dict): The recommendation results to save.
+        filepath (str): The path to the output JSON file.
+    """
+    try:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+        print(f"✅ Recommendations successfully saved to {filepath}")
+    except Exception as e:
+        print(f"❌ Error saving file: {e}")
+
+
+
+def get_data_from_mongodb(collection_name: str, query_filter: dict = None) -> list:
+    """
+    Busca dados do MongoDB e retorna uma lista de dicionários.
+    """
+    client = None
+    try:
+        conn_params = {
+            'host': MONGO_HOST_INPUT,
+            'port': MONGO_PORT,
+            'serverSelectionTimeoutMS': 5000 # Timeout de conexão mais rápido
+        }
+        client = MongoClient(**conn_params)
+        db = client[MONGO_DB_NAME_INPUT]
+        collection = db[collection_name]
+
+        final_filter = query_filter if query_filter is not None else {}
+        # Aumentar o timeout da query no lado do servidor
+        cursor = collection.find(final_filter).max_time_ms(120000)
+        
+        # Retorna a lista de documentos diretamente
+        return list(cursor)
+
+    except pymongo.errors.ConnectionFailure as e:
+        print(f"ERROR: Connection to MongoDB (input) failed: {str(e)}", flush=True)
+        raise  # Lança a exceção para ser tratada pela função que chamou
+    except Exception as e:
+        print(f"ERROR: An unexpected error occurred during get_data: {str(e)}", flush=True)
+        raise # Lança a exceção
+    finally:
+        if client:
+            client.close()
+
+def save_data_to_mongodb(data_list: list, collection_name: str, id_field: str = None,
+                         mongo_host: str = MONGO_HOST_OUTPUT,
+                         mongo_db_name: str = MONGO_DB_NAME_OUTPUT) -> dict:
+    client = None
+    try:
+        # Keep this initial save attempt message
+        print(f"DEBUG SAVE: Attempting to save {len(data_list)} docs to host={mongo_host}, db={mongo_db_name}, collection={collection_name}", flush=True)
+        
+        conn_params = {
+            'host': mongo_host,
+            'port': MONGO_PORT
+        }
+        client = MongoClient(**conn_params)
+        db = client[mongo_db_name]
+        collection = db[collection_name]
+
+        results = []
+        for doc_original in data_list:
+            doc_to_save = dict(doc_original)
+
+            if '_id' in doc_to_save and isinstance(doc_to_save['_id'], str):
+                try:
+                    doc_to_save['_id'] = ObjectId(doc_to_save['_id'])
+                except:
+                    pass
+
+            if id_field and id_field in doc_to_save:
+                filter_query = {id_field: doc_to_save[id_field]}
+                
+                update_result = collection.update_one(
+                    filter_query,
+                    {"$set": doc_to_save},
+                    upsert=True
+                )
+                if update_result.upserted_id:
+                    results.append(f"Inserido novo documento para SKU {doc_to_save[id_field]}") # Simplified print
+                elif update_result.modified_count > 0:
+                    results.append(f"Documento para SKU {doc_to_save[id_field]} atualizado.") # Simplified print
+                else:
+                    results.append(f"Documento para SKU {doc_to_save[id_field]} não modificado.") # Simplified print
+            else:
+                insert_result = collection.insert_one(doc_to_save)
+                results.append(f"Inserido novo documento com _id: {insert_result.inserted_id} (no id_field).")
+            
+        # Keep this final print of the save operation, without dumping results list.
+        print(f"DEBUG SAVE: Completed saving process. Total results: {len(results)}.", flush=True)
+        return {"status": "success", "message": "Dados salvos com sucesso.", "details": results}
+
+    except pymongo.errors.ConnectionFailure as e:
+        print(f"ERROR SAVE: Connection to output MongoDB failed at {mongo_host}:{MONGO_PORT}/{mongo_db_name}: {str(e)}", flush=True)
+        return {"status": "error", "message": f"Connection to output MongoDB failed: {str(e)}"}
+    except Exception as e:
+        print(f"ERROR SAVE: An unexpected error occurred during save_data: {str(e)}", flush=True)
+        return {"status": "error", "message": f"An unexpected error occurred: {str(e)}"}
+    finally:
+        if client:
+            client.close()

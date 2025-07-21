@@ -237,8 +237,35 @@ services:
     depends_on:
       eureka-server:
         condition: service_started
+      listings-service-mongodb:
+        condition: service_started
+      zookeeper: 
+        condition: service_started
+      kafka:
+        condition: service_healthy
     ports:
       - "8086:8086"
+    networks:
+      - my-network
+    working_dir: /app
+    command: ["python", "main.py"]
+    deploy:
+      resources:
+        limits:
+          memory: 6G 
+          cpus: '2.0'
+        reservations:
+          memory: 2G 
+          cpus: '1.0'
+
+
+  recommendations-service-mongodb:
+    image: mongo:5.0
+    container_name: recommendations-service-mongodb
+    ports:
+      - "5490:27017"
+    volumes:
+      - recommendations-service:/data/db
     networks:
       - my-network
 
@@ -248,6 +275,7 @@ volumes:
   listings_db_data:
   orders_db_data:
   reviews_db_data:
+  recommendations-service:
 
 networks:
   my-network:
