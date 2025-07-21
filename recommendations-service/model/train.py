@@ -5,9 +5,9 @@ MONGO_PORT = 27017
 MONGO_DB_NAME = 'listings-service-mongodb'    
 INPUT_COLLECTION_NAME = 'listings' # Exemplo: Sua coleção de produtos/listings
 
-def treinar_modelo_robusto(file_path):
-    df_full = pd.read_json(file_path)  # Load the full dataset (1.08 million items)
-   return train_and_save_model(df_full, "trained_model.pkl")
+# def treinar_modelo_robusto(file_path):
+#     df_full = pd.read_json(file_path)  # Load the full dataset (1.08 million items)
+#    return train_and_save_model(df_full, "trained_model.pkl")
 
 
 def load_model(model_path: str):
