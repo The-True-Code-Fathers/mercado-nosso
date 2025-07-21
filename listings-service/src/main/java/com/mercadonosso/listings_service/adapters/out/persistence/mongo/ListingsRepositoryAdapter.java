@@ -52,6 +52,12 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
     }
 
     @Override
+    public Optional<ListingsEntity> findBySku(String sku) {
+        Optional<ListingsModel> modelOptional = mongoRepository.findBySku(sku);
+        return modelOptional.map(mapper::toDomain);
+    }
+
+    @Override
     public List<ListingsEntity> listAll() {
         List<ListingsModel> models = mongoRepository.findAll();
         return models.stream()

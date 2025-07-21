@@ -94,6 +94,31 @@ public class ListingsController {
         }
     }
 
+    @GetMapping("/item/{sku}")
+public ListingResponse getListingBySku(@PathVariable String sku) {
+    logger.info("GET /item/{} - Received request to find listing with SKU: {}", sku, sku);
+
+    try {
+        // The service port call is correct! It uses your findBySku repository method.
+        ListingsEntity listingsEntity = listingsServicePort.findBySku(sku);
+
+        if (listingsEntity == null) {
+            logger.warn("GET /item/{} - Listing not found in the database", sku);
+            // Consider returning a 404 Not Found response here
+            // throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Listing not found");
+        }
+
+        ListingResponse response = toResponse(listingsEntity);
+        logger.info("GET /item/{} - Response generated: {}", sku, response);
+        return response;
+
+    } catch (Exception e) {
+        logger.error("GET /item/{} - Error while fetching listing", sku, e);
+        // Re-throwing the original exception is fine, or map to a specific HTTP status
+        throw e;
+    }
+}
+
     @PutMapping("/{id}")
     public ListingResponse updateListing(@PathVariable String id, @RequestBody UpdateListingsRequest request) {
         logger.info("PUT /{} - Recebida requisição para atualizar listing com ID: {}", id, id);

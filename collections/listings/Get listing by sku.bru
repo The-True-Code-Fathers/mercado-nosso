@@ -1,0 +1,11 @@
+meta {
+  name: Get listing by sku
+  type: http
+  seq: 9
+}
+
+get {
+  url: http://localhost:8080/api/listings/{{listingId}}
+  body: none
+  auth: inherit
+}

@@ -20,6 +20,8 @@ public interface ListingsServicePort {
 
         ListingsEntity findById(ObjectId id);
 
+        ListingsEntity findBySku(String sku);
+
         List<ListingsEntity> searchListings(String partialName, ProductCondition productCondition, BigDecimal minPrice,
                         BigDecimal maxPrice, SearchOrdering ordering);
 
