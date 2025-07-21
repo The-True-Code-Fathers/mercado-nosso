@@ -1,6 +1,7 @@
 package com.mercadonosso.listings_service.adapters.out.persistence.mongo;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -124,28 +125,33 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
 
     private Criteria buildSearchCriteria(String partialName, ProductCondition productCondition,
             BigDecimal minPrice, BigDecimal maxPrice) {
-        Criteria criteria = Criteria.where("active").is(true);
+        
+        List<Criteria> criteriaList = new ArrayList<>();
 
+        // Always filter for active listings
+        criteriaList.add(Criteria.where("active").is(true));
+
+        // 2. Add other conditions to the list if they exist
         if (partialName != null && !partialName.trim().isEmpty()) {
             Criteria textCriteria = new Criteria().orOperator(
                     Criteria.where("title").regex(partialName, "i"),
                     Criteria.where("description").regex(partialName, "i"));
-            criteria = criteria.andOperator(textCriteria);
+            criteriaList.add(textCriteria);
         }
 
         if (productCondition != null) {
-            criteria = criteria.and("productCondition").is(productCondition);
+            criteriaList.add(Criteria.where("productCondition").is(productCondition));
         }
 
-        if (minPrice != null && maxPrice != null) {
-            criteria = criteria.and("price").gte(minPrice.doubleValue()).lte(maxPrice.doubleValue());
-        } else if (minPrice != null) {
-            criteria = criteria.and("price").gte(minPrice.doubleValue());
-        } else if (maxPrice != null) {
-            criteria = criteria.and("price").lte(maxPrice.doubleValue());
+        if (minPrice != null) {
+            criteriaList.add(Criteria.where("price").gte(minPrice));
         }
 
-        return criteria;
+        if (maxPrice != null) {
+            criteriaList.add(Criteria.where("price").lte(maxPrice));
+        }
+
+        return new Criteria().andOperator(criteriaList.toArray(new Criteria[0]));
     }
 
     private Sort getSort(SearchOrdering ordering) {
