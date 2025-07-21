@@ -12,10 +12,35 @@ post {
 
 body:json {
   {
-    "orderId": "b3094a42-5c7b-4554-a487-c628409eb797",
-    "buyerId": "7635ae0e-88d4-4582-bf52-3895d60a325a",
-    "sellerId": "7635ae0e-88d4-4582-bf52-3895d60a325a",
-    "status": "OPEN",
-    "listing": ["687e600a7ed8794930559f4c"]
+    "buyerId": "550e8400-e29b-41d4-a716-446655440001",
+    "sellerId": "550e8400-e29b-41d4-a716-446655440002",
+    "orderItems": [
+      {
+        "listingId": "687a6149dae7cc3ebb4bf705",
+        "quantity": 2
+      },
+      {
+        "listingId": "687a6149dae7cc3ebb4bf706",
+        "quantity": 1
+      }
+    ],
+    "shippingAddress": {
+      "street": "Rua das Flores, 123",
+      "city": "São Paulo",
+      "state": "SP",
+      "zipCode": "01234-567",
+      "country": "Brasil"
+    },
+    "paymentMethod": {
+      "type": "CREDIT_CARD",
+      "details": "Visa ending in 1234"
+    },
+    "orderSummary": {
+      "subtotal": 150.00,
+      "shippingTotal": 15.00,
+      "discountTotal": 0.00,
+      "total": 165.00,
+      "itemsCount": 3
+    }
   }
 }

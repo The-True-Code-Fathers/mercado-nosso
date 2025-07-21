@@ -19,5 +19,5 @@ eureka:
 
 app:
   services:
-    listings-url: http://listings-service
+    listings-url: http://listings-service:8084
     users-url: http://users-service
