@@ -1,0 +1,69 @@
+meta {
+  name: Create Order Test
+  type: http
+  seq: 20
+}
+
+post {
+  url: http://localhost:8080/api/orders
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "buyerId": "550e8400-e29b-41d4-a716-446655440001",
+    "sellerId": "550e8400-e29b-41d4-a716-446655440002",
+    "orderItems": [
+      {
+        "listingId": "687a6149dae7cc3ebb4bf705",
+        "quantity": 2
+      },
+      {
+        "listingId": "687a6149dae7cc3ebb4bf706",
+        "quantity": 1
+      }
+    ],
+    "shippingAddress": {
+      "street": "Rua das Flores, 123",
+      "city": "São Paulo",
+      "state": "SP",
+      "zipCode": "01234-567",
+      "country": "Brasil"
+    },
+    "paymentMethod": {
+      "type": "CREDIT_CARD",
+      "details": "Visa ending in 1234"
+    },
+    "orderSummary": {
+      "subtotal": 150.00,
+      "shippingTotal": 15.00,
+      "discountTotal": 0.00,
+      "total": 165.00,
+      "itemsCount": 3
+    }
+  }
+}
+
+tests {
+  test("Status should be 201 Created", function() {
+    expect(res.getStatus()).to.equal(201);
+  });
+  
+  test("Response should have orderId", function() {
+    expect(res.getBody()).to.have.property('orderId');
+  });
+  
+  test("Response should have correct buyerId", function() {
+    expect(res.getBody().buyerId).to.equal('550e8400-e29b-41d4-a716-446655440001');
+  });
+  
+  test("Response should have order items", function() {
+    expect(res.getBody().orderItems).to.be.an('array');
+    expect(res.getBody().orderItems.length).to.equal(2);
+  });
+  
+  test("Response should have PENDING status", function() {
+    expect(res.getBody().status).to.equal('PENDING');
+  });
+}

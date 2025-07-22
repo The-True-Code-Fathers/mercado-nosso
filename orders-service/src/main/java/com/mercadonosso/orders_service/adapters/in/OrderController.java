@@ -17,6 +17,7 @@ import com.mercadonosso.orders_service.core.domain.Order;
 import com.mercadonosso.orders_service.core.ports.in.OrdersServicePort;
 
 @RestController
+@RequestMapping("/")
 public class OrderController {
     private final OrdersServicePort ordersServicePort;
     private final DashboardServicePort dashboardService;

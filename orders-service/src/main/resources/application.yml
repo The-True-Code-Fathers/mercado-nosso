@@ -1,5 +1,6 @@
 server:
-  port: 0
+  error:
+    include-message: always
 
 spring:
   application:
@@ -8,6 +9,11 @@ spring:
     mongodb:
       uri: ${SPRING_DATA_MONGODB_URI}
       uuid-representation: java_legacy
+
+logging:
+  level:
+    org.springframework.web: DEBUG
+    org.springframework.security: DEBUG
 
 eureka:
   client:
