@@ -22,7 +22,7 @@ public class ListingsModel {
 
     private String sellerId;
     private String sku;
-    private List<String> productRecommendation;
+
     private String title;
     private String description;
 
