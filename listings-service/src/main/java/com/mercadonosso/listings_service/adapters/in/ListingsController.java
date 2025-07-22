@@ -291,7 +291,7 @@ public class ListingsController {
                 listingsEntity.getProductCondition());
     }
 
-    @GetMapping("/recommendations/{sku}")
+    @GetMapping("api/recommendations/{sku}")
     public List<ListingResponse> getRelatedProducts(@PathVariable String sku) {
     // This calls the service method that gets the SKUs AND then gets the full listings.
     List<ListingsEntity> relatedListings = listingsServicePort.findRelatedBySku(sku);
@@ -302,7 +302,7 @@ public class ListingsController {
             .collect(Collectors.toList());
     }
 
-    @PostMapping("/listings/by-skus") 
+    @PostMapping("/by-skus") 
     public List<ListingResponse> getListingsBySkus(@RequestBody List<String> skus) { // Change from @RequestParam to @RequestBody
     return listingsServicePort.findAllBySkuIn(skus)
             .stream()
