@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.FieldType;
 import com.mercadonosso.listings_service.core.domain.enums.ProductCondition;
 
 public record ListingResponse(
-                String id,
+                String listingId,
                 String sellerId,
                 String sku,
                 List<String> productRecommendation,
