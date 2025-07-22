@@ -113,7 +113,7 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
         criteriaList.add(Criteria.where("title").regex(partialName, "i")); // "i" for case-insensitive
     }
     if (productCondition != null) {
-        criteriaList.add(Criteria.where("productCondition").is(productCondition));
+        criteriaList.add(Criteria.where("productCondition").is(productCondition.name()));
     }
     if (minPrice != null) {
         criteriaList.add(Criteria.where("price").gte(minPrice));
@@ -175,7 +175,7 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
     }
 
     if (productCondition != null) {
-        criteriaList.add(Criteria.where("productCondition").is(productCondition));
+        criteriaList.add(Criteria.where("productCondition").is(productCondition.name()));
     }
 
     if (minPrice != null) {
