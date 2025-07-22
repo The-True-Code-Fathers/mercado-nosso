@@ -57,10 +57,4 @@ public class OrderRepositoryAdapter implements OrdersRepositoryPort {
                 .map(OrderMapper::toDomain)
                 .collect(Collectors.toList());
     }
-
-    @Override
-    public void delete(Order order) {
-        OrderModel model = OrderMapper.toModel(order);
-        orderRepository.delete(model);
-    }
 }

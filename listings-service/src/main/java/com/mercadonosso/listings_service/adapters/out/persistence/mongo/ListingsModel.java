@@ -1,13 +1,12 @@
 package com.mercadonosso.listings_service.adapters.out.persistence.mongo;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
-import org.springframework.data.mongodb.core.mapping.FieldType;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 
@@ -23,7 +22,7 @@ public class ListingsModel {
 
     private String sellerId;
     private String sku;
-    private List<String> productRecommendation;
+
     private String title;
     private String description;
 
@@ -33,6 +32,7 @@ public class ListingsModel {
     private List<ObjectId> reviewsId;
     private List<String> imagesUrl;
     private String category;
+    private LocalDateTime updatedAt;
     private Integer stock;
     private Integer salesCount;
     private boolean active;

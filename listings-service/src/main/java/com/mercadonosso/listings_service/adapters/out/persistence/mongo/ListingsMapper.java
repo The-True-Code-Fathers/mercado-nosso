@@ -15,13 +15,12 @@ public class ListingsMapper {
     public ListingsModel toModel(ListingsEntity domain) {
         ListingsModel model = new ListingsModel();
 
-        if (domain.getListingId() != null) {
-            model.setId(domain.getListingId());
+        if (domain.getId() != null) {
+            model.setId(domain.getId());
         }
 
         model.setSellerId(domain.getSellerId());
         model.setSku(domain.getSku());
-        model.setProductRecommendation(domain.getProductRecommendation());
         model.setTitle(domain.getTitle());
         model.setDescription(domain.getDescription());
         model.setPrice(domain.getPrice());
@@ -29,6 +28,7 @@ public class ListingsMapper {
         model.setRating(domain.getRating());
         model.setReviewsId(domain.getReviewsId());
         model.setImagesUrl(domain.getImagesUrl());
+        model.setUpdatedAt(domain.getUpdatedAt());
         model.setStock(domain.getStock());
         model.setSalesCount(domain.getSalesCount());
         model.setActive(domain.isActive());
@@ -45,10 +45,9 @@ public class ListingsMapper {
     public ListingsEntity toDomain(ListingsModel model) {
         ListingsEntity domain = new ListingsEntity();
 
-        domain.setListingId(model.getId());
+        domain.setId(model.getId());
         domain.setSellerId(model.getSellerId());
         domain.setSku(model.getSku());
-        domain.setProductRecommendation(model.getProductRecommendation());
         domain.setTitle(model.getTitle());
         domain.setDescription(model.getDescription());
         domain.setPrice(model.getPrice());
@@ -56,6 +55,7 @@ public class ListingsMapper {
         domain.setRating(model.getRating());
         domain.setReviewsId(model.getReviewsId());
         domain.setImagesUrl(model.getImagesUrl());
+        domain.setUpdatedAt(model.getUpdatedAt());
         domain.setStock(model.getStock());
         domain.setSalesCount(model.getSalesCount());
         domain.setActive(model.isActive());

@@ -12,13 +12,36 @@ post {
 
 body:json {
   {
-  "orderId": "7c44564e-59a7-45f9-ae19-b13507395fd9",
   "buyerId": "f2e3bf7c-d189-408f-904e-0991ebe80de2",
-  "status": "OPEN",
-  "listing": [
-    "507f1f77bcf86cd799439011",
-    "507f1f77bcf86cd799439012"
-    ]
+  "sellerId": "550e8400-e29b-41d4-a716-446655440002",
+  "orderItems": [
+    {
+      "listingId": "507f1f77bcf86cd799439011",
+      "quantity": 1
+    },
+    {
+      "listingId": "507f1f77bcf86cd799439012",
+      "quantity": 2
+    }
+  ],
+  "shippingAddress": {
+    "street": "Rua das Flores, 123",
+    "city": "São Paulo", 
+    "state": "SP",
+    "zipCode": "01234-567",
+    "country": "Brasil"
+  },
+  "paymentMethod": {
+    "type": "CREDIT_CARD",
+    "details": "Visa ending in 1234"
+  },
+  "orderSummary": {
+    "subtotal": 200.00,
+    "shippingTotal": 20.00,
+    "discountTotal": 0.00,
+    "total": 220.00,
+    "itemsCount": 3
+  }
   }
 }
 
@@ -26,8 +49,10 @@ tests {
   test("Should create order with ObjectId listings", function() {
     expect(res.getStatus()).to.equal(201);
     expect(res.getBody()).to.have.property('orderId');
-    expect(res.getBody()).to.have.property('listingID');
-    expect(res.getBody().listingID).to.be.an('array');
-    expect(res.getBody().listingID.length).to.equal(2);
+    expect(res.getBody()).to.have.property('orderItems');
+    expect(res.getBody().orderItems).to.be.an('array');
+    expect(res.getBody().orderItems.length).to.equal(2);
+    expect(res.getBody().orderItems[0]).to.have.property('listingId');
+    expect(res.getBody().orderItems[0]).to.have.property('quantity');
   });
 }

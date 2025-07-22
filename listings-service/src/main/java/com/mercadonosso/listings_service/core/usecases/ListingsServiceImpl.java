@@ -42,7 +42,7 @@ public class ListingsServiceImpl implements ListingsServicePort {
 
     public ListingsEntity create(ListingsEntity listingsEntity) {
         validateListing(listingsEntity);
-        listingsEntity.setListingId(new ObjectId());
+        listingsEntity.setId(new ObjectId());
         listingsEntity.setUpdatedAt(LocalDateTime.now());
         listingsEntity.setActive(true);
         return listingsRepositoryPort.save(listingsEntity);

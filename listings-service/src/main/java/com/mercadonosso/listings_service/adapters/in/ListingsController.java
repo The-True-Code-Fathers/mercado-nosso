@@ -79,7 +79,7 @@ public class ListingsController {
         try {
             ListingsEntity listingsEntity = listingsServicePort.findById(objectId);
             logger.info("GET /{} - Listing encontrado no banco: {}", id,
-                    listingsEntity != null ? listingsEntity.getListingId() : "null");
+                    listingsEntity != null ? listingsEntity.getId() : "null");
 
             if (listingsEntity == null) {
                 logger.warn("GET /{} - Listing não encontrado no banco de dados", id);
@@ -259,7 +259,7 @@ public class ListingsController {
 
     private ListingResponse toResponse(ListingsEntity listingsEntity) {
         return new ListingResponse(
-                listingsEntity.getListingId() != null ? listingsEntity.getListingId().toHexString() : null,
+                listingsEntity.getId() != null ? listingsEntity.getId().toHexString() : null,
                 listingsEntity.getSellerId(),
                 listingsEntity.getSku(),
                 listingsEntity.getProductRecommendation(),
