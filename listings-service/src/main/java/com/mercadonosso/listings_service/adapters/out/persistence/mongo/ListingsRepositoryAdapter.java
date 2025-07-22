@@ -100,44 +100,64 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
 
     @Override
     public PagedResult<ListingsEntity> searchListingsPaginated(String partialName, ProductCondition productCondition,
-            BigDecimal minPrice, BigDecimal maxPrice, SearchOrdering ordering, Pagination pagination, String category) {
+        BigDecimal minPrice, BigDecimal maxPrice, SearchOrdering ordering, Pagination pagination, String category) {
 
-        Criteria criteria = buildSearchCriteria(partialName, productCondition, minPrice, maxPrice);
-        
-        List<Criteria> criteriaList = new ArrayList<>();
+    // 1. Create a list to hold all our filter conditions
+    List<Criteria> criteriaList = new ArrayList<>();
 
-        // Count total elements
-        Query countQuery = new Query(criteria);
-        long totalElements = mongoTemplate.count(countQuery, ListingsModel.class);
+    // Always filter for active listings
+    criteriaList.add(Criteria.where("active").is(true));
 
-        // Build the main query with pagination and sorting
-        Query query = new Query(criteria);
-
-        if (ordering != null) {
-            Sort sort = getSort(ordering);
-            query.with(sort);
-        }
-
-        query.skip(pagination.getOffset()).limit(pagination.getSize());
-
-        List<ListingsModel> models = mongoTemplate.find(query, ListingsModel.class);
-
-        log.info("Search Listings Paginated - Total: {}, Found: {}", totalElements, models.size());
-
-        List<ListingsEntity> entities = models.stream()
-                .map(mapper::toDomain)
-                .collect(Collectors.toList());
-
-
-        if (category != null && !category.isEmpty()) {
-            criteriaList.add(Criteria.where("category").is(category));
-            // For case-insensitive search (recommended):
-            // criteriaList.add(Criteria.where("category").regex("^" + category + "$", "i"));
-        }
-
-        return new PagedResult<>(entities, pagination, totalElements);
+    // Add other filters ONLY if they are provided
+    if (partialName != null && !partialName.isEmpty()) {
+        criteriaList.add(Criteria.where("title").regex(partialName, "i")); // "i" for case-insensitive
+    }
+    if (productCondition != null) {
+        criteriaList.add(Criteria.where("productCondition").is(productCondition));
+    }
+    if (minPrice != null) {
+        criteriaList.add(Criteria.where("price").gte(minPrice));
+    }
+    if (maxPrice != null) {
+        criteriaList.add(Criteria.where("price").lte(maxPrice));
+    }
+    // This is the crucial part that was missing from your query
+    if (category != null && !category.isEmpty()) {
+        criteriaList.add(Criteria.where("category").regex("^" + category + "$", "i")); // Case-insensitive match
     }
 
+    // 2. Build the main query object
+    Query query = new Query();
+    if (!criteriaList.isEmpty()) {
+        query.addCriteria(new Criteria().andOperator(criteriaList.toArray(new Criteria[0])));
+    }
+
+    // This is our new log line that will show the CORRECT query
+    log.info("Executing MongoDB Query: {}", query.getQueryObject().toJson());
+
+    // 3. Count total results that match the filters
+    long totalElements = mongoTemplate.count(query, ListingsModel.class);
+
+    // 4. Apply sorting
+    if (ordering != null) {
+        Sort sort = getSort(ordering);
+        query.with(sort);
+    }
+
+    // 5. Apply pagination
+    query.skip(pagination.getOffset()).limit(pagination.getSize());
+
+    // 6. Execute the query
+    List<ListingsModel> models = mongoTemplate.find(query, ListingsModel.class);
+    log.info("Search Listings Paginated - Total: {}, Found: {}", totalElements, models.size());
+
+    // 7. Map results and return
+    List<ListingsEntity> entities = models.stream()
+            .map(mapper::toDomain)
+            .collect(Collectors.toList());
+
+    return new PagedResult<>(entities, pagination, totalElements);
+}
     private Criteria buildSearchCriteria(String partialName, ProductCondition productCondition,
             BigDecimal minPrice, BigDecimal maxPrice) {
         
@@ -170,15 +190,22 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
     }
 
     private Sort getSort(SearchOrdering ordering) {
-        return switch (ordering) {
-            case PRICE_ASC -> Sort.by(Sort.Direction.ASC, "price");
-            case PRICE_DESC -> Sort.by(Sort.Direction.DESC, "price");
-            case NAME_ASC -> Sort.by(Sort.Direction.ASC, "title");
-            case NAME_DESC -> Sort.by(Sort.Direction.DESC, "title");
-            case CREATED_AT_ASC -> Sort.by(Sort.Direction.ASC, "createdAt");
-            case CREATED_AT_DESC -> Sort.by(Sort.Direction.DESC, "createdAt");
-            case RATING_DESC -> Sort.by(Sort.Direction.DESC, "rating");
-        };
+        switch (ordering) {
+            case PRICE_ASC:
+                return Sort.by(Sort.Direction.ASC, "price");
+            case PRICE_DESC:
+                return Sort.by(Sort.Direction.DESC, "price");
+            case RATING_DESC:
+                return Sort.by(Sort.Direction.DESC, "rating");
+            case NAME_ASC:
+                return Sort.by(Sort.Direction.ASC, "title");
+            case NAME_DESC:
+                return Sort.by(Sort.Direction.DESC, "title");
+            case CREATED_AT_DESC:
+                return Sort.by(Sort.Direction.DESC, "createdAt");
+            default: // CREATED_AT_ASC
+                return Sort.by(Sort.Direction.ASC, "createdAt");
+        }
     }
 
     @Override

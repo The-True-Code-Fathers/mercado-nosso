@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -75,8 +76,8 @@ public class ListingsController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
 
-        logger.info("GET /search/paginated - Searching listings: name={}, condition={}, minPrice={}, maxPrice={}, ordering={}, page={}, size={}",
-                name, condition, minPrice, maxPrice, ordering, page, size);
+        logger.info("GET /search/paginated - Searching listings: name={}, category={}, condition={}, minPrice={}, maxPrice={}, ordering={}, page={}, size={}",
+                name, category, condition, minPrice, maxPrice, ordering, page, size);
 
         Pagination pagination = Pagination.of(page, size);
         PagedResult<ListingsEntity> pagedResult = listingsServicePort.searchListingsPaginated(
