@@ -3,7 +3,9 @@ package com.mercadonosso.listings_service.adapters.in;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Map;
 
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +62,48 @@ public class ListingsController {
 
         return toResponse(createdListingsEntity);
     }
+
+
+    @GetMapping("/search/paginated")
+    public PagedListingResponse searchListingsPaginated(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) SearchOrdering ordering,
+            @RequestParam(required = false) ProductCondition condition,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+
+        logger.info("GET /search/paginated - Searching listings: name={}, condition={}, minPrice={}, maxPrice={}, ordering={}, page={}, size={}",
+                name, condition, minPrice, maxPrice, ordering, page, size);
+
+        Pagination pagination = Pagination.of(page, size);
+        PagedResult<ListingsEntity> pagedResult = listingsServicePort.searchListingsPaginated(
+                name, condition, minPrice, maxPrice, ordering, pagination, category);
+
+        List<ListingResponse> listingResponses = pagedResult.getContent().stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+
+        return new PagedListingResponse(
+                listingResponses,
+                pagedResult.getPagination().getPage(),
+                pagedResult.getPagination().getSize(),
+                pagedResult.getTotalElements(),
+                pagedResult.getTotalPages(),
+                pagedResult.hasNext(),
+                pagedResult.hasPrevious(),
+                pagedResult.isEmpty());
+    }
+
+    @GetMapping("/categories")
+    public List<Document> getCategories() { // 👈 Change the return type
+        logger.info("GET /categories - Received request to fetch all categories");
+        return listingsServicePort.getCategories();
+    }
+
+    
 
     @GetMapping("/{id}")
     public ListingResponse getListingById(@PathVariable String id) {
@@ -225,37 +269,7 @@ public class ListingsController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/search/paginated")
-    public PagedListingResponse searchListingsPaginated(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) SearchOrdering ordering,
-            @RequestParam(required = false) ProductCondition condition,
-            @RequestParam(required = false) BigDecimal minPrice,
-            @RequestParam(required = false) BigDecimal maxPrice,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size) {
-
-        logger.info("GET /search/paginated - Searching listings: name={}, condition={}, minPrice={}, maxPrice={}, ordering={}, page={}, size={}",
-                name, condition, minPrice, maxPrice, ordering, page, size);
-
-        Pagination pagination = Pagination.of(page, size);
-        PagedResult<ListingsEntity> pagedResult = listingsServicePort.searchListingsPaginated(
-                name, condition, minPrice, maxPrice, ordering, pagination);
-
-        List<ListingResponse> listingResponses = pagedResult.getContent().stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
-
-        return new PagedListingResponse(
-                listingResponses,
-                pagedResult.getPagination().getPage(),
-                pagedResult.getPagination().getSize(),
-                pagedResult.getTotalElements(),
-                pagedResult.getTotalPages(),
-                pagedResult.hasNext(),
-                pagedResult.hasPrevious(),
-                pagedResult.isEmpty());
-    }
+    
 
     private ListingResponse toResponse(ListingsEntity listingsEntity) {
         return new ListingResponse(
@@ -295,4 +309,5 @@ public class ListingsController {
             .collect(Collectors.toList());
     }
     
+
 }

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.Map;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -106,10 +107,10 @@ public class ListingsServiceImpl implements ListingsServicePort {
 
     @Override
     public PagedResult<ListingsEntity> searchListingsPaginated(String partialName, ProductCondition productCondition,
-            BigDecimal minPrice, BigDecimal maxPrice, SearchOrdering ordering, Pagination pagination) {
+            BigDecimal minPrice, BigDecimal maxPrice, SearchOrdering ordering, Pagination pagination, String category) {
 
         return listingsRepositoryPort.searchListingsPaginated(partialName, productCondition, minPrice, maxPrice,
-                ordering, pagination);
+                ordering, pagination, category);
     }
 
     @Override
@@ -136,5 +137,10 @@ public class ListingsServiceImpl implements ListingsServicePort {
     @Override
     public List<ListingsEntity> findAllBySkuIn(List<String> skus) {
     return listingsRepositoryPort.findAllBySkuIn(skus);
+    }
+
+    @Override
+    public List<Document> getCategories() { // 👈 Change the return type
+        return listingsRepositoryPort.getCategories();
     }
 }

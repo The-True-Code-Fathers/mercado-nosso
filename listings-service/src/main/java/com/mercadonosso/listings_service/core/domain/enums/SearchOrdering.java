@@ -6,5 +6,6 @@ public enum SearchOrdering {
     NAME_ASC,
     NAME_DESC,
     CREATED_AT_ASC,
-    CREATED_AT_DESC
+    CREATED_AT_DESC,
+    RATING_DESC
 }

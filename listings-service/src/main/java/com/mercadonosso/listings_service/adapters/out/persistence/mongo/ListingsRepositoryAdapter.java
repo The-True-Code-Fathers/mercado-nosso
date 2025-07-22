@@ -4,11 +4,16 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.bson.Document;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 
 import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.domain.Sort;
@@ -95,9 +100,11 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
 
     @Override
     public PagedResult<ListingsEntity> searchListingsPaginated(String partialName, ProductCondition productCondition,
-            BigDecimal minPrice, BigDecimal maxPrice, SearchOrdering ordering, Pagination pagination) {
+            BigDecimal minPrice, BigDecimal maxPrice, SearchOrdering ordering, Pagination pagination, String category) {
 
         Criteria criteria = buildSearchCriteria(partialName, productCondition, minPrice, maxPrice);
+        
+        List<Criteria> criteriaList = new ArrayList<>();
 
         // Count total elements
         Query countQuery = new Query(criteria);
@@ -120,6 +127,13 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
         List<ListingsEntity> entities = models.stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
+
+
+        if (category != null && !category.isEmpty()) {
+            criteriaList.add(Criteria.where("category").is(category));
+            // For case-insensitive search (recommended):
+            // criteriaList.add(Criteria.where("category").regex("^" + category + "$", "i"));
+        }
 
         return new PagedResult<>(entities, pagination, totalElements);
     }
@@ -163,6 +177,7 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
             case NAME_DESC -> Sort.by(Sort.Direction.DESC, "title");
             case CREATED_AT_ASC -> Sort.by(Sort.Direction.ASC, "createdAt");
             case CREATED_AT_DESC -> Sort.by(Sort.Direction.DESC, "createdAt");
+            case RATING_DESC -> Sort.by(Sort.Direction.DESC, "rating");
         };
     }
 
@@ -178,5 +193,21 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
         return models.stream()
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Document> getCategories() { // 👈 Change the return type
+        Aggregation aggregation = Aggregation.newAggregation(
+            Aggregation.group("category").count().as("count"),
+            Aggregation.project("count").and("_id").as("key").and("_id").as("name"),
+            Aggregation.sort(Sort.Direction.DESC, "count")
+        );
+
+        AggregationResults<Document> results = mongoTemplate.aggregate(
+                aggregation, "listings", Document.class
+        );
+
+        // This now works perfectly with no type mismatch.
+        return results.getMappedResults();
     }
 }

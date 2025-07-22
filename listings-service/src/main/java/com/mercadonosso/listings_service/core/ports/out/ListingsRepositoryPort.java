@@ -2,8 +2,10 @@ package com.mercadonosso.listings_service.core.ports.out;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Repository;
 
@@ -29,7 +31,9 @@ public interface ListingsRepositoryPort {
                         BigDecimal minPrice, BigDecimal maxPrice, SearchOrdering ordering);
 
         PagedResult<ListingsEntity> searchListingsPaginated(String partialName, ProductCondition productCondition,
-                        BigDecimal minPrice, BigDecimal maxPrice, SearchOrdering ordering, Pagination pagination);
+                        BigDecimal minPrice, BigDecimal maxPrice, SearchOrdering ordering, Pagination pagination, String category);
 
         List<ListingsEntity> findAllBySkuIn(List<String> skus);
+
+        List<Document> getCategories();
 }

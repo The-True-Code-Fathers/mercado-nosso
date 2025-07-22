@@ -4,7 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+
 
 
 import com.mercadonosso.listings_service.adapters.out.persistence.mongo.ListingsRepositoryAdapter;
