@@ -29,8 +29,6 @@ public class UserService implements UserServicePort {
             throw new IllegalStateException("CPF already in use");
         }
 
-        // Definir os dados
-        user.setId(UUID.randomUUID());
         user.setActive(true);
 
         return userRepository.save(user);
