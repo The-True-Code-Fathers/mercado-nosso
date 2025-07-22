@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @Entity(name = "users")
 public class UserJPAEntity {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue
     private UUID id;
 
     @Column(name = "social_reason", length = 255)
