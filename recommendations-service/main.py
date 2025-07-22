@@ -8,7 +8,7 @@ import os
 from contextlib import asynccontextmanager
 from pydantic import BaseModel
 
-EUREKA_SERVER = os.getenv("EUREKA_CLIENT_SERVICEURL_DEFAULTZONE", "http://eureka-server:8761/eureka/")
+EUREKA_SERVER = os.getenv("EUREKA_CLIENT_SERVICEURL_DEFAULTZONE", "http://eureka-server:8761/eureka/") # <--- CRITICAL CHANGE
 APP_NAME = os.getenv("SPRING_APPLICATION_NAME", "recommendations-service")
 SERVER_PORT = int(os.getenv("SERVER_PORT", 8086))
 
@@ -122,6 +122,9 @@ async def generate_recommendations():
         # If execute_recommendation_pipeline is itself async, you can await it directly.
         # Assuming it's synchronous for now:
         await asyncio.to_thread(execute_recommendation_pipeline)
+        # For Python versions < 3.9, use:
+        # loop = asyncio.get_event_loop()
+        # await loop.run_in_executor(None, execute_recommendation_pipeline)
         
         return {"status": "success", "message": "Recommendation pipeline triggered successfully. Check logs for details."}
 
