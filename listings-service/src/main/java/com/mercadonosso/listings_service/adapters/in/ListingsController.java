@@ -95,7 +95,7 @@ public class ListingsController {
     }
 
     @GetMapping("/item/{sku}")
-public ListingResponse getListingBySku(@PathVariable String sku) {
+    public ListingResponse getListingBySku(@PathVariable String sku) {
     logger.info("GET /item/{} - Received request to find listing with SKU: {}", sku, sku);
 
     try {
@@ -275,4 +275,24 @@ public ListingResponse getListingBySku(@PathVariable String sku) {
                 listingsEntity.isActive(),
                 listingsEntity.getProductCondition());
     }
+
+    @GetMapping("/recommendations/{sku}")
+    public List<ListingResponse> getRelatedProducts(@PathVariable String sku) {
+    // This calls the service method that gets the SKUs AND then gets the full listings.
+    List<ListingsEntity> relatedListings = listingsServicePort.findRelatedBySku(sku);
+    
+    // This converts the full listings to the response format.
+    return relatedListings.stream()
+            .map(this::toResponse)
+            .collect(Collectors.toList());
+    }
+
+    @PostMapping("/listings/by-skus") 
+    public List<ListingResponse> getListingsBySkus(@RequestBody List<String> skus) { // Change from @RequestParam to @RequestBody
+    return listingsServicePort.findAllBySkuIn(skus)
+            .stream()
+            .map(this::toResponse)
+            .collect(Collectors.toList());
+    }
+    
 }

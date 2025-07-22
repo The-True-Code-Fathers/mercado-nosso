@@ -30,4 +30,6 @@ public interface ListingsRepositoryPort {
 
         PagedResult<ListingsEntity> searchListingsPaginated(String partialName, ProductCondition productCondition,
                         BigDecimal minPrice, BigDecimal maxPrice, SearchOrdering ordering, Pagination pagination);
+
+        List<ListingsEntity> findAllBySkuIn(List<String> skus);
 }

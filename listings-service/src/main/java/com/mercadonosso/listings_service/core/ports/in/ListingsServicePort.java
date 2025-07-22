@@ -29,4 +29,8 @@ public interface ListingsServicePort {
                         BigDecimal minPrice, BigDecimal maxPrice, SearchOrdering ordering, Pagination pagination);
 
         List<ListingsEntity> listAll();
+
+        List<ListingsEntity> findRelatedBySku(String sku);
+
+        List<ListingsEntity> findAllBySkuIn(List<String> skus);
 }

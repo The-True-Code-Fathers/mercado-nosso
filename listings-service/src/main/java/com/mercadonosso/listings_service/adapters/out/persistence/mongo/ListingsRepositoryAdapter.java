@@ -2,6 +2,7 @@ package com.mercadonosso.listings_service.adapters.out.persistence.mongo;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -126,30 +127,30 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
     private Criteria buildSearchCriteria(String partialName, ProductCondition productCondition,
             BigDecimal minPrice, BigDecimal maxPrice) {
         
-        List<Criteria> criteriaList = new ArrayList<>();
+    List<Criteria> criteriaList = new ArrayList<>();
 
-        // Always filter for active listings
-        criteriaList.add(Criteria.where("active").is(true));
+    // Always filter for active listings
+    criteriaList.add(Criteria.where("active").is(true));
 
-        // 2. Add other conditions to the list if they exist
-        if (partialName != null && !partialName.trim().isEmpty()) {
-            Criteria textCriteria = new Criteria().orOperator(
-                    Criteria.where("title").regex(partialName, "i"),
-                    Criteria.where("description").regex(partialName, "i"));
-            criteriaList.add(textCriteria);
-        }
+    // 2. Add other conditions to the list if they exist
+    if (partialName != null && !partialName.trim().isEmpty()) {
+        Criteria textCriteria = new Criteria().orOperator(
+                Criteria.where("title").regex(partialName, "i"),
+                Criteria.where("description").regex(partialName, "i"));
+        criteriaList.add(textCriteria);
+    }
 
-        if (productCondition != null) {
-            criteriaList.add(Criteria.where("productCondition").is(productCondition));
-        }
+    if (productCondition != null) {
+        criteriaList.add(Criteria.where("productCondition").is(productCondition));
+    }
 
-        if (minPrice != null) {
-            criteriaList.add(Criteria.where("price").gte(minPrice));
-        }
+    if (minPrice != null) {
+        criteriaList.add(Criteria.where("price").gte(minPrice));
+    }
 
-        if (maxPrice != null) {
-            criteriaList.add(Criteria.where("price").lte(maxPrice));
-        }
+    if (maxPrice != null) {
+        criteriaList.add(Criteria.where("price").lte(maxPrice));
+    }
 
         return new Criteria().andOperator(criteriaList.toArray(new Criteria[0]));
     }
@@ -163,5 +164,19 @@ public class ListingsRepositoryAdapter implements ListingsRepositoryPort {
             case CREATED_AT_ASC -> Sort.by(Sort.Direction.ASC, "createdAt");
             case CREATED_AT_DESC -> Sort.by(Sort.Direction.DESC, "createdAt");
         };
+    }
+
+    @Override
+    public List<ListingsEntity> findAllBySkuIn(List<String> skus) {
+        if (skus == null || skus.isEmpty()) {
+            return Collections.emptyList();
+        }
+        // Find all active products where the SKU is "in" the provided list
+        Criteria criteria = Criteria.where("sku").in(skus).and("active").is(true);
+        Query query = new Query(criteria);
+        List<ListingsModel> models = mongoTemplate.find(query, ListingsModel.class);
+        return models.stream()
+                .map(mapper::toDomain)
+                .collect(Collectors.toList());
     }
 }

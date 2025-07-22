@@ -3,6 +3,9 @@ package com.mercadonosso.listings_service.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+
 
 import com.mercadonosso.listings_service.adapters.out.persistence.mongo.ListingsRepositoryAdapter;
 import com.mercadonosso.listings_service.core.ports.in.ListingsServicePort;
@@ -16,7 +19,8 @@ public class BeanConfiguration {
     @Primary
     public ListingsServicePort listingServicePort(
             ListingsRepositoryAdapter listingRepositoryAdapter,
-            Validator validator) {
-        return new ListingsServiceImpl(listingRepositoryAdapter, validator);
+            Validator validator,
+            MongoTemplate mongoTemplate) {
+        return new ListingsServiceImpl(listingRepositoryAdapter, validator, mongoTemplate);
     }
 }
